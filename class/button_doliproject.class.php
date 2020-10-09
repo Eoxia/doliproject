@@ -8,7 +8,7 @@ function button_pressed() {
 
 	//Connection to the db
 	try {
-		$bdd = new PDO("mysql:host=" . $_GET['db_host'] . ";dbname=" . $_GET['db_name'] . ";charset=UTF8", $_GET['db_user'], '');
+		$bdd = new PDO("mysql:host=" . $_GET['db_host'] . ";dbname=" . $_GET['db_name'] . ";charset=UTF8", $_GET['db_user'], ''); //@todo connection db KO LM
 	} catch (Exception $e) {
 		die('Erreur : ' . $e->getMessage());
 	}
@@ -26,6 +26,7 @@ function button_pressed() {
 		}
 	}
 	//Increase the number of the task taken
+    //@todo KO utiliser la fonction de dolibarr native
 	$ref_last_task = str_split($ref_last_task[0], 5);
 	$length = 0;
 	while (isset($ref_last_task[$length])) {
@@ -48,6 +49,9 @@ function button_pressed() {
 	}
 	$wording = $title[0];
 	//Tag retrieval
+    //@todo lié aux tags des projets affectés à la facture modèle
+    //@todo paramtres de récupération des tags projets
+    //@todo REGEX à construire dans les réglages dans notre cas : DATEDEBUTPERIODE-NOMPROJET-TAGS EX: 20200801-eoxia.fr-ref
 	$note_private_invoice = $_GET['note_private'];
 	$note_private_invoice = explode(' ', $note_private_invoice);
 	if (in_array('Hebergement', $note_private_invoice)) {

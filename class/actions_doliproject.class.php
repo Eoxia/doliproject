@@ -327,7 +327,7 @@ class ActionsDoliproject
 		{
 			$location = DOL_URL_ROOT . '/compta/facture/card.php?facid=' . $object->lines[0]->fk_facture . '';
 			try {
-				$bdd = new PDO("mysql:host=" . $conf->db->host . ";dbname=" . $conf->db->name . ";charset=UTF8", $conf->db->user, '');
+				$bdd = new PDO("mysql:host=" . $conf->db->host . ";dbname=" . $conf->db->name . ";charset=UTF8", $conf->db->user, ''); //@todo connection db ko LM
 			} catch (Exception $e) {
 				die('Erreur : ' . $e->getMessage());
 			}
@@ -340,7 +340,7 @@ class ActionsDoliproject
 			if ($error_button != 1) {
 				print '<div class="inline-block divButAction"><a class="butAction"  href="' . DOL_URL_ROOT  . '/custom/doliproject/class/button_doliproject.class.php?link=
 				' . $location . '&db_host=' . $conf->db->host . '&db_name=' . $conf->db->name . '&db_user=' . $conf->db->user . '&fk_project=' . $object->fk_project . '&fk_name=
-				' . $object->ref . '&note_private=' . $object->note_private . '&fk_object=' . $object->lines[0]->fk_facture . '&id=' . $object->id . '">Créer tâche</a></div>';
+				' . $object->ref . '&note_private=' . $object->note_private . '&fk_object=' . $object->lines[0]->fk_facture . '&id=' . $object->id . '">Créer tâche</a></div>'; //@todo traduction LM
 			}
 
 		}
