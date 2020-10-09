@@ -1,0 +1,79 @@
+# Copyright (C) 2020 SuperAdmin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# Generic
+#
+
+# Module label 'ModuleDoliprojectName'
+ModuleDoliprojectName = Doliproject
+# Module description 'ModuleDoliprojectDesc'
+ModuleDoliprojectDesc = Doliproject description
+
+#
+# Admin page
+#
+DoliprojectSetup = Doliproject setup
+Settings = Settings
+DoliprojectSetupPage = Doliproject setup page
+DOLIPROJECT_MYPARAM1 = My param 1
+DOLIPROJECT_MYPARAM1Tooltip = My param 1 tooltip
+DOLIPROJECT_MYPARAM2=My param 2
+DOLIPROJECT_MYPARAM2Tooltip=My param 2 tooltip
+
+
+#
+# About page
+#
+About = About
+DoliprojectAbout = About Doliproject
+DoliprojectAboutPage = Doliproject about page
+
+#
+# Sample page
+#
+MyPageName = My page name
+
+#
+# Sample widget
+#
+MyWidget = My widget
+MyWidgetDescription = My widget description
+
+#
+# logging doliproject
+#
+StartTask = Start of task creation
+ConnectionDBSuccess = Connection to the db established
+ConnectionDBFailed = Connection to the db failed at line 
+StartVariable = Start of variable generation
+VRef = Varibale : ref = 
+Vfk_projet = Varibale  : fk_projet = 
+Vlabel = Varibale  : label = 
+Vdescription = Varibale  : description = 
+Vdateo = Varibale  : dateo = 
+Vdatee = Varibale  : datee = 
+Vplanned_workload = Variable  : planned_workload = 
+TaskCreated = Task : 
+TaskCreated2 =  create successfully
+TaskCreatedFailed = Task not create
+EndTask = End of task creation
+
+#
+# module doliproject
+#
+DescriptionTask = Realize from the invoice 
+MessageInfo = Task successfully created
+MessageInfoNoCreate = Task not created
