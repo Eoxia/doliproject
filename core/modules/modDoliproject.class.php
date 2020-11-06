@@ -98,13 +98,14 @@ class modDoliproject extends DolibarrModules
 			),
 			// Set this to relative path of js file if module must load a js on all pages
 			'js' => array(
-				'/doliproject/js/doliproject.js.php',
+				//   '/doliproject/js/doliproject.js.php',
 			),
 			// Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
 			'hooks' => array(
-				  'data' => array(
-				      'invoicecard',
-				  ),
+				//   'data' => array(
+				//       'hookcontext1',
+				//       'hookcontext2',
+				//   ),
 				//   'entity' => '0',
 			),
 			// Set this to 1 if features of module are opened to external users
