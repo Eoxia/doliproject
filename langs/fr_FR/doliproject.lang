@@ -72,3 +72,5 @@ EndTask = Fin de la creation de tache
 DescriptionTask = Réalisé depuis la facture 
 MessageInfo = Tâche créée avec succès
 MessageInfoNoCreate = Aucune tâche n'a été créée
+MessageInfoNoCreateProject = Aucune tâche n'a été créée car pas de projet lié
+MessageInfoNoCreateTime = Aucune tâche n'a été créée car le service n'a pas de temps

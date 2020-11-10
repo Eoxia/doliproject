@@ -77,3 +77,5 @@ EndTask = End of task creation
 DescriptionTask = Realize from the invoice 
 MessageInfo = Task successfully created
 MessageInfoNoCreate = Task not created
+MessageInfoNoCreateProject = No task was created because no linked project
+MessageInfoNoCreateTime = No task has been created because the service has no time
