@@ -95,6 +95,9 @@ class ActionsDoliproject
 	public function doActions($parameters, &$object, &$action, $hookmanager)
 	{
 		require_once DOL_DOCUMENT_ROOT.'/core/modules/project/task/mod_task_simple.php';
+		// echo '<pre>';
+		// print_r();
+		// echo '</pre>';
 
 		global $conf, $user, $langs;
 
@@ -178,73 +181,42 @@ class ActionsDoliproject
 					//Start
 					//Variable : dateo
 					//Decription : retrieval of the start date of the invoice
-					unset($datef_invoice);
-					$query = "SELECT datef, ref FROM ".MAIN_DB_PREFIX."facture";
+					$i = 0;
+					$query = "SELECT fk_facture, date_start, date_end FROM ".MAIN_DB_PREFIX."facturedet";
 					$result = $this->db->query($query);
 					while ($row = $result->fetch_array()) {
-						if ($row['ref'] == $object->ref) {
-							$datef_invoice[0] = $row['datef'];
+						if ($row['fk_facture'] == $object->lines[0]->fk_facture) {
+							$date_start[$i] = $row['date_start'];
 						}
 					}
-					$dateo = implode($datef_invoice);
+					$dateo = $date_start[0];
 					//End
 
 					//Start
 					//Variable : datee
 					//Description : retrieval of the end date of the invoice
-					unset($datef_invoice);
-					$query = "SELECT fk_fac_rec_source, datef, ref FROM ".MAIN_DB_PREFIX."facture";
+					$i = 0;
+					$query = "SELECT fk_facture, date_start, date_end FROM ".MAIN_DB_PREFIX."facturedet";
 					$result = $this->db->query($query);
 					while ($row = $result->fetch_array()) {
-						if ($row['ref'] == $object->ref) {
-							$datef_invoice[0] = $row['datef'];
-						}
-						if ($row['fk_fac_rec_source']) {
-							$fk_fac_rec_source_invoice[0] = $row['fk_fac_rec_source'];
+						if ($row['fk_facture'] == $object->lines[0]->fk_facture) {
+							$date_end[$i] = $row['date_end'];
+							$i += 1;
 						}
 					}
-					$datef_invoice = explode('-', $datef_invoice[0]);
-					$query = "SELECT rowid, frequency, unit_frequency FROM ".MAIN_DB_PREFIX."facture_rec";
-					$result = $this->db->query($query);
-					while ($row = $result->fetch_array()) {
-						if ($row['rowid'] == $fk_fac_rec_source_invoice[0]) {
-							$frequency_invoice_rec[0] = $row['frequency'];
-							$unit_frequency_invoice_rec[0] = $row['unit_frequency'];
-						}
-					}
-					$day = $datef_invoice[2];
-					$month = $datef_invoice[1];
-					$year = $datef_invoice[0];
-					$hour = 0;
-					$minute = 0;
-					$second = 0;
-					//Creation of the end date of the invoice with the start date according to the frequency
-					if ($unit_frequency_invoice_rec[0] == 'd') {
-						$datee = date("Y-m-d H:i:s", mktime($hour, $minute, $second - 1, $month, $day + 1, $year));
-					} elseif ($unit_frequency_invoice_rec[0] == 'm') {
-						$datee = date("Y-m-d", mktime($hour, $minute, $second, $month + 1, 0, $year));
-					} elseif ($unit_frequency_invoice_rec[0] == 'y') {
-						$datee = date("Y-m-d", mktime($hour, $minute, $second, $month, 0, $year + 1));
-					}
+					$datee = $date_end[0];
 					//End
 
 					//Start
 					//Variable : planned_workload
 					//Description : time calculation of the planned workload
 					//We recover all the products from the invoice
-					$query = "SELECT rowid, ref FROM ".MAIN_DB_PREFIX."facture";
-					$result = $this->db->query($query);
-					while ($row = $result->fetch_array()) {
-						if ($row['ref'] == $object->ref) {
-							$rowid_invoice[0] = $row['rowid'];
-						}
-					}
 					$i = 0;
 					//We recover the quantity of all the products
 					$query = "SELECT fk_facture, fk_product, qty FROM ".MAIN_DB_PREFIX."facturedet";
 					$result = $this->db->query($query);
 					while ($row = $result->fetch_array()) {
-						if ($row['fk_facture'] == $rowid_invoice[0]) {
+						if ($row['fk_facture'] == $object->lines[0]->fk_facture) {
 							$fk_product[$i] = $row['fk_product'];
 							$fk_quantity[$i] = $row['qty'];
 							$i += 1;
@@ -314,10 +286,21 @@ class ActionsDoliproject
 					}
 					//End
 
+					//Check if the invoice is already linked to the task
+					$error_button = 0;
+					$query = "SELECT fk_facture_name FROM ".MAIN_DB_PREFIX."projet_task_extrafields";
+					$result = $this->db->query($query);
+					while ($row = $result->fetch_array()) {
+						if ($row['fk_facture_name'] == $object->id) {
+							$error_button = 1;
+						}
+					}
+
 					//Start
 					//Filling of the llx_projet_task table with the variables to create the task
-					if ($fk_projet && $planned_workload != 0) {
-						$req = 'INSERT INTO '.MAIN_DB_PREFIX.'projet_task(ref, fk_projet, label, dateo, datee, planned_workload) VALUES("'.$ref.'", '.intval($fk_projet).', "'.$label.'", "'.$dateo.'", "'.$datee.'", '.intval($planned_workload).')';
+					if ($error_button == 0) {
+						if ($fk_projet && $planned_workload != 0) {
+							$req = 'INSERT INTO '.MAIN_DB_PREFIX.'projet_task(ref, fk_projet, label, dateo, datee, planned_workload) VALUES("'.$ref.'", '.intval($fk_projet).', "'.$label.'", "'.$dateo.'", "'.$datee.'", '.intval($planned_workload).')';
 						$this->db->query($req);
 						$query = "SELECT rowid, ref, fk_projet FROM ".MAIN_DB_PREFIX."projet_task";
 						$result = $this->db->query($query);
@@ -337,13 +320,14 @@ class ActionsDoliproject
 						$this->db->query($req);
 						setEventMessages('<a href="'.DOL_URL_ROOT.'/projet/tasks/task.php?id='.$rowid_last_task[0].'">'.$langs->trans("MessageInfo").'</a>', null, 'mesgs');
 						//End
-					}
-					else {
-						if ($fk_projet) {
-							setEventMessages($langs->trans("MessageInfoNoCreateTime"), null, 'errors');
 						}
-						else if ($planned_workload != 0) {
-							setEventMessages($langs->trans("MessageInfoNoCreateProject"), null, 'errors');
+						else {
+							if ($fk_projet) {
+								setEventMessages($langs->trans("MessageInfoNoCreateTime"), null, 'errors');
+							}
+							if ($planned_workload != 0) {
+								setEventMessages($langs->trans("MessageInfoNoCreateProject"), null, 'errors');
+							}
 						}
 					}
 				}
