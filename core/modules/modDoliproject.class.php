@@ -56,7 +56,7 @@ class modDoliproject extends DolibarrModules
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->picto = 'generic';
 		$this->module_parts = array(
-			'triggers' => 0,
+			'triggers' => 1,
 			'login' => 0,
 			'substitutions' => 0,
 			'menus' => 0,
@@ -71,6 +71,7 @@ class modDoliproject extends DolibarrModules
 			'hooks' => array(
 				  'data' => array(
 				      'invoicecard',
+					  'ticketcard',
 				  ),
 			),
 			'moduleforexternal' => 0,
