@@ -48,25 +48,6 @@ MyWidget = Mon widget
 MyWidgetDescription = Description de mon widget
 
 #
-# logging doliproject
-#
-StartTask = Debut de la creation de la tache
-ConnectionDBSuccess = Connexion a la db etablie
-ConnectionDBFailed = Connexion a la db echoue a la ligne 
-StartVariable = Debut de la generation des variables
-VRef = Variable : ref = 
-Vfk_projet = Varibale  : fk_projet = 
-Vlabel = Varibale  : label = 
-Vdescription = Varibale  : description = 
-Vdateo = Varibale  : dateo = 
-Vdatee = Varibale  : datee = 
-Vplanned_workload = Variable  : planned_workload = 
-TaskCreated = Tache : 
-TaskCreated2 =  creee avec succes
-TaskCreatedFailed = Tache non creee
-EndTask = Fin de la creation de tache
-
-#
 # module doliproject
 #
 DescriptionTask = Réalisé depuis la facture 
@@ -79,3 +60,5 @@ ErrorNoProject = Projet non lié
 ErrorDateStart = Pas de date de début
 ErrorDateEnd = Pas de date de fin
 ErrorServiceTime = Le temps du(des) service(s) est nul
+MessageTimeSpentCreate = Temps consommé crée
+MessageNoTaskLink = Pas de tâche affectée, pas de temps passé disponible

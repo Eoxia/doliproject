@@ -312,8 +312,7 @@ class ActionsDoliproject
 						//Filling of the llx_facture_extrafields table
 						$req = 'INSERT INTO '.MAIN_DB_PREFIX.'facture_extrafields(fk_object, fk_task) VALUES('.$object->lines[0]->fk_facture.', '.$rowid_last_task[0].')';
 						$this->db->query($req);
-						//
-						setEventMessages('<a href="'.DOL_URL_ROOT.'/projet/tasks/task.php?id='.$rowid_last_task[0].'">'.$langs->trans("MessageInfo").' : '.$ref.'</a>', null, 'mesgs');
+						setEventMessages($langs->trans("MessageInfo").' : '.'<a href="'.DOL_URL_ROOT.'/projet/tasks/task.php?id='.$rowid_last_task[0].'">'.$ref.'</a>', null, 'mesgs');
 					}
 					//Error messages
 					else {
@@ -483,7 +482,42 @@ class ActionsDoliproject
 			return -1;
 		}
 	}
-	
-	/* Add here any other hooked methods... */
 
+	public function printCommonFooter($parameters, &$object, &$action, $hookmanager)
+	{
+		global $conf, $user, $langs;
+		$langs->load('projects');
+		if (in_array('ticketcard', explode(':', $parameters['context'])))
+		{
+			if (GETPOST('action') == 'presend_addmessage') {
+				$ticket = new Ticket($this->db);
+				$result = $ticket->fetch('',GETPOST('ref','alpha'),GETPOST('track_id','alpha'));
+				dol_syslog(var_export($ticket, true), LOG_DEBUG);
+				if ($result > 0 && ((int)$ticket->id) > 0) {
+					if ( is_array($ticket->array_options) && array_key_exists('options_fk_task',$ticket->array_options) && $ticket->array_options['options_fk_task']>0) {
+					?>
+					<script>
+						let InputTime = document.createElement("input");
+						InputTime.id = "timespent";
+						InputTime.name = "timespent";
+						InputTime.type = "number";
+						InputTime.value = 15;
+						let $tr = $('<tr>');
+						$tr.append($('<td>').append('<?php echo $langs->trans('NewTimeSpent');?>'));
+						$tr.append($('<td>').append(InputTime));
+
+						let currElement = $("form[name='ticket'] > table tbody");
+						currElement.append($tr);
+					</script>
+					<?php
+					} else {
+						setEventMessage($langs->trans('MessageNoTaskLink'),'warnings');
+					}
+				} else {
+					setEventMessages($ticket->error,$ticket->errors,'errors');
+				}
+			}
+		}
+	}
+	/* Add here any other hooked methods... */
 }

@@ -103,219 +103,49 @@ class InterfaceDoliprojectTriggers extends DolibarrTriggers
 		// Data and type of action are stored into $object and $action
 
 		switch ($action) {
-			// Users
-			//case 'USER_CREATE':
-			//case 'USER_MODIFY':
-			//case 'USER_NEW_PASSWORD':
-			//case 'USER_ENABLEDISABLE':
-			//case 'USER_DELETE':
-			//case 'USER_SETINGROUP':
-			//case 'USER_REMOVEFROMGROUP':
-
 			// Actions
-			//case 'ACTION_MODIFY':
-			//case 'ACTION_CREATE':
-			//case 'ACTION_DELETE':
+			case 'ACTION_CREATE':
+				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+				if (((int)$object->fk_element) > 0 && $object->elementtype == 'ticket' && preg_match('/^TICKET_/s',$object->code)) {
+					dol_syslog("Add time spent");
+					$result= 0;
+					$ticket = new Ticket($this->db);
+					$result = $ticket->fetch($object->fk_element);
+					dol_syslog(var_export($ticket, true), LOG_DEBUG);
+					if ($result > 0 && ((int)$ticket->id) > 0) {
+						if (is_array($ticket->array_options) && array_key_exists('options_fk_task',$ticket->array_options) && $ticket->array_options['options_fk_task']>0) {
+							require_once DOL_DOCUMENT_ROOT .'/projet/class/task.class.php';
+							$task = new Task($this->db);
+							$result = $task->fetch($ticket->array_options['options_fk_task']);
+							dol_syslog(var_export($task, true), LOG_DEBUG);
+							if ($result > 0 && ((int)$task->id) > 0) {
+								$task->timespent_note = $object->note_private;
+								$task->timespent_duration = GETPOST('timespent','int') * 60; // We store duration in seconds
+								$task->timespent_date = dol_now();
+								$task->timespent_withhour = 1;
+								$task->timespent_fk_user = $user->id;
 
-			// Groups
-			//case 'USERGROUP_CREATE':
-			//case 'USERGROUP_MODIFY':
-			//case 'USERGROUP_DELETE':
+								$id_message = $task->id;
+								$name_message = $task->ref;
 
-			// Companies
-			//case 'COMPANY_CREATE':
-			//case 'COMPANY_MODIFY':
-			//case 'COMPANY_DELETE':
-
-			// Contacts
-			//case 'CONTACT_CREATE':
-			//case 'CONTACT_MODIFY':
-			//case 'CONTACT_DELETE':
-			//case 'CONTACT_ENABLEDISABLE':
-
-			// Products
-			//case 'PRODUCT_CREATE':
-			//case 'PRODUCT_MODIFY':
-			//case 'PRODUCT_DELETE':
-			//case 'PRODUCT_PRICE_MODIFY':
-			//case 'PRODUCT_SET_MULTILANGS':
-			//case 'PRODUCT_DEL_MULTILANGS':
-
-			//Stock mouvement
-			//case 'STOCK_MOVEMENT':
-
-			//MYECMDIR
-			//case 'MYECMDIR_CREATE':
-			//case 'MYECMDIR_MODIFY':
-			//case 'MYECMDIR_DELETE':
-
-			// Customer orders
-			//case 'ORDER_CREATE':
-			//case 'ORDER_MODIFY':
-			//case 'ORDER_VALIDATE':
-			//case 'ORDER_DELETE':
-			//case 'ORDER_CANCEL':
-			//case 'ORDER_SENTBYMAIL':
-			//case 'ORDER_CLASSIFY_BILLED':
-			//case 'ORDER_SETDRAFT':
-			//case 'LINEORDER_INSERT':
-			//case 'LINEORDER_UPDATE':
-			//case 'LINEORDER_DELETE':
-
-			// Supplier orders
-			//case 'ORDER_SUPPLIER_CREATE':
-			//case 'ORDER_SUPPLIER_MODIFY':
-			//case 'ORDER_SUPPLIER_VALIDATE':
-			//case 'ORDER_SUPPLIER_DELETE':
-			//case 'ORDER_SUPPLIER_APPROVE':
-			//case 'ORDER_SUPPLIER_REFUSE':
-			//case 'ORDER_SUPPLIER_CANCEL':
-			//case 'ORDER_SUPPLIER_SENTBYMAIL':
-			//case 'ORDER_SUPPLIER_DISPATCH':
-			//case 'LINEORDER_SUPPLIER_DISPATCH':
-			//case 'LINEORDER_SUPPLIER_CREATE':
-			//case 'LINEORDER_SUPPLIER_UPDATE':
-			//case 'LINEORDER_SUPPLIER_DELETE':
-
-			// Proposals
-			//case 'PROPAL_CREATE':
-			//case 'PROPAL_MODIFY':
-			//case 'PROPAL_VALIDATE':
-			//case 'PROPAL_SENTBYMAIL':
-			//case 'PROPAL_CLOSE_SIGNED':
-			//case 'PROPAL_CLOSE_REFUSED':
-			//case 'PROPAL_DELETE':
-			//case 'LINEPROPAL_INSERT':
-			//case 'LINEPROPAL_UPDATE':
-			//case 'LINEPROPAL_DELETE':
-
-			// SupplierProposal
-			//case 'SUPPLIER_PROPOSAL_CREATE':
-			//case 'SUPPLIER_PROPOSAL_MODIFY':
-			//case 'SUPPLIER_PROPOSAL_VALIDATE':
-			//case 'SUPPLIER_PROPOSAL_SENTBYMAIL':
-			//case 'SUPPLIER_PROPOSAL_CLOSE_SIGNED':
-			//case 'SUPPLIER_PROPOSAL_CLOSE_REFUSED':
-			//case 'SUPPLIER_PROPOSAL_DELETE':
-			//case 'LINESUPPLIER_PROPOSAL_INSERT':
-			//case 'LINESUPPLIER_PROPOSAL_UPDATE':
-			//case 'LINESUPPLIER_PROPOSAL_DELETE':
-
-			// Contracts
-			//case 'CONTRACT_CREATE':
-			//case 'CONTRACT_MODIFY':
-			//case 'CONTRACT_ACTIVATE':
-			//case 'CONTRACT_CANCEL':
-			//case 'CONTRACT_CLOSE':
-			//case 'CONTRACT_DELETE':
-			//case 'LINECONTRACT_INSERT':
-			//case 'LINECONTRACT_UPDATE':
-			//case 'LINECONTRACT_DELETE':
-
-			// Bills
-			//case 'BILL_CREATE':
-			//case 'BILL_MODIFY':
-			//case 'BILL_VALIDATE':
-			//case 'BILL_UNVALIDATE':
-			//case 'BILL_SENTBYMAIL':
-			//case 'BILL_CANCEL':
-			//case 'BILL_DELETE':
-			//case 'BILL_PAYED':
-			//case 'LINEBILL_INSERT':
-			//case 'LINEBILL_UPDATE':
-			//case 'LINEBILL_DELETE':
-
-			//Supplier Bill
-			//case 'BILL_SUPPLIER_CREATE':
-			//case 'BILL_SUPPLIER_UPDATE':
-			//case 'BILL_SUPPLIER_DELETE':
-			//case 'BILL_SUPPLIER_PAYED':
-			//case 'BILL_SUPPLIER_UNPAYED':
-			//case 'BILL_SUPPLIER_VALIDATE':
-			//case 'BILL_SUPPLIER_UNVALIDATE':
-			//case 'LINEBILL_SUPPLIER_CREATE':
-			//case 'LINEBILL_SUPPLIER_UPDATE':
-			//case 'LINEBILL_SUPPLIER_DELETE':
-
-			// Payments
-			//case 'PAYMENT_CUSTOMER_CREATE':
-			//case 'PAYMENT_SUPPLIER_CREATE':
-			//case 'PAYMENT_ADD_TO_BANK':
-			//case 'PAYMENT_DELETE':
-
-			// Online
-			//case 'PAYMENT_PAYBOX_OK':
-			//case 'PAYMENT_PAYPAL_OK':
-			//case 'PAYMENT_STRIPE_OK':
-
-			// Donation
-			//case 'DON_CREATE':
-			//case 'DON_UPDATE':
-			//case 'DON_DELETE':
-
-			// Interventions
-			//case 'FICHINTER_CREATE':
-			//case 'FICHINTER_MODIFY':
-			//case 'FICHINTER_VALIDATE':
-			//case 'FICHINTER_DELETE':
-			//case 'LINEFICHINTER_CREATE':
-			//case 'LINEFICHINTER_UPDATE':
-			//case 'LINEFICHINTER_DELETE':
-
-			// Members
-			//case 'MEMBER_CREATE':
-			//case 'MEMBER_VALIDATE':
-			//case 'MEMBER_SUBSCRIPTION':
-			//case 'MEMBER_MODIFY':
-			//case 'MEMBER_NEW_PASSWORD':
-			//case 'MEMBER_RESILIATE':
-			//case 'MEMBER_DELETE':
-
-			// Categories
-			//case 'CATEGORY_CREATE':
-			//case 'CATEGORY_MODIFY':
-			//case 'CATEGORY_DELETE':
-			//case 'CATEGORY_SET_MULTILANGS':
-
-			// Projects
-			//case 'PROJECT_CREATE':
-			//case 'PROJECT_MODIFY':
-			//case 'PROJECT_DELETE':
-
-			// Project tasks
-			//case 'TASK_CREATE':
-			//case 'TASK_MODIFY':
-			//case 'TASK_DELETE':
-
-			// Task time spent
-			//case 'TASK_TIMESPENT_CREATE':
-			//case 'TASK_TIMESPENT_MODIFY':
-			//case 'TASK_TIMESPENT_DELETE':
-			//case 'PROJECT_ADD_CONTACT':
-			//case 'PROJECT_DELETE_CONTACT':
-			//case 'PROJECT_DELETE_RESOURCE':
-
-			// Shipping
-			//case 'SHIPPING_CREATE':
-			//case 'SHIPPING_MODIFY':
-			//case 'SHIPPING_VALIDATE':
-			//case 'SHIPPING_SENTBYMAIL':
-			//case 'SHIPPING_BILLED':
-			//case 'SHIPPING_CLOSED':
-			//case 'SHIPPING_REOPEN':
-			//case 'SHIPPING_DELETE':
-
-			// and more...
-
-			// case 'add_message':
-			// 	echo 'bj';
-			// 	exit;
+								$result = $task->addTimeSpent($user);
+								setEventMessages($langs->trans("MessageTimeSpentCreate").' : '.'<a href="'.DOL_URL_ROOT.'/projet/tasks/time.php?id='.$id_message.'">'.$name_message.'</a>', null, 'mesgs');
+							} else {
+								setEventMessages($task->error,$task->errors,'errors');
+								return -1;
+							}
+						}
+					} else {
+						setEventMessages($ticket->error,$ticket->errors,'errors');
+						return -1;
+					}
+				}
+			break;
 
 			default:
 				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
 				break;
 		}
-
 		return 0;
 	}
 }

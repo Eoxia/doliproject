@@ -52,7 +52,7 @@ class modDoliproject extends DolibarrModules
 		$this->descriptionlong = "Doliproject description (Long)";
 		$this->editor_name = 'Editor name';
 		$this->editor_url = 'https://www.example.com';
-		$this->version = '1.0';
+		$this->version = '1.1.0';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->picto = 'generic';
 		$this->module_parts = array(
@@ -167,6 +167,9 @@ class modDoliproject extends DolibarrModules
 		unset($param);
 		$param['options']['Facture:compta/facture/class/facture.class.php'] = NULL;
 		$extra_fields->addExtraField('fk_facture_name', 'Facture', 'link', 100, NULL, 'projet_task', 1, 0, NULL, $param, 1, 1, 1); //extrafields task
+		unset($param);
+		$param['options']['Task:projet/class/task.class.php'] = NULL;
+		$extra_fields->addExtraField('fk_task', 'Tâche', 'link', 100, NULL, 'ticket', 0, 0, NULL, $param, 1, 1, 1); //extrafields ticket
 
 		// Permissions
 		$this->remove($options);
