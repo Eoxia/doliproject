@@ -67,3 +67,8 @@ ErrorDateEnd = No date end
 ErrorServiceTime = Service(s) time is zero
 MessageTimeSpentCreate = Time spent created
 MessageNoTaskLink = No task affected, no time passed available
+
+#
+# Setup Page
+#
+DOLIPROJECT_DEFAUT_TICKET_TIME = Default time spent

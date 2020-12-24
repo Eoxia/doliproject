@@ -62,3 +62,8 @@ ErrorDateEnd = Pas de date de fin
 ErrorServiceTime = Le temps du(des) service(s) est nul
 MessageTimeSpentCreate = Temps consommé crée
 MessageNoTaskLink = Pas de tâche affectée, pas de temps passé disponible
+
+#
+# Setup Page
+#
+DOLIPROJECT_DEFAUT_TICKET_TIME = Temps passé par défaut

@@ -492,7 +492,7 @@ class ActionsDoliproject
 			if (GETPOST('action') == 'presend_addmessage') {
 				$ticket = new Ticket($this->db);
 				$result = $ticket->fetch('',GETPOST('ref','alpha'),GETPOST('track_id','alpha'));
-				dol_syslog(var_export($ticket, true), LOG_DEBUG);
+				dol_syslog(var_export($ticket, true), LOG_DEBUG);			
 				if ($result > 0 && ((int)$ticket->id) > 0) {
 					if ( is_array($ticket->array_options) && array_key_exists('options_fk_task',$ticket->array_options) && $ticket->array_options['options_fk_task']>0) {
 					?>
@@ -501,7 +501,7 @@ class ActionsDoliproject
 						InputTime.id = "timespent";
 						InputTime.name = "timespent";
 						InputTime.type = "number";
-						InputTime.value = 15;
+						InputTime.value = <?php echo (!empty($conf->global->DOLIPROJECT_DEFAUT_TICKET_TIME)?$conf->global->DOLIPROJECT_DEFAUT_TICKET_TIME:0); ?>;
 						let $tr = $('<tr>');
 						$tr.append($('<td>').append('<?php echo $langs->trans('NewTimeSpent');?>'));
 						$tr.append($('<td>').append(InputTime));
@@ -516,6 +516,7 @@ class ActionsDoliproject
 				} else {
 					setEventMessages($ticket->error,$ticket->errors,'errors');
 				}
+				dol_htmloutput_events();
 			}
 		}
 	}

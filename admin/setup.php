@@ -56,8 +56,8 @@ $backtopage = GETPOST('backtopage', 'alpha');
 $value = GETPOST('value', 'alpha');
 
 $arrayofparameters = array(
-	'DOLIPROJECT_MYPARAM1'=>array('css'=>'minwidth200', 'enabled'=>1),
-	'DOLIPROJECT_MYPARAM2'=>array('css'=>'minwidth500', 'enabled'=>1)
+	'DOLIPROJECT_DEFAUT_TICKET_TIME'=>array('css'=>'minwidth200', 'enabled'=>1),
+//	'DOLIPROJECT_MYPARAM2'=>array('css'=>'minwidth500', 'enabled'=>1)
 );
 
 $error = 0;
