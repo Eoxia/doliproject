@@ -88,7 +88,7 @@ class modDoliproject extends DolibarrModules
 		$this->warnings_activation 		= array(); // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 		$this->warnings_activation_ext 	= array(); // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 		$this->const 					= array();
-		
+
 		$r ++;
 		$this->const[$r][0] = "DOLIPROJECT_DEFAUT_TICKET_TIME";
 		$this->const[$r][1] = "chaine";
@@ -180,7 +180,7 @@ class modDoliproject extends DolibarrModules
 		$extra_fields->addExtraField('fk_facture_name', 'Facture', 'link', 100, NULL, 'projet_task', 1, 0, NULL, $param, 1, 1, 1); //extrafields task
 		unset($param);
 		$param['options']['Task:projet/class/task.class.php'] = NULL;
-		$extra_fields->addExtraField('fk_task', 'Tâche', 'link', 100, NULL, 'ticket', 0, 0, NULL, $param, 1, 1, 1); //extrafields ticket
+		$extra_fields->addExtraField('fk_task', 'Tâche', 'link', 100, NULL, 'ticket', 0, 0, NULL, $param, 1, 1, 'preg_match(\'/public/\',$_SERVER[\'PHP_SELF\'])?0:1'); //extrafields ticket
 
 		return $this->_init($sql, $options);
 	}
