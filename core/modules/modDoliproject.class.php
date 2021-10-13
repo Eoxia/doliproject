@@ -179,7 +179,7 @@ class modDoliproject extends DolibarrModules
 		$param['options']['Facture:compta/facture/class/facture.class.php'] = NULL;
 		$extra_fields->addExtraField('fk_facture_name', 'Facture', 'link', 100, NULL, 'projet_task', 1, 0, NULL, $param, 1, 1, 1); //extrafields task
 		unset($param);
-		$extra_fields->delete('fk_task', 'ticket');
+		$extra_fields->update('fk_task', 'Tâche', 'sellist', '', 'ticket', 0, 0, 100, 'a:1:{s:7:"options";a:1:{s:110:"projet_task:ref:rowid::entity = $ENTITY$ AND fk_projet = ($SEL$ fk_project FROM llx_ticket WHERE rowid = $ID$)";N;}}', 1, 1, 'preg_match(\'/public/\',$_SERVER[\'PHP_SELF\'])?0:1');
 		$extra_fields->addExtraField('fk_task', 'Tâche', 'sellist', 100, NULL, 'ticket', 0, 0, NULL, 'a:1:{s:7:"options";a:1:{s:110:"projet_task:ref:rowid::entity = $ENTITY$ AND fk_projet = ($SEL$ fk_project FROM llx_ticket WHERE rowid = $ID$)";N;}}', 1, 1, 'preg_match(\'/public/\',$_SERVER[\'PHP_SELF\'])?0:1'); //extrafields ticket
 
 		return $this->_init($sql, $options);
