@@ -91,7 +91,8 @@ require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
 //dol_include_once('/othermodule/class/otherobject.class.php');
 
 // Load translation files required by the page
-$langs->loadLangs(array("bibliotheque@bibliotheque", "other"));
+$langs->loadLangs(array("projects", "other"));
+
 
 $action     = GETPOST('action', 'aZ09') ?GETPOST('action', 'aZ09') : 'view'; // The action 'add', 'create', 'edit', 'update', 'view', ...
 $massaction = GETPOST('massaction', 'alpha'); // The bulk action (combo box choice into lists)
@@ -120,26 +121,27 @@ $pagenext = $page + 1;
 
 // Initialize technical objects
 $object = new Task($db);
-$extrafields = new ExtraFields($db);
+//$extrafields = new ExtraFields($db);
 //$diroutputmassaction = $conf->bibliotheque->dir_output.'/temp/massgeneration/'.$user->id;
 //$hookmanager->initHooks(array('booklist')); // Note that conf->hooks_modules contains array
 
 // Fetch optionals attributes and labels
-$extrafields->fetch_name_optionals_label($object->table_element);
+//$extrafields->fetch_name_optionals_label($object->table_element);
 //$extrafields->fetch_name_optionals_label($object->table_element_line);
 
-$search_array_options = $extrafields->getOptionalsFromPost($object->table_element, '', 'search_');
+//$search_array_options = $extrafields->getOptionalsFromPost($object->table_element, '', 'search_');
 
 $arrayfields = array(
-	's.nom' => array('label'=>"Customer", 'checked'=>1, 'position'=>5),
-	'p.ref' => array('label'=>"Project", 'checked'=>1, 'position'=>10),
-	'p.title' => array('label'=>"Title", 'checked'=>1, 'position'=>11),
-	'pt.ref' => array('label'=>"Task", 'checked'=>1, 'position'=>12),
-	'pt.label' => array('label'=>"Label", 'checked'=>1, 'position'=>13),
-	'ptt.task_date' => array('label'=>"Date", 'checked'=>1, 'position'=>13),
-	'ptt.fk_user' => array('label'=>"User", 'checked'=>1, 'position'=>14),
-	'ptt.task_duration' => array('label'=>"Label", 'checked'=>1, 'position'=>15),
-	'ptt.note' => array('label'=>"Note", 'checked'=>1, 'position'=>16),
+	'rowid' => array('tablealias'=>'s.','label'=>"Customer", 'checked'=>1, 'position'=>5, 'type'=>'integer:Societe:societe/class/societe.class.php:1:status=1 AND entity IN (__SHARED_ENTITIES__)', 'visible'=>1),
+	'ref' => array('tablealias'=>'p.', 'label'=>"Project", 'checked'=>1, 'position'=>10, 'type'=>'integer:Project:projet/class/project.class.php:1', 'visible'=>1),
+	'title' => array('tablealias'=>'p.', 'label'=>"Title", 'checked'=>1, 'position'=>11, 'type'=>'text', 'visible'=>1),
+	'pt.rowid' => array('tablealias'=>'', 'label'=>"Task", 'checked'=>1, 'position'=>12, 'type'=>'integer:Task:projet/class/task.class.php:1', 'visible'=>1),
+	//'ref' => array('tablealias'=>'pt.', 'label'=>"Task", 'checked'=>1, 'position'=>12, 'type'=>'integer:Task:projet/class/task.class.php:1', 'visible'=>1),
+	'label' => array('tablealias'=>'pt.','label'=>"Label", 'checked'=>1, 'position'=>13, 'type'=>'text', 'visible'=>1),
+	'task_date' => array('tablealias'=>'ptt.', 'label'=>"Date", 'checked'=>1, 'position'=>13, 'type'=>'datetime', 'visible'=>1),
+	'fk_user' => array('tablealias'=>'ptt.', 'label'=>"User", 'checked'=>1, 'position'=>14, 'type'=>'integer:User:user/class/user.class.php', 'visible'=>1),
+	'task_duration' => array('tablealias'=>'ptt.', 'label'=>"Duration", 'checked'=>1, 'position'=>15, 'type'=>'duration', 'visible'=>1),
+	'note' => array('tablealias'=>'ptt.', 'label'=>"Note", 'checked'=>1, 'position'=>16, 'type'=>'text', 'visible'=>1),
 );
 
 
@@ -151,10 +153,12 @@ if (!$sortorder) {
 	$sortorder = "ASC";
 }
 
+$arrayfields = dol_sort_array($arrayfields, 'position');
+
 // Initialize array of search criterias
 $search_all = GETPOST('search_all', 'alphanohtml');
 $search = array();
-foreach ($object->fields as $key => $val) {
+foreach ($arrayfields as $key => $val) {
 	if (GETPOST('search_'.$key, 'alpha') !== '') {
 		$search[$key] = GETPOST('search_'.$key, 'alpha');
 	}
@@ -167,9 +171,9 @@ foreach ($object->fields as $key => $val) {
 // List of fields to search into when doing a "search in all"
 $fieldstosearchall = array();
 //TODO
-foreach ($object->fields as $key => $val) {
+foreach ($arrayfields as $key => $val) {
 	if (!empty($val['searchall'])) {
-		$fieldstosearchall['t.'.$key] = $val['label'];
+		$fieldstosearchall[$key] = $val['label'];
 	}
 }
 
@@ -179,7 +183,7 @@ foreach ($object->fields as $key => $val) {
 	// If $val['visible']==0, then we never show the field
 	if (!empty($val['visible'])) {
 		$visible = (int) dol_eval($val['visible'], 1);
-		$arrayfields['t.'.$key] = array(
+		$arrayfields[$key] = array(
 			'label'=>$val['label'],
 			'checked'=>(($visible < 0) ? 0 : 1),
 			'enabled'=>($visible != 3 && dol_eval($val['enabled'], 1)),
@@ -191,8 +195,7 @@ foreach ($object->fields as $key => $val) {
 // Extra fields
 include DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_list_array_fields.tpl.php';
 
-$object->fields = dol_sort_array($object->fields, 'position');
-$arrayfields = dol_sort_array($arrayfields, 'position');
+
 
 // There is several ways to check permission.
 // Set $enablepermissioncheck to 1 to enable a minimum low level of checks
@@ -256,12 +259,6 @@ if (empty($reshook)) {
 		|| GETPOST('button_search_x', 'alpha') || GETPOST('button_search.x', 'alpha') || GETPOST('button_search', 'alpha')) {
 		$massaction = ''; // Protection to avoid mass action if we force a new search during a mass action confirmation
 	}
-
-	// Mass actions
-	$objectclass = 'Book';
-	$objectlabel = 'Book';
-	$uploaddir = $conf->bibliotheque->dir_output;
-	include DOL_DOCUMENT_ROOT . '/core/actions_massactions.inc.php';
 }
 
 
@@ -276,7 +273,7 @@ $now = dol_now();
 
 //$help_url="EN:Module_Book|FR:Module_Book_FR|ES:Módulo_Book";
 $help_url = '';
-$title = $langs->trans('ListOf', $langs->transnoentitiesnoconv("Books"));
+$title = $langs->trans('ListOf', $langs->transnoentitiesnoconv("NewTimeSpent"));
 $morejs = array();
 $morecss = array();
 
@@ -284,29 +281,34 @@ $morecss = array();
 // Build and execute select
 // --------------------------------------------------------------------
 $sql = 'SELECT ';
-$sql = 'DISTINCT ';
+$sql .= 'DISTINCT ';
 /*s.nom as s_nom, p.ref as p_ref, p.title as p_title, p.entity as p_entity,
 pt.ref as pt_ref, pt.label as pt_label, ptt.task_date as ptt_task_date,
 ptt.task_duration as ptt_task_duration, ptt.fk_user as ptt_fk_user, ptt.note as ptt_note*/
-$sql .= explode(',',array_keys($arrayfields));
+$sqlfields=array();
+foreach($arrayfields as $field=>$data) {
+	$sqlfields[]= $data['tablealias'].$field;
+}
+$sql .= implode(',', $sqlfields);
+
 
 
 // Add fields from extrafields
-if (!empty($extrafields->attributes[$object->table_element]['label'])) {
+/*if (!empty($extrafields->attributes[$object->table_element]['label'])) {
 	foreach ($extrafields->attributes[$object->table_element]['label'] as $key => $val) {
 		$sql .= ($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? ", ef.".$key." as options_".$key : '');
 	}
-}
+}*/
 // Add fields from hooks
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListSelect', $parameters, $object); // Note that $action and $object may have been modified by hook
 $sql .= preg_replace('/^,/', '', $hookmanager->resPrint);
 $sql = preg_replace('/,\s*$/', '', $sql);
-$sql .= 'FROM '.MAIN_DB_PREFIX.'projet as p';
-$sql .= '         LEFT JOIN '.MAIN_DB_PREFIX.'projet_extrafields as extra ON p.rowid = extra.fk_object';
-$sql .= '       LEFT JOIN '.MAIN_DB_PREFIX.'c_lead_status as cls ON p.fk_opp_status = cls.rowid';
+$sql .= ' FROM '.MAIN_DB_PREFIX.'projet as p';
+$sql .= '        LEFT JOIN '.MAIN_DB_PREFIX.'projet_extrafields as extra ON p.rowid = extra.fk_object';
+$sql .= '        LEFT JOIN '.MAIN_DB_PREFIX.'c_lead_status as cls ON p.fk_opp_status = cls.rowid';
 $sql .= '        LEFT JOIN '.MAIN_DB_PREFIX.'projet_task as pt ON p.rowid = pt.fk_projet';
-$sql .= '        LEFT JOIN '.MAIN_DB_PREFIX.'projet_task_extrafields as extra2 ON pt.rowid = extra2.fk_object';
+$sql .= '        LEFT JOIN '.MAIN_DB_PREFIX.'projet_task_extrafields as ef ON pt.rowid = ef.fk_object';
 $sql .= '        LEFT JOIN '.MAIN_DB_PREFIX.'projet_task_time as ptt ON pt.rowid = ptt.fk_task';
 $sql .= '        LEFT JOIN '.MAIN_DB_PREFIX.'societe as s ON p.fk_soc = s.rowid';
 $sql .= '        LEFT JOIN '.MAIN_DB_PREFIX.'facture as f ON ptt.invoice_id = f.rowid';
@@ -323,6 +325,7 @@ if ($object->ismultientitymanaged == 1) {
 } else {
 	$sql .= " WHERE 1 = 1";
 }
+$sql .= ' AND ptt.task_duration IS NOT NULL';
 /*foreach ($search as $key => $val) {
 	if (array_key_exists($key, $object->fields)) {
 		if ($key == 'status' && $search[$key] == -1) {
@@ -518,10 +521,7 @@ $newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle'
 print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, 'object_'.$object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
 
 // Add code for pre mass action (confirmation or email presend form)
-$topicmail = "SendBookRef";
-$modelmail = "book";
-$objecttmp = new Book($db);
-$trackid = 'xxxx'.$object->id;
+$objecttmp = new Task($db);
 include DOL_DOCUMENT_ROOT . '/core/tpl/massactions_pre.tpl.php';
 
 if ($search_all) {
@@ -561,7 +561,7 @@ print '<table class="tagtable nobottomiftotal liste'.($moreforfilter ? " listwit
 // Fields title search
 // --------------------------------------------------------------------
 print '<tr class="liste_titre">';
-foreach ($object->fields as $key => $val) {
+foreach ($arrayfields as $key => $val) {
 	$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 	if ($key == 'status') {
 		$cssforfield .= ($cssforfield ? ' ' : '').'center';
@@ -572,7 +572,7 @@ foreach ($object->fields as $key => $val) {
 	} elseif (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
 		$cssforfield .= ($cssforfield ? ' ' : '').'right';
 	}
-	if (!empty($arrayfields['t.'.$key]['checked'])) {
+	if (!empty($arrayfields[$key]['checked'])) {
 		print '<td class="liste_titre'.($cssforfield ? ' '.$cssforfield : '').'">';
 		if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
 			print $form->selectarray('search_'.$key, $val['arrayofkeyval'], (isset($search[$key]) ? $search[$key] : ''), $val['notnull'], 0, 0, '', 1, 0, 0, '', 'maxwidth100', 1);
@@ -613,7 +613,7 @@ print '</tr>'."\n";
 // Fields title label
 // --------------------------------------------------------------------
 print '<tr class="liste_titre">';
-foreach ($object->fields as $key => $val) {
+foreach ($arrayfields as $key => $val) {
 	$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 	if ($key == 'status') {
 		$cssforfield .= ($cssforfield ? ' ' : '').'center';
@@ -624,8 +624,8 @@ foreach ($object->fields as $key => $val) {
 	} elseif (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
 		$cssforfield .= ($cssforfield ? ' ' : '').'right';
 	}
-	if (!empty($arrayfields['t.'.$key]['checked'])) {
-		print getTitleFieldOfList($arrayfields['t.'.$key]['label'], 0, $_SERVER['PHP_SELF'], 't.'.$key, '', $param, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
+	if (!empty($arrayfields[$key]['checked'])) {
+		print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', $param, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
 	}
 }
 // Extra fields
@@ -641,13 +641,13 @@ print '</tr>'."\n";
 
 // Detect if we need a fetch on each output line
 $needToFetchEachLine = 0;
-if (isset($extrafields->attributes[$object->table_element]['computed']) && is_array($extrafields->attributes[$object->table_element]['computed']) && count($extrafields->attributes[$object->table_element]['computed']) > 0) {
+/*if (isset($extrafields->attributes[$object->table_element]['computed']) && is_array($extrafields->attributes[$object->table_element]['computed']) && count($extrafields->attributes[$object->table_element]['computed']) > 0) {
 	foreach ($extrafields->attributes[$object->table_element]['computed'] as $key => $val) {
 		if (preg_match('/\$object/', $val)) {
 			$needToFetchEachLine++; // There is at least one compute field that use $object
 		}
 	}
-}
+}*/
 
 
 // Loop on record
@@ -660,13 +660,12 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 	if (empty($obj)) {
 		break; // Should not happen
 	}
-
-	// Store properties in $object
+	$object->fields=$arrayfields;
 	$object->setVarsFromFetchObj($obj);
 
 	// Show here line of result
 	print '<tr class="oddeven">';
-	foreach ($object->fields as $key => $val) {
+	foreach ($arrayfields as $key => $val) {
 		$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 		if (in_array($val['type'], array('date', 'datetime', 'timestamp'))) {
 			$cssforfield .= ($cssforfield ? ' ' : '').'center';
@@ -685,12 +684,12 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 		}
 		//if (in_array($key, array('fk_soc', 'fk_user', 'fk_warehouse'))) $cssforfield = 'tdoverflowmax100';
 
-		if (!empty($arrayfields['t.'.$key]['checked'])) {
+		if (!empty($arrayfields[$key]['checked'])) {
 			print '<td'.($cssforfield ? ' class="'.$cssforfield.'"' : '').'>';
 			if ($key == 'status') {
 				print $object->getLibStatut(5);
-			} elseif ($key == 'rowid') {
-				print $object->showOutputField($val, $key, $object->id, '');
+			} elseif ($key=='rowid') {
+				print $object->showOutputField($val, $key, $obj->rowid, '');
 			} else {
 				print $object->showOutputField($val, $key, $object->$key, '');
 			}
@@ -700,15 +699,15 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 			}
 			if (!empty($val['isameasure']) && $val['isameasure'] == 1) {
 				if (!$i) {
-					$totalarray['pos'][$totalarray['nbfield']] = 't.'.$key;
+					$totalarray['pos'][$totalarray['nbfield']] = $key;
 				}
 				if (!isset($totalarray['val'])) {
 					$totalarray['val'] = array();
 				}
-				if (!isset($totalarray['val']['t.'.$key])) {
-					$totalarray['val']['t.'.$key] = 0;
+				if (!isset($totalarray['val'][$key])) {
+					$totalarray['val'][$key] = 0;
 				}
-				$totalarray['val']['t.'.$key] += $object->$key;
+				$totalarray['val'][$key] += $object->$key;
 			}
 		}
 	}
