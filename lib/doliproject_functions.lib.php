@@ -20,7 +20,6 @@ function toggleTaskFavorite($task_id, $user_id)
 	$task->fetch($task_id);
 	$task->fetchObjectLinked();
 
-
 	if (!empty($task->linkedObjects) && key_exists('user', $task->linkedObjects)) {
 		foreach($task->linkedObjects['user'] as $userLinked) {
 			if ($userLinked->id == $user_id) {
