@@ -66,11 +66,12 @@ class modDoliproject extends DolibarrModules
 			'models' 					=> 0,
 			'theme' 					=> 0,
 			'css' 						=> array(),
-			'js' 						=> array(),
+			'js' => array("/doliproject/js/doliproject.js.php"),
 			'hooks' 					=> array(
 				  'data' 				=> array(
 				      'invoicecard',
 					  'ticketcard',
+					  'projecttaskcard',
 				  ),
 			),
 			'moduleforexternal' => 0,
@@ -79,7 +80,7 @@ class modDoliproject extends DolibarrModules
 		$this->dirs 					= array("/doliproject/temp");
 		$this->config_page_url 			= array("setup.php@doliproject");
 		$this->hidden 					= false;
-		$this->depends 					= array();
+		$this->depends 					= array('modProjet');
 		$this->requiredby 				= array(); // List of module class names as string to disable if this one is disabled. Example: array('modModuleToDisable1', ...)
 		$this->conflictwith 			= array(); // List of module class names as string this module is in conflict with. Example: array('modModuleToDisable1', ...)
 		$this->langfiles 				= array("doliproject@doliproject");
@@ -104,7 +105,9 @@ class modDoliproject extends DolibarrModules
 			$conf->doliproject->enabled = 0;
 		}
 
-		$this->tabs 					= array();
+		$this->tabs = array();
+		$this->tabs[] = array('data' => 'user:+workinghours:Horaires:doliproject@doliproject:1:/custom/doliproject/view/workinghours_card.php?id=__ID__'); // To add a new tab identified by code tabname1
+
 		$this->dictionaries 			= array();
 		$this->boxes 					= array();
 		$this->cronjobs 				= array();
@@ -115,24 +118,26 @@ class modDoliproject extends DolibarrModules
 		$r = 0;
 		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Read objects of Doliproject'; // Permission label
-		$this->rights[$r][4] = 'myobject'; // In php code, permission will be checked by test if ($user->rights->doliproject->level1->level2)
-		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->doliproject->level1->level2)
+		$this->rights[$r][4] = 'read'; // In php code, permission will be checked by test if ($user->rights->doliproject->level1->level2)
+		$r++;
+		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][1] = 'Read objects of Doliproject'; // Permission label
+		$this->rights[$r][4] = 'lire'; // In php code, permission will be checked by test if ($user->rights->doliproject->level1->level2)
 		$r++;
 		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Create/Update objects of Doliproject'; // Permission label
-		$this->rights[$r][4] = 'myobject'; // In php code, permission will be checked by test if ($user->rights->doliproject->level1->level2)
-		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->doliproject->level1->level2)
+		$this->rights[$r][4] = 'write'; // In php code, permission will be checked by test if ($user->rights->doliproject->level1->level2)
 		$r++;
 		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Delete objects of Doliproject'; // Permission label
-		$this->rights[$r][4] = 'myobject'; // In php code, permission will be checked by test if ($user->rights->doliproject->level1->level2)
-		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->doliproject->level1->level2)
+		$this->rights[$r][4] = 'delete'; // In php code, permission will be checked by test if ($user->rights->doliproject->level1->level2)
 		$r++;
 		/* END MODULEBUILDER PERMISSIONS */
 
 		// Main menu entries to add
 		$this->menu = array();
 
+		$langs->load('doliproject@doliproject');
 		// Add here entries to declare new menus
 		/* BEGIN MODULEBUILDER TOPMENU */
 		$r = 0;
@@ -150,7 +155,34 @@ class modDoliproject extends DolibarrModules
 			'target'=>'',
 			'user'=>2, // 0=Menu for internal users, 1=external users, 2=both
 		);
-		$r = 1;
+		$this->menu[$r++] = array(
+			'fk_menu'  => '', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'type'     => 'top', // This is a Top menu entry
+			'titre'    => 'Doliproject',
+			'mainmenu' => 'doliproject',
+			'leftmenu' => '',
+			'url'      => '/doliproject/doliprojectindex.php',
+			'langs'    => 'doliproject@doliproject', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'position' => 48520 + $r,
+			'enabled'  => '$conf->doliproject->enabled', // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled.
+			'perms'    => '$user->rights->doliproject->lire', // Use 'perms'=>'$user->rights->doliproject->level1->level2' if you want your menu with a permission rules
+			'target'   => '',
+			'user'     => 2, // 0=Menu for internal users, 1=external users, 2=both
+		);
+		$this->menu[$r++] = array(
+			'fk_menu'  => 'fk_mainmenu=doliproject', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'type'     => 'left', // This is a Top menu entry
+			'titre'    => '<i class="far fa-clock"></i>  ' . $langs->trans('TimeSpent'),
+			'mainmenu' => 'doliproject',
+			'leftmenu' => '',
+			'url'      => '/doliproject/view/timespent.php',
+			'langs'    => 'doliproject@doliproject', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'position' => 48520 + $r,
+			'enabled'  => '$conf->doliproject->enabled', // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled.
+			'perms'    => '$user->rights->doliproject->lire', // Use 'perms'=>'$user->rights->doliproject->digiriskconst->read' if you want your menu with a permission rules
+			'target'   => '',
+			'user'     => 2, // 0=Menu for internal users, 1=external users, 2=both
+		);
 		/* END MODULEBUILDER TOPMENU */
 	}
 

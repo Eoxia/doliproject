@@ -64,6 +64,30 @@ MessageTimeSpentCreate = Temps consommé crée
 MessageNoTaskLink = Pas de tâche affectée, pas de temps passé disponible
 
 #
+# Temps consommé
+#
+
+Monday = Lundi
+Tuesday = Mardi
+Wednesday = Mercredi
+Thursday = Jeudi
+Friday = Vendredi
+Saturday = Samedi
+Sunday = Dimanche
+MondayWorkingHours = Heures de travail du lundi
+TuesdayWorkingHours = Heures de travail du mardi
+WednesdayWorkingHours = Heures de travail du mercredi
+ThursdayWorkingHours = Heures de travail du jeudi
+FridayWorkingHours = Heures de travail du vendredi
+SaturdayWorkingHours = Heures de travail du samedi
+SundayWorkingHours = Heures de travail du dimanche
+UserWorkingHours = Horaires de l'utilisateur
+WrongWorkingHoursFormat = Mauvais format pour les heures travaillées : %s
+UserWorkingHoursSaved = Horaires de l'utilisateurs sauvegardés
+WorkingHours(min) = Temps travaillé (en minutes)
+TimeSpent = Temps consommé
+
+#
 # Setup Page
 #
 DOLIPROJECT_DEFAUT_TICKET_TIME = Temps passé par défaut
