@@ -25,6 +25,16 @@
  *	\brief      List activities of tasks (per day entry)
  */
 
+if ( ! defined('NOREQUIREUSER'))  define('NOREQUIREUSER', '1');
+if ( ! defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL', '1');
+if ( ! defined('NOREQUIREMENU'))  define('NOREQUIREMENU', '1');
+if ( ! defined('NOREQUIREHTML'))  define('NOREQUIREHTML', '1');
+if ( ! defined('NOLOGIN'))        define("NOLOGIN", 1); // This means this output page does not require to be logged.
+if ( ! defined('NOCSRFCHECK'))    define("NOCSRFCHECK", 1); // We accept to go on this page from external web site.
+if ( ! defined('NOIPCHECK'))      define('NOIPCHECK', '1'); // Do not check IP defined into conf $dolibarr_main_restrict_ip
+if ( ! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
+
+
 // Load Dolibarr environment
 $res = 0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
