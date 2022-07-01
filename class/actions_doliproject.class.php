@@ -103,7 +103,7 @@ class ActionsDoliproject
 		if (in_array($parameters['currentcontext'], array('invoicecard'))) {
 			// Action that will be done after pressing the button
 			if ($action == 'createtask-doliproject') {
-				
+
 				// Start
 				// Variable : ref
 				// Description : create the ref of the task
@@ -127,7 +127,7 @@ class ActionsDoliproject
 				$datef_invoice = explode('-', $datef_invoice[0]);
 				$datef = implode($datef_invoice);
 				//datef
-				
+
 				// Contruction de la chaine de caractère REGEX : AAAAMMJJ-nomprojet-tag
 				// Wording retrieval
 				$fk_projet_fac = $object->fk_project;
@@ -344,7 +344,7 @@ class ActionsDoliproject
 	public function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager)
 	{
 		global $conf, $user, $langs;
-		
+
 		$error = 0; // Error counter
 
 		if (in_array('invoicecard', explode(':', $parameters['context'])))
@@ -355,7 +355,7 @@ class ActionsDoliproject
 				$server_protocol = 'https';
 				} else {
 				$server_protocol = 'http';
-				} 
+				}
 			} else {
 				$server_protocol = 'http';
 			}
@@ -492,7 +492,7 @@ class ActionsDoliproject
 			if (GETPOST('action') == 'presend_addmessage') {
 				$ticket = new Ticket($this->db);
 				$result = $ticket->fetch('',GETPOST('ref','alpha'),GETPOST('track_id','alpha'));
-				dol_syslog(var_export($ticket, true), LOG_DEBUG);			
+				dol_syslog(var_export($ticket, true), LOG_DEBUG);
 				if ($result > 0 && ((int)$ticket->id) > 0) {
 					if ( is_array($ticket->array_options) && array_key_exists('options_fk_task',$ticket->array_options) && $ticket->array_options['options_fk_task']>0) {
 					?>
@@ -519,6 +519,50 @@ class ActionsDoliproject
 				dol_htmloutput_events();
 			}
 		}
+		if (in_array($parameters['currentcontext'], array('projecttaskcard'))) {
+			require_once __DIR__ . '/../lib/doliproject_functions.lib.php';
+
+			if (GETPOST('action') == 'toggleTaskFavorite') {
+				toggleTaskFavorite(GETPOST('id'), $user->id);
+			}
+
+
+//			$result = isTaskFavorite(GETPOST('id'), $user->id);
+			if (isTaskFavorite(GETPOST('id'), $user->id)) {
+				$favoriteStar = '<div><span class="fas fa-star toggleTaskFavorite" onclick="toggleTaskFavorite()"></span></div>';
+			} else {
+				$favoriteStar = '<div><span class="far fa-star toggleTaskFavorite" onclick="toggleTaskFavorite()"></span></div>';
+			}
+			?>
+			<script>
+				function toggleTaskFavorite () {
+					let token = $('.fichecenter').find('input[name="token"]').val();
+					$.ajax({
+						url: document.URL + '&action=toggleTaskFavorite&token='+token,
+						type: "POST",
+						processData: false,
+						contentType: false,
+						success: function ( resp ) {
+							if ($('.toggleTaskFavorite').hasClass('fas')) {
+								$('.toggleTaskFavorite').removeClass('fas')
+								$('.toggleTaskFavorite').addClass('far')
+							} else if ($('.toggleTaskFavorite').hasClass('far')) {
+								$('.toggleTaskFavorite').removeClass('far')
+								$('.toggleTaskFavorite').addClass('fas')
+							}
+						},
+						error: function ( resp ) {
+
+						}
+					});
+				}
+				jQuery('.fas.fa-tasks').closest('.tabBar').find('.marginbottomonly.refid').append(<?php echo json_encode($favoriteStar) ?>);
+			</script>
+
+			<?php
+
+		}
+
 	}
 	/* Add here any other hooked methods... */
 }
