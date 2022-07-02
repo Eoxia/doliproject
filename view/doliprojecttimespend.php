@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2007-2017 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) ---Put here your own copyright and developer email---
+ * Copyright (C) 2022 Florian HENRY <florian.henry@scopen.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -137,7 +137,7 @@ $arrayfields = array(
 	'fk_user'       => array('tablealias' => 'ptt.', 'fieldalias' => 'fk_user', 'label' => "User", 'checked' => 1, 'position' => 14,
 							 'type'       => 'User:user/class/user.class.php', 'visible' => 1),
 	'task_duration' => array('tablealias' => 'ptt.', 'label' => "Duration", 'checked' => 1, 'position' => 15,
-							 'type'       => 'duration', 'visible' => 1),
+							 'type'       => 'duration', 'visible' => 1,'isameasure'=>1),
 	'note'          => array('tablealias' => 'ptt.', 'label' => "Note", 'checked' => 1, 'position' => 16,
 							 'type'       => 'text', 'visible' => 1),
 );
@@ -470,6 +470,7 @@ print '</tr>' . "\n";
 $i = 0;
 $totalarray = array();
 $totalarray['nbfield'] = 0;
+$totalarray['type'][8]='duration';
 while ($i < ($limit ? min($num, $limit) : $num)) {
 	$obj = $db->fetch_object($resql);
 	if (empty($obj)) {
@@ -525,7 +526,7 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 					if (!isset($totalarray['val'][$key])) {
 						$totalarray['val'][$key] = 0;
 					}
-					$totalarray['val'][$key] += $object->$key;
+					$totalarray['val'][$key] += $obj->{$key};
 				}
 			}
 		}
@@ -543,6 +544,7 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 
 	$i++;
 }
+
 
 // Show total line
 include DOL_DOCUMENT_ROOT . '/core/tpl/list_print_total.tpl.php';
