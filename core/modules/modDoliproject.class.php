@@ -201,6 +201,78 @@ class modDoliproject extends DolibarrModules
 		$result = $this->_load_tables('/doliproject/sql/');
 		if ($result < 0) return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
 
+		if ($conf->global->DOLIPROJECT_HR_PROsJECT < 1) {
+			global $db, $user;
+
+			require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
+			require_once DOL_DOCUMENT_ROOT . '/projet/class/task.class.php';
+			require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
+			require_once DOL_DOCUMENT_ROOT . '/core/modules/project/mod_project_simple.php';
+
+			$project = new Project($db);
+			$projectRef  = new $conf->global->PROJECT_ADDON();
+
+			$project->ref         = $projectRef->getNextValue('', $project);
+			$project->title       = $langs->trans('HR') . ' - ' . $conf->global->MAIN_INFO_SOCIETE_NOM;
+			$project->description = $langs->trans('HRDescription');
+			$project->date_c      = dol_now();
+			$currentYear          = dol_print_date(dol_now(), '%Y');
+			$fiscalMonthStart     = $conf->global->SOCIETE_FISCAL_MONTH_START;
+			$startdate            = dol_mktime('0', '0', '0', $fiscalMonthStart ? $fiscalMonthStart : '1', '1', $currentYear);
+			$project->date_start  = $startdate;
+
+			$project->usage_task = 1;
+
+			$startdateAddYear      = dol_time_plus_duree($startdate, 1, 'y');
+			$startdateAddYearMonth = dol_time_plus_duree($startdateAddYear, -1, 'd');
+			$enddate               = dol_print_date($startdateAddYearMonth, 'dayrfc');
+			$project->date_end     = $enddate;
+			$project->statut       = 1;
+
+			$result = $project->create($user);
+
+			if ($result > 0) {
+				dolibarr_set_const($db, 'DOLIPROJECT_HR_PROJECT', $result, 'integer', 0, '', $conf->entity);
+				$task = new Task($db);
+				$defaultref = '';
+				$obj = empty($conf->global->PROJECT_TASK_ADDON) ? 'mod_task_simple' : $conf->global->PROJECT_TASK_ADDON;
+				if (!empty($conf->global->PROJECT_TASK_ADDON) && is_readable(DOL_DOCUMENT_ROOT . "/core/modules/project/task/" . $conf->global->PROJECT_TASK_ADDON . ".php")) {
+					require_once DOL_DOCUMENT_ROOT . "/core/modules/project/task/" . $conf->global->PROJECT_TASK_ADDON . '.php';
+					$modTask = new $obj;
+					$defaultref = $modTask->getNextValue('', null);
+				}
+				$task->fk_project = $result;
+				$task->ref = $defaultref;
+				$task->label = $langs->trans('Holidays');
+				$task->date_c = dol_now();
+				$task->create($user);
+
+				$task->fk_project = $result;
+				$task->ref = $modTask->getNextValue('', null);;
+				$task->label = $langs->trans('PaidHolidays');
+				$task->date_c = dol_now();
+				$task->create($user);
+
+				$task->fk_project = $result;
+				$task->ref = $modTask->getNextValue('', null);;
+				$task->label = $langs->trans('SickLeave');
+				$task->date_c = dol_now();
+				$task->create($user);
+
+				$task->fk_project = $result;
+				$task->ref = $modTask->getNextValue('', null);;
+				$task->label = $langs->trans('PublicHoliday');
+				$task->date_c = dol_now();
+				$task->create($user);
+
+				$task->fk_project = $result;
+				$task->ref = $modTask->getNextValue('', null);;
+				$task->label = $langs->trans('AdditionalHour');
+				$task->date_c = dol_now();
+				$task->create($user);
+			}
+		}
+
 		// Create extrafields during init
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		$extra_fields = new ExtraFields($this->db);

@@ -86,6 +86,11 @@ WrongWorkingHoursFormat = Mauvais format pour les heures travaillées : %s
 UserWorkingHoursSaved = Horaires de l'utilisateurs sauvegardés
 WorkingHours(min) = Temps travaillé (en minutes)
 TimeSpent = Temps consommé
+Holidays = Congés
+PaidHolidays = Congés payés
+SickLeave = Congés maladie
+PublicHoliday = Jour férié
+AdditionalHour = Heure supplémentaire
 
 #
 # Setup Page
