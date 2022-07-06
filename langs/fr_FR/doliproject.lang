@@ -74,6 +74,7 @@ Thursday = Jeudi
 Friday = Vendredi
 Saturday = Samedi
 Sunday = Dimanche
+Schedule = Horaires
 MondayWorkingHours = Heures de travail du lundi
 TuesdayWorkingHours = Heures de travail du mardi
 WednesdayWorkingHours = Heures de travail du mercredi
@@ -85,12 +86,15 @@ UserWorkingHours = Horaires de l'utilisateur
 WrongWorkingHoursFormat = Mauvais format pour les heures travaillées : %s
 UserWorkingHoursSaved = Horaires de l'utilisateurs sauvegardés
 WorkingHours(min) = Temps travaillé (en minutes)
+DayWorkTime = Temps du jour
+NonConsumedTime = Temps non pointé
 TimeSpent = Temps consommé
 Holidays = Congés
 PaidHolidays = Congés payés
 SickLeave = Congés maladie
 PublicHoliday = Jour férié
 AdditionalHour = Heure supplémentaire
+TooMuchTimeSpent = Vous avez pointé plus de temps que le temps non pointé disponible
 
 #
 # Setup Page

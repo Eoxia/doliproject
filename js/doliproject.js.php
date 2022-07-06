@@ -122,7 +122,7 @@ if ( ! window.eoxiaJS.scriptsLoaded ) {
 
 
 /**
- * Initialise l'objet "risk" ainsi que la méthode "init" obligatoire pour la bibliothèque EoxiaJS.
+ * Initialise l'objet "task" ainsi que la méthode "init" obligatoire pour la bibliothèque EoxiaJS.
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -150,7 +150,7 @@ window.eoxiaJS.task.init = function() {
  * @return {void}
  */
 window.eoxiaJS.task.event = function() {
-	$( document ).on( 'click', '.tabBar', window.eoxiaJS.task.toggleTaskFavorite );
+	$( document ).on( 'click', '.auto-fill-timespent', window.eoxiaJS.task.addTimeSpent );
 };
 
 /**
@@ -162,18 +162,11 @@ window.eoxiaJS.task.event = function() {
  * @param  {MouseEvent} event [description]
  * @return {void}
  */
-window.eoxiaJS.task.toggleTaskFavorite = function( event ) {
-console.log('fgff')
-	$.ajax({
-		url: document.URL + '&action=toggleTaskFavorite&token='+token,
-		type: "POST",
-		processData: false,
-		contentType: false,
-		success: function ( resp ) {
-
-		},
-		error: function ( resp ) {
-
-		}
-	});
+window.eoxiaJS.task.addTimeSpent = function( event ) {
+	let nonConsumedMinutes = $('.non-consumed-time-minute').val()
+	let nonConsumedHours = $('.non-consumed-time-hour').val()
+	$('.inputhour').val('')
+	$('.inputminute').val('')
+	$(this).closest('.duration').find('.inputhour').val(nonConsumedHours)
+	$(this).closest('.duration').find('.inputminute').val(nonConsumedMinutes)
 };
