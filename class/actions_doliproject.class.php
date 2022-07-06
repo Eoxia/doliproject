@@ -579,41 +579,67 @@ class ActionsDoliproject
 					<?php
 				}
 			}
-
-			if (GETPOST('action') == 'toggleTaskFavorite') {
-				toggleTaskFavorite(GETPOST('taskId'), $user->id);
-			}
-			?>
-			<script>
-				function toggleTaskFavorite (taskId) {
-					let token = $('#searchFormList').find('input[name="token"]').val();
-					$.ajax({
-						url: document.URL + '&action=toggleTaskFavorite&taskId='+ taskId +'&token='+token,
-						type: "POST",
-						processData: false,
-						contentType: false,
-						success: function ( resp ) {
-							let taskContainer = $('#'+taskId)
-							
-							if (taskContainer.hasClass('fas')) {
-								taskContainer.removeClass('fas')
-								taskContainer.addClass('far')
-							} else if (taskContainer.hasClass('far')) {
-								taskContainer.removeClass('far')
-								taskContainer.addClass('fas')
-							}
-						},
-						error: function ( resp ) {
-
-						}
-					});
-				}
-			</script>
-
-			<?php
-
 		}
+		if (in_array($parameters['currentcontext'], array('tasklist'))) {
+			global $db;
+			require_once __DIR__ . '/../lib/doliproject_functions.lib.php';
 
+			$task = new Task($db);
+			$tasksarray = $task->getTasksArray(0, 0, GETPOST('id'));
+
+			if (is_array($tasksarray) && !empty($tasksarray)) {
+				foreach ($tasksarray as $linked_task) {
+
+					if (isTaskFavorite($linked_task->id, $user->id)) {
+						$favoriteStar = '<span class="fas fa-star toggleTaskFavorite" id="'. $linked_task->id .'" onclick="toggleTaskFavorite(this.id)"></span>';
+					} else {
+						$favoriteStar = '<span class="far fa-star toggleTaskFavorite" id="'. $linked_task->id .'" onclick="toggleTaskFavorite(this.id)"></span>';
+					}
+					?>
+					<script>
+						console.log('oui')
+						if (typeof taskId == null) {
+							let taskId = <?php echo json_encode($linked_task->id); ?>
+						} else {
+							taskId = <?php echo json_encode($linked_task->id); ?>
+						}
+						jQuery("tr[data-rowid="+taskId+"] .nowraponall:not(.tdoverflowmax150)").html(jQuery("tr[data-rowid="+taskId+"] .nowraponall:not(.tdoverflowmax150)").html()  + ' ' + <?php echo json_encode($favoriteStar) ?>  )
+
+					</script>
+					<?php
+				}
+			}
+		}
+		if (GETPOST('action') == 'toggleTaskFavorite') {
+			toggleTaskFavorite(GETPOST('taskId'), $user->id);
+		}
+		?>
+		<script>
+			function toggleTaskFavorite (taskId) {
+				let token = $('#searchFormList').find('input[name="token"]').val();
+				$.ajax({
+					url: document.URL + '&action=toggleTaskFavorite&taskId='+ taskId +'&token='+token,
+					type: "POST",
+					processData: false,
+					contentType: false,
+					success: function ( resp ) {
+						let taskContainer = $('#'+taskId)
+
+						if (taskContainer.hasClass('fas')) {
+							taskContainer.removeClass('fas')
+							taskContainer.addClass('far')
+						} else if (taskContainer.hasClass('far')) {
+							taskContainer.removeClass('far')
+							taskContainer.addClass('fas')
+						}
+					},
+					error: function ( resp ) {
+
+					}
+				});
+			}
+		</script>
+		<?php
 	}
 	/* Add here any other hooked methods... */
 }

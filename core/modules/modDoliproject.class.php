@@ -73,6 +73,7 @@ class modDoliproject extends DolibarrModules
 					  'ticketcard',
 					  'projecttaskcard',
 					  'projecttaskscard',
+					  'tasklist',
 				  ),
 			),
 			'moduleforexternal' => 0,
@@ -202,7 +203,7 @@ class modDoliproject extends DolibarrModules
 		$result = $this->_load_tables('/doliproject/sql/');
 		if ($result < 0) return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
 
-		if ($conf->global->DOLIPROJECT_HR_PROsJECT < 1) {
+		if ($conf->global->DOLIPROJECT_HR_PROJECT < 1) {
 			global $db, $user;
 
 			require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
