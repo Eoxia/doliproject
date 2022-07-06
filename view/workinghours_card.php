@@ -86,25 +86,25 @@ if (($action == 'update' && ! GETPOST("cancel", 'alpha')) || ($action == 'update
 	$object->schedule_saturday     = GETPOST('schedule_saturday', 'string');
 	$object->schedule_sunday       = GETPOST('schedule_sunday', 'string');
 
-	if (((int) GETPOST('workinghours_monday')) == 0) {
+	if (dol_strlen(GETPOST('workinghours_monday')) > 0 && ((int) GETPOST('workinghours_monday')) == 0) {
 		setEventMessages($langs->trans('WrongWorkingHoursFormat', $langs->trans('MondayWorkingHours')), null, 'errors');
 	}
-	if (((int) GETPOST('workinghours_tuesday')) == 0) {
+	if (dol_strlen(GETPOST('workinghours_tuesday')) > 0 &&((int) GETPOST('workinghours_tuesday')) == 0) {
 		setEventMessages($langs->trans('WrongWorkingHoursFormat', $langs->trans('TuesdayWorkingHours')), null, 'errors');
 	}
-	if (((int) GETPOST('workinghours_wednesday')) == 0) {
+	if (dol_strlen(GETPOST('workinghours_wednesday')) > 0 &&((int) GETPOST('workinghours_wednesday')) == 0) {
 		setEventMessages($langs->trans('WrongWorkingHoursFormat', $langs->trans('WednesdayWorkingHours')), null, 'errors');
 	}
-	if (((int) GETPOST('workinghours_thursday')) == 0) {
+	if (dol_strlen(GETPOST('workinghours_thursday')) > 0 &&((int) GETPOST('workinghours_thursday')) == 0) {
 		setEventMessages($langs->trans('WrongWorkingHoursFormat', $langs->trans('ThursdayWorkingHours')), null, 'errors');
 	}
-	if (((int) GETPOST('workinghours_friday')) == 0) {
+	if (dol_strlen(GETPOST('workinghours_friday')) > 0 &&((int) GETPOST('workinghours_friday')) == 0) {
 		setEventMessages($langs->trans('WrongWorkingHoursFormat', $langs->trans('FridayWorkingHours')), null, 'errors');
 	}
-	if (((int) GETPOST('workinghours_saturday')) == 0) {
+	if (dol_strlen(GETPOST('workinghours_saturday')) > 0 &&((int) GETPOST('workinghours_saturday')) == 0) {
 		setEventMessages($langs->trans('WrongWorkingHoursFormat', $langs->trans('SaturdayWorkingHours')), null, 'errors');
 	}
-	if (((int) GETPOST('workinghours_sunday')) == 0) {
+	if (dol_strlen(GETPOST('workinghours_sunday')) > 0 &&((int) GETPOST('workinghours_sunday')) == 0) {
 		setEventMessages($langs->trans('WrongWorkingHoursFormat', $langs->trans('SundayWorkingHours')), null, 'errors');
 	}
 
