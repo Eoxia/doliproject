@@ -526,12 +526,10 @@ class ActionsDoliproject
 				toggleTaskFavorite(GETPOST('id'), $user->id);
 			}
 
-
-//			$result = isTaskFavorite(GETPOST('id'), $user->id);
 			if (isTaskFavorite(GETPOST('id'), $user->id)) {
-				$favoriteStar = '<div><span class="fas fa-star toggleTaskFavorite" onclick="toggleTaskFavorite()"></span></div>';
+				$favoriteStar = '<span class="fas fa-star toggleTaskFavorite" onclick="toggleTaskFavorite()"></span>';
 			} else {
-				$favoriteStar = '<div><span class="far fa-star toggleTaskFavorite" onclick="toggleTaskFavorite()"></span></div>';
+				$favoriteStar = '<span class="far fa-star toggleTaskFavorite" onclick="toggleTaskFavorite()"></span>';
 			}
 			?>
 			<script>
@@ -556,7 +554,60 @@ class ActionsDoliproject
 						}
 					});
 				}
-				jQuery('.fas.fa-tasks').closest('.tabBar').find('.marginbottomonly.refid').append(<?php echo json_encode($favoriteStar) ?>);
+				jQuery('.fas.fa-tasks').closest('.tabBar').find('.marginbottomonly.refid').html(<?php echo json_encode($favoriteStar) ?> + jQuery('.fas.fa-tasks').closest('.tabBar').find('.marginbottomonly.refid').html());
+			</script>
+			<?php
+		}
+		if (in_array($parameters['currentcontext'], array('projecttaskscard'))) {
+			global $db;
+			require_once __DIR__ . '/../lib/doliproject_functions.lib.php';
+
+			$task = new Task($db);
+			$tasksarray = $task->getTasksArray(0, 0, GETPOST('id'));
+			if (is_array($tasksarray) && !empty($tasksarray)) {
+				foreach ($tasksarray as $linked_task) {
+
+					if (isTaskFavorite($linked_task->id, $user->id)) {
+						$favoriteStar = '<span class="fas fa-star toggleTaskFavorite" id="'. $linked_task->id .'" onclick="toggleTaskFavorite(this.id)"></span>';
+					} else {
+						$favoriteStar = '<span class="far fa-star toggleTaskFavorite" id="'. $linked_task->id .'" onclick="toggleTaskFavorite(this.id)"></span>';
+					}
+					?>
+					<script>
+						jQuery('#row-'+<?php echo json_encode($linked_task->id) ?>).find('.nowraponall').html(jQuery('#row-'+<?php echo json_encode($linked_task->id) ?>).find('.nowraponall').html()  + ' ' + <?php echo json_encode($favoriteStar) ?>  )
+					</script>
+					<?php
+				}
+			}
+
+			if (GETPOST('action') == 'toggleTaskFavorite') {
+				toggleTaskFavorite(GETPOST('taskId'), $user->id);
+			}
+			?>
+			<script>
+				function toggleTaskFavorite (taskId) {
+					let token = $('#searchFormList').find('input[name="token"]').val();
+					$.ajax({
+						url: document.URL + '&action=toggleTaskFavorite&taskId='+ taskId +'&token='+token,
+						type: "POST",
+						processData: false,
+						contentType: false,
+						success: function ( resp ) {
+							let taskContainer = $('#'+taskId)
+							
+							if (taskContainer.hasClass('fas')) {
+								taskContainer.removeClass('fas')
+								taskContainer.addClass('far')
+							} else if (taskContainer.hasClass('far')) {
+								taskContainer.removeClass('far')
+								taskContainer.addClass('fas')
+							}
+						},
+						error: function ( resp ) {
+
+						}
+					});
+				}
 			</script>
 
 			<?php

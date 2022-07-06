@@ -72,6 +72,7 @@ class modDoliproject extends DolibarrModules
 				      'invoicecard',
 					  'ticketcard',
 					  'projecttaskcard',
+					  'projecttaskscard',
 				  ),
 			),
 			'moduleforexternal' => 0,
