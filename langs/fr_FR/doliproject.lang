@@ -98,6 +98,8 @@ PublicHoliday = Jour férié
 AdditionalHour = Heure supplémentaire
 TooMuchTimeSpent = Vous avez pointé plus de temps que le temps non pointé disponible
 AddTimeSpent = Pointage de temps
+HR = Ressources humaines
+HRDescription = Projet comprenant les tâches liées aux ressources humaines
 
 #
 # Setup Page
