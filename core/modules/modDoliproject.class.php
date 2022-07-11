@@ -43,7 +43,7 @@ class modDoliproject extends DolibarrModules
 		global $langs, $conf;
 		$this->db = $db;
 
-		$this->numero = 500000; // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve an id number for your module
+		$this->numero = 436370; // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve an id number for your module
 		$this->rights_class 			= 'doliproject';
 		$this->family 					= "other";
 		$this->module_position 			= '90';
@@ -144,12 +144,12 @@ class modDoliproject extends DolibarrModules
 		/* BEGIN MODULEBUILDER TOPMENU */
 		$r = 0;
 		$this->menu[$r++] = array(
-			// 'fk_menu'=>'', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			// 'type'=>'top', // This is a Top menu entry
-			// 'titre'=>'ModuleDoliprojectName',
-			// 'mainmenu'=>'doliproject',
-			// 'leftmenu'=>'',
-			// 'url'=>'/doliproject/doliprojectindex.php',
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=timespent', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'type'=>'left', // This is a Top menu entry
+			'titre'=>'DoliprojectTimeSpent',
+			'mainmenu'=>'project',
+			'leftmenu'=>'timespent',
+			'url'=>'/doliproject/view/doliprojecttimespend.php',
 			'langs'=>'doliproject@doliproject', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'position'=>1000 + $r,
 			'enabled'=>'$conf->doliproject->enabled', // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled.
@@ -288,7 +288,7 @@ class modDoliproject extends DolibarrModules
 		$extra_fields->update('fk_task', 'Tâche', 'sellist', '', 'ticket', 0, 0, 100, 'a:1:{s:7:"options";a:1:{s:110:"projet_task:ref:rowid::entity = $ENTITY$ AND fk_projet = ($SEL$ fk_project FROM llx_ticket WHERE rowid = $ID$)";N;}}', 1, 1, 'preg_match(\'/public/\',$_SERVER[\'PHP_SELF\'])?0:1');
 		$extra_fields->addExtraField('fk_task', 'Tâche', 'sellist', 100, NULL, 'ticket', 0, 0, NULL, 'a:1:{s:7:"options";a:1:{s:110:"projet_task:ref:rowid::entity = $ENTITY$ AND fk_projet = ($SEL$ fk_project FROM llx_ticket WHERE rowid = $ID$)";N;}}', 1, 1, 'preg_match(\'/public/\',$_SERVER[\'PHP_SELF\'])?0:1'); //extrafields ticket
 
-		return $this->_init($sql, $options);
+		return $this->_init(array(), $options);
 	}
 
 	/**
