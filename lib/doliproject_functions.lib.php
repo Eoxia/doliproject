@@ -590,10 +590,13 @@ function doliprojectLinesPerDay(&$inc, $parent, $fuser, $lines, &$level, &$proje
 				$tableCell .= '<span class="timesheetalreadyrecorded" title="texttoreplace"><input type="text" class="center" size="2" disabled id="timespent['.$inc.']['.$idw.']" name="task['.$lines[$i]->id.']['.$idw.']" value="'.$alreadyspent.'"></span>';
 				$tableCell .= '<span class="hideonsmartphone"> + </span>';
 				//$tableCell.='&nbsp;&nbsp;&nbsp;';
+				if (!empty($conf->use_javascript_ajax)) {
+					$tableCell .= img_picto("Auto fill", 'rightarrow', "class='auto-fill-timespent' data-rowname='".$namef."' data-value='".($sign * $remaintopay)."'");
+				}
 				$tableCell .= $form->select_duration($lines[$i]->id.'duration', '', $disabledtask, 'text', 0, 1);
 				//$tableCell.='&nbsp;<input type="submit" class="button"'.($disabledtask?' disabled':'').' value="'.$langs->trans("Add").'">';
 				print $tableCell;
-				print ' <i class="auto-fill-timespent fas fa-arrow-left"></i>';
+
 
 
 				$modeinput = 'hours';
