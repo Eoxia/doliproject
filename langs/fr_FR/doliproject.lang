@@ -63,6 +63,8 @@ ErrorServiceTime = Le temps du(des) service(s) est nul
 MessageTimeSpentCreate = Temps consommé crée
 MessageNoTaskLink = Pas de tâche affectée, pas de temps passé disponible
 
+DoliprojectTimeSpent=Rapport de temps passé
+
 #
 # Temps consommé
 #
