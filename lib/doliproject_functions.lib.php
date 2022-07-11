@@ -452,67 +452,7 @@ function doliprojectLinesPerDay(&$inc, $parent, $fuser, $lines, &$level, &$proje
 						print ' - ';
 						print '<span class="secondary">'.$projectstatic->title.'</span>';
 					}
-					/*
-					$colspan=5+(empty($conf->global->PROJECT_TIMESHEET_DISABLEBREAK_ON_PROJECT)?0:2);
-					print '<table class="">';
 
-					print '<tr class="liste_titre">';
-
-					// PROJECT fields
-					if (! empty($arrayfields['p.fk_opp_status']['checked'])) print_liste_field_titre($arrayfields['p.fk_opp_status']['label'], $_SERVER["PHP_SELF"], 'p.fk_opp_status', "", $param, '', $sortfield, $sortorder, 'center ');
-					if (! empty($arrayfields['p.opp_amount']['checked']))    print_liste_field_titre($arrayfields['p.opp_amount']['label'], $_SERVER["PHP_SELF"], 'p.opp_amount', "", $param, '', $sortfield, $sortorder, 'right ');
-					if (! empty($arrayfields['p.opp_percent']['checked']))   print_liste_field_titre($arrayfields['p.opp_percent']['label'], $_SERVER["PHP_SELF"], 'p.opp_percent', "", $param, '', $sortfield, $sortorder, 'right ');
-					if (! empty($arrayfields['p.budget_amount']['checked'])) print_liste_field_titre($arrayfields['p.budget_amount']['label'], $_SERVER["PHP_SELF"], 'p.budget_amount', "", $param, '', $sortfield, $sortorder, 'right ');
-					if (! empty($arrayfields['p.usage_bill_time']['checked']))     print_liste_field_titre($arrayfields['p.usage_bill_time']['label'], $_SERVER["PHP_SELF"], 'p.usage_bill_time', "", $param, '', $sortfield, $sortorder, 'right ');
-
-					$extrafieldsobjectkey='projet';
-					$extrafieldsobjectprefix='efp.';
-					include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_title.tpl.php';
-
-					print '</tr>';
-					print '<tr>';
-
-					// PROJECT fields
-					if (! empty($arrayfields['p.fk_opp_status']['checked']))
-					{
-						print '<td class="nowrap">';
-						$code = dol_getIdFromCode($db, $lines[$i]->fk_opp_status, 'c_lead_status', 'rowid', 'code');
-						if ($code) print $langs->trans("OppStatus".$code);
-						print "</td>\n";
-					}
-					if (! empty($arrayfields['p.opp_amount']['checked']))
-					{
-						print '<td class="nowrap">';
-						print price($lines[$i]->opp_amount, 0, $langs, 1, 0, -1, $conf->currency);
-						print "</td>\n";
-					}
-					if (! empty($arrayfields['p.opp_percent']['checked']))
-					{
-						print '<td class="nowrap">';
-						print price($lines[$i]->opp_percent, 0, $langs, 1, 0).' %';
-						print "</td>\n";
-					}
-					if (! empty($arrayfields['p.budget_amount']['checked']))
-					{
-						print '<td class="nowrap">';
-						print price($lines[$i]->budget_amount, 0, $langs, 1, 0, 0, $conf->currency);
-						print "</td>\n";
-					}
-					if (! empty($arrayfields['p.usage_bill_time']['checked']))
-					{
-						print '<td class="nowrap">';
-						print yn($lines[$i]->usage_bill_time);
-						print "</td>\n";
-					}
-
-					$extrafieldsobjectkey='projet';
-					$extrafieldsobjectprefix='efp.';
-					include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_print_fields.tpl.php';
-
-					print '</tr>';
-					print '</table>';
-
-					*/
 					print '</td>';
 					print '</tr>';
 				}
@@ -568,24 +508,6 @@ function doliprojectLinesPerDay(&$inc, $parent, $fuser, $lines, &$level, &$proje
 				$extrafieldsobjectprefix = 'efpt.';
 				include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_print_fields.tpl.php';
 
-//				// Planned Workload
-//				if (!empty($arrayfields['t.planned_workload']['checked'])) {
-//					print '<td class="leftborder plannedworkload right">';
-//					if ($lines[$i]->planned_workload) {
-//						print convertSecondToTime($lines[$i]->planned_workload, 'allhourmin');
-//					} else {
-//						print '--:--';
-//					}
-//					print '</td>';
-//				}
-
-//				// Progress declared %
-//				if (!empty($arrayfields['t.progress']['checked'])) {
-//					print '<td class="right">';
-//					print $formother->select_percent($lines[$i]->progress, $lines[$i]->id.'progress');
-//					print '</td>';
-//				}
-
 				if (!empty($arrayfields['timeconsumed']['checked'])) {
 					// Time spent by everybody
 					print '<td class="right">';
@@ -612,9 +534,7 @@ function doliprojectLinesPerDay(&$inc, $parent, $fuser, $lines, &$level, &$proje
 
 				$disabledproject = 1;
 				$disabledtask = 1;
-				//print "x".$lines[$i]->fk_project;
-				//var_dump($lines[$i]);
-				//var_dump($projectsrole[$lines[$i]->fk_project]);
+
 				// If at least one role for project
 				if ($lines[$i]->public || !empty($projectsrole[$lines[$i]->fk_project]) || $user->rights->projet->all->creer) {
 					$disabledproject = 0;
@@ -714,7 +634,7 @@ function doliprojectLinesPerDay(&$inc, $parent, $fuser, $lines, &$level, &$proje
 			if ($lines[$i]->id > 0) {
 				//var_dump('totalforeachday after taskid='.$lines[$i]->id.' and previous one on level '.$level);
 				//var_dump($totalforeachday);
-				$ret = projectLinesPerDay($inc, $lines[$i]->id, $fuser, ($parent == 0 ? $lineswithoutlevel0 : $lines), $level, $projectsrole, $tasksrole, $mine, $restricteditformytask, $preselectedday, $isavailable, $oldprojectforbreak, $arrayfields, $extrafields);
+				$ret = doliprojectLinesPerDay($inc, $lines[$i]->id, $fuser, ($parent == 0 ? $lineswithoutlevel0 : $lines), $level, $projectsrole, $tasksrole, $mine, $restricteditformytask, $preselectedday, $isavailable, $oldprojectforbreak, $arrayfields, $extrafields);
 				//var_dump('ret with parent='.$lines[$i]->id.' level='.$level);
 				//var_dump($ret);
 				foreach ($ret as $key => $val) {
