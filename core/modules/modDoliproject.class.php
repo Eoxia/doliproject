@@ -52,7 +52,7 @@ class modDoliproject extends DolibarrModules
 		$this->descriptionlong 			= "Doliproject description (Long)";
 		$this->editor_name 				= 'Eoxia';
 		$this->editor_url 				= 'https://eoxia.com';
-		$this->version 					= '1.1.1';
+		$this->version 					= '1.2.0';
 		$this->const_name 				= 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->picto 					= 'doliproject256px@doliproject';
 

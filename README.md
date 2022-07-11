@@ -10,7 +10,7 @@
 # Méthode 1 :
 
 - Depuis le menu "Déployer/Installer un module externe" de Dolibarr : 
-- Glisser l'archive ZIP 'module_doliproject-1.1.0' et cliquer sur "SEND"
+- Glisser l'archive ZIP 'module_doliproject-1.2.0' et cliquer sur "SEND"
 - Activer le module dans la liste des Modules/Applications installés
 
 # Méthode 2 :
