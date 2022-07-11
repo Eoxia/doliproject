@@ -503,7 +503,7 @@ class ActionsDoliproject
 						InputTime.type = "number";
 						InputTime.value = <?php echo (!empty($conf->global->DOLIPROJECT_DEFAUT_TICKET_TIME)?$conf->global->DOLIPROJECT_DEFAUT_TICKET_TIME:0); ?>;
 						let $tr = $('<tr>');
-						$tr.append($('<td>').append('<?php echo $langs->trans('NewTimeSpent');?>'));
+						$tr.append($('<td>').append('<?php echo $langs->trans('DoliProjectNewTimeSpent');?>'));
 						$tr.append($('<td>').append(InputTime));
 
 						let currElement = $("form[name='ticket'] > table tbody");

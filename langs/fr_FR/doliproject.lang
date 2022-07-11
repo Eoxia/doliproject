@@ -100,6 +100,7 @@ TooMuchTimeSpent = Vous avez pointé plus de temps que le temps non pointé disp
 AddTimeSpent = Pointage de temps
 HR = Ressources humaines
 HRDescription = Projet comprenant les tâches liées aux ressources humaines
+DoliProjectNewTimeSpent = Temps consommé (en minutes)
 
 #
 # Setup Page
