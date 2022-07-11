@@ -84,6 +84,7 @@ ThursdayWorkingHours = Heures de travail du jeudi
 FridayWorkingHours = Heures de travail du vendredi
 SaturdayWorkingHours = Heures de travail du samedi
 SundayWorkingHours = Heures de travail du dimanche
+WorkingHoursFormatDesc = Renseigner le temps travaillé par jour (en minutes)
 UserWorkingHours = Horaires de l'utilisateur
 WrongWorkingHoursFormat = Mauvais format pour les heures travaillées : %s
 UserWorkingHoursSaved = Horaires de l'utilisateurs sauvegardés
