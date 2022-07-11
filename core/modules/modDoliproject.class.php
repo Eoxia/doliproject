@@ -82,7 +82,7 @@ class modDoliproject extends DolibarrModules
 		$this->dirs 					= array("/doliproject/temp");
 		$this->config_page_url 			= array("setup.php@doliproject");
 		$this->hidden 					= false;
-		$this->depends 					= array('modProjet');
+		$this->depends 					= array('modProjet', 'modBookmark');
 		$this->requiredby 				= array(); // List of module class names as string to disable if this one is disabled. Example: array('modModuleToDisable1', ...)
 		$this->conflictwith 			= array(); // List of module class names as string this module is in conflict with. Example: array('modModuleToDisable1', ...)
 		$this->langfiles 				= array("doliproject@doliproject");
@@ -198,13 +198,12 @@ class modDoliproject extends DolibarrModules
 	 */
 	public function init($options = '')
 	{
-		global $conf, $langs;
+		global $conf, $langs, $db, $user;
 
 		$result = $this->_load_tables('/doliproject/sql/');
 		if ($result < 0) return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
 
 		if ($conf->global->DOLIPROJECT_HR_PROJECT < 1) {
-			global $db, $user;
 
 			require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
 			require_once DOL_DOCUMENT_ROOT . '/projet/class/task.class.php';
@@ -275,6 +274,17 @@ class modDoliproject extends DolibarrModules
 			}
 		}
 
+		if ($conf->global->DOLIPROJECT_TIMESPENT_BOOKMARK_SET < 1) {
+			include_once DOL_DOCUMENT_ROOT.'/bookmarks/class/bookmark.class.php';
+
+			$bookmark = new Bookmark($db);
+
+			$bookmark->title = $langs->trans('TimeSpent');
+			$bookmark->url = '/dolibarr/htdocs/custom/doliproject/view/timespent_day.php?mainmenu=project';
+			$bookmark->target = 0;
+			$bookmark->position = 10;
+			$bookmark->create($user);
+		}
 		// Create extrafields during init
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		$extra_fields = new ExtraFields($this->db);
