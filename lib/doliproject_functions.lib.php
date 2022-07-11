@@ -140,12 +140,16 @@ function getFavoriteTasksArray($task_id = 0, $usert = null, $userp = null, $proj
 			$sql .= ", ".MAIN_DB_PREFIX."element_contact as ec2";
 			$sql .= ", ".MAIN_DB_PREFIX."c_type_contact as ctc2";
 		}
-		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."element_element as elel ON (t.rowid = elel.fk_target AND elel.targettype='project_task')";
+		if ($conf->global->DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS) {
+			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."element_element as elel ON (t.rowid = elel.fk_target AND elel.targettype='project_task')";
+		}
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."projet_task_extrafields as efpt ON (t.rowid = efpt.fk_object)";
 		$sql .= " WHERE p.entity IN (".getEntity('project').")";
 		$sql .= " AND t.fk_projet = p.rowid";
-		$sql .= " AND elel.fk_target = t.rowid";
-		$sql .= " AND elel.fk_source = " . $user->id;
+		if ($conf->global->DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS) {
+			$sql .= " AND elel.fk_target = t.rowid";
+			$sql .= " AND elel.fk_source = " . $user->id;
+		}
 
 	} elseif ($mode == 1) {
 		if ($filteronprojuser > 0) {

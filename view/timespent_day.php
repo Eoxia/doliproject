@@ -42,6 +42,7 @@ if ( ! $res) die("Include of main fails");
 require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
 require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/project.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
@@ -50,6 +51,8 @@ require_once DOL_DOCUMENT_ROOT.'/holiday/class/holiday.class.php';
 
 require_once DOL_DOCUMENT_ROOT.'/custom/doliproject/lib/doliproject_functions.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/custom/doliproject/class/workinghours.class.php';
+
+global $conf, $user, $langs, $db;
 
 // Load translation files required by the page
 $langs->loadLangs(array('projects', 'users', 'companies'));
@@ -353,6 +356,13 @@ if ($action == 'addtime' && $user->rights->projet->lire && GETPOST('formfilterac
 
 }
 
+if ($action == 'showOnlyFavoriteTasks') {
+	if ($conf->global->DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS == 1) {
+		dolibarr_set_const($db, 'DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS', 0, 'integer', 0, '', $conf->entity);
+	} else {
+		dolibarr_set_const($db, 'DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS', 1, 'integer', 0, '', $conf->entity);
+	}
+}
 
 
 /*
@@ -541,7 +551,8 @@ print '<div class="floatright right'.($conf->dol_optimize_smallscreen ? ' centpe
 //print '</div>';
 
 print '<div class="clearboth" style="padding-bottom: 20px;"></div>';
-
+print $langs->trans('ShowOnlyFavoriteTasks');
+print '<input type="checkbox"  class="show-only-favorite-tasks"'. ($conf->global->DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS ? ' checked' : '').' >';
 
 $moreforfilter = '';
 

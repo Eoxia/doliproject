@@ -152,6 +152,7 @@ window.eoxiaJS.task.init = function() {
 window.eoxiaJS.task.event = function() {
 	$( document ).on( 'click', '.auto-fill-timespent', window.eoxiaJS.task.addTimeSpent );
 	$( document ).on( 'click', '.auto-fill-timespent-project', window.eoxiaJS.task.divideTimeSpent );
+	$( document ).on( 'click', '.show-only-favorite-tasks', window.eoxiaJS.task.showOnlyFavoriteTasks );
 };
 
 /**
@@ -204,5 +205,30 @@ window.eoxiaJS.task.divideTimeSpent = function( event ) {
 		$(this).find('.inputhour').val(taskHour)
 		$(this).find('.inputminute').val(taskMinute)
 	})
-
 };
+
+/**
+ * Active/désactive la configuration pour n'afficher que les tâches favorites
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param  {MouseEvent} event [description]
+ * @return {void}
+ */
+window.eoxiaJS.task.showOnlyFavoriteTasks = function( event ) {
+	let token = $('.id-container').find('input[name="token"]').val();
+
+	$.ajax({
+		url: document.URL + "&action=showOnlyFavoriteTasks&token=" + token,
+		type: "POST",
+		processData: false,
+		contentType: false,
+		success: function ( resp ) {
+			window.location.reload()
+		},
+		error: function ( ) {
+		}
+	});
+};
+
