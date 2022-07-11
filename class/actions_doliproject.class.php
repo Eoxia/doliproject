@@ -568,9 +568,9 @@ class ActionsDoliproject
 				foreach ($tasksarray as $linked_task) {
 
 					if (isTaskFavorite($linked_task->id, $user->id)) {
-						$favoriteStar = '<span class="fas fa-star toggleTaskFavorite" id="'. $linked_task->id .'" onclick="toggleTaskFavorite(this.id)"></span>';
+						$favoriteStar = '<span class="fas fa-star toggleTaskFavorite" id="'. $linked_task->id .'" onclick="toggleTaskFavoriteWithId(this.id)"></span>';
 					} else {
-						$favoriteStar = '<span class="far fa-star toggleTaskFavorite" id="'. $linked_task->id .'" onclick="toggleTaskFavorite(this.id)"></span>';
+						$favoriteStar = '<span class="far fa-star toggleTaskFavorite" id="'. $linked_task->id .'" onclick="toggleTaskFavoriteWithId(this.id)"></span>';
 					}
 					?>
 					<script>
@@ -591,9 +591,9 @@ class ActionsDoliproject
 				foreach ($tasksarray as $linked_task) {
 
 					if (isTaskFavorite($linked_task->id, $user->id)) {
-						$favoriteStar = '<span class="fas fa-star toggleTaskFavorite" id="'. $linked_task->id .'" onclick="toggleTaskFavorite(this.id)"></span>';
+						$favoriteStar = '<span class="fas fa-star toggleTaskFavorite" id="'. $linked_task->id .'" onclick="toggleTaskFavoriteWithId(this.id)"></span>';
 					} else {
-						$favoriteStar = '<span class="far fa-star toggleTaskFavorite" id="'. $linked_task->id .'" onclick="toggleTaskFavorite(this.id)"></span>';
+						$favoriteStar = '<span class="far fa-star toggleTaskFavorite" id="'. $linked_task->id .'" onclick="toggleTaskFavoriteWithId(this.id)"></span>';
 					}
 					?>
 					<script>
@@ -615,8 +615,10 @@ class ActionsDoliproject
 		}
 		?>
 		<script>
-			function toggleTaskFavorite (taskId) {
+			function toggleTaskFavoriteWithId (taskId) {
 				let token = $('#searchFormList').find('input[name="token"]').val();
+				console.log('coucou')
+
 				$.ajax({
 					url: document.URL + '&action=toggleTaskFavorite&taskId='+ taskId +'&token='+token,
 					type: "POST",
