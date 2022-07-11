@@ -151,10 +151,11 @@ window.eoxiaJS.task.init = function() {
  */
 window.eoxiaJS.task.event = function() {
 	$( document ).on( 'click', '.auto-fill-timespent', window.eoxiaJS.task.addTimeSpent );
+	$( document ).on( 'click', '.auto-fill-timespent-project', window.eoxiaJS.task.divideTimeSpent );
 };
 
 /**
- * Lors du clic sur un taskCategory, remplaces le contenu du toggle et met l'image du risque sélectionné.
+ * Remplit automatiquement le temps à pointer disponible sur une tâche
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -169,4 +170,39 @@ window.eoxiaJS.task.addTimeSpent = function( event ) {
 	$('.inputminute').val('')
 	$(this).closest('.duration').find('.inputhour').val(nonConsumedHours)
 	$(this).closest('.duration').find('.inputminute').val(nonConsumedMinutes)
+};
+
+/**
+ * Répartit automatiquement le temps à pointer disponible entre les tâches du projet
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param  {MouseEvent} event [description]
+ * @return {void}
+ */
+window.eoxiaJS.task.divideTimeSpent = function( event ) {
+	let projectId = $(this).closest('.project-line').attr('id')
+
+	let taskMinute = 0
+	let taskHour = 0
+
+	let nonConsumedMinutes = $('.non-consumed-time-minute').val()
+	let nonConsumedHours = $('.non-consumed-time-hour').val()
+	let totalTimeInMinutes = +nonConsumedMinutes + +nonConsumedHours*60
+
+	let taskLinkedCounter = $('.'+projectId).length
+	let minutesToSpend = parseInt(totalTimeInMinutes/taskLinkedCounter)
+
+	$('.inputhour').val('')
+	$('.inputminute').val('')
+
+	$('.'+projectId).each(function() {
+		taskHour = parseInt(minutesToSpend/60)
+		taskMinute = minutesToSpend%60
+
+		$(this).find('.inputhour').val(taskHour)
+		$(this).find('.inputminute').val(taskMinute)
+	})
+
 };

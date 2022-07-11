@@ -429,21 +429,8 @@ function doliprojectLinesPerDay(&$inc, $parent, $fuser, $lines, &$level, &$proje
 				$thirdpartystatic->email = $lines[$i]->thirdparty_email;
 
 				if (empty($oldprojectforbreak) || ($oldprojectforbreak != -1 && $oldprojectforbreak != $projectstatic->id)) {
-					$addcolspan = 0;
-					if (!empty($arrayfields['t.planned_workload']['checked'])) {
-						$addcolspan++;
-					}
-					if (!empty($arrayfields['t.progress']['checked'])) {
-						$addcolspan++;
-					}
-					foreach ($arrayfields as $key => $val) {
-						if ($val['checked'] && substr($key, 0, 5) == 'efpt.') {
-							$addcolspan++;
-						}
-					}
-
-					print '<tr class="oddeven trforbreak nobold">'."\n";
-					print '<td colspan="'.(5 + $addcolspan).'">';
+					print '<tr class="oddeven trforbreak nobold project-line" id="project-'. $projectstatic->id .'">'."\n";
+					print '<td colspan="4">';
 					print $projectstatic->getNomUrl(1, '', 0, '<strong>'.$langs->transnoentitiesnoconv("YourRole").':</strong> '.$projectsrole[$lines[$i]->fk_project]);
 					if ($thirdpartystatic->id > 0) {
 						print ' - '.$thirdpartystatic->getNomUrl(1);
@@ -453,6 +440,21 @@ function doliprojectLinesPerDay(&$inc, $parent, $fuser, $lines, &$level, &$proje
 						print '<span class="secondary">'.$projectstatic->title.'</span>';
 					}
 
+
+					print '</td>';
+					print '<td style="text-align: center; ">';
+					if (!empty($conf->use_javascript_ajax)) {
+						print img_picto("Auto fill", 'rightarrow', "class='auto-fill-timespent-project' data-rowname='".$namef."' data-value='".($sign * $remaintopay)."'");
+					}
+					print ' ' . $langs->trans('DivideTimeIntoTasks');
+					print '</td>';
+
+					print '<td>';
+
+					print '</td>';
+
+					print '<td>';
+
 					print '</td>';
 					print '</tr>';
 				}
@@ -461,7 +463,7 @@ function doliprojectLinesPerDay(&$inc, $parent, $fuser, $lines, &$level, &$proje
 					$oldprojectforbreak = $projectstatic->id;
 				}
 
-				print '<tr class="oddeven" data-taskid="'.$lines[$i]->id.'">'."\n";
+				print '<tr class="oddeven project-'. $projectstatic->id .'" data-taskid="'.$lines[$i]->id.'">'."\n";
 
 				// User
 				/*
@@ -596,8 +598,6 @@ function doliprojectLinesPerDay(&$inc, $parent, $fuser, $lines, &$level, &$proje
 				$tableCell .= $form->select_duration($lines[$i]->id.'duration', '', $disabledtask, 'text', 0, 1);
 				//$tableCell.='&nbsp;<input type="submit" class="button"'.($disabledtask?' disabled':'').' value="'.$langs->trans("Add").'">';
 				print $tableCell;
-
-
 
 				$modeinput = 'hours';
 

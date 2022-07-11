@@ -102,6 +102,7 @@ AddTimeSpent = Pointage de temps
 HR = Ressources humaines
 HRDescription = Projet comprenant les tâches liées aux ressources humaines
 DoliProjectNewTimeSpent = Temps consommé (en minutes)
+DivideTimeIntoTasks = Répartir entre les tâches du projet
 
 #
 # Setup Page
