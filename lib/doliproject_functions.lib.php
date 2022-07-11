@@ -654,3 +654,52 @@ function doliprojectLinesPerDay(&$inc, $parent, $fuser, $lines, &$level, &$proje
 
 	return $totalforeachday;
 }
+
+/**
+ * Prepare array with list of tabs
+ *
+ * @param	string	$mode		Mode
+ * @param   string  $fuser      Filter on user
+ * @return  array				Array of tabs to show
+ */
+function doliproject_timesheet_prepare_head($mode, $fuser = null)
+{
+	global $langs, $conf, $user;
+	$h = 0;
+	$head = array();
+
+	$h = 0;
+
+	$param = '';
+	$param .= ($mode ? '&mode='.$mode : '');
+	if (is_object($fuser) && $fuser->id > 0 && $fuser->id != $user->id) {
+		$param .= '&search_usertoprocessid='.$fuser->id;
+	}
+
+//	if (empty($conf->global->PROJECT_DISABLE_TIMESHEET_PERMONTH)) {
+//		$head[$h][0] = DOL_URL_ROOT."/custom/doliproject/view/timespent_month.php".($param ? '?'.$param : '');
+//		$head[$h][1] = $langs->trans("InputPerMonth");
+//		$head[$h][2] = 'inputpermonth';
+//		$h++;
+//	}
+
+	if (empty($conf->global->PROJECT_DISABLE_TIMESHEET_PERWEEK)) {
+		$head[$h][0] = DOL_URL_ROOT."/custom/doliproject/view/timespent_week.php".($param ? '?'.$param : '');
+		$head[$h][1] = $langs->trans("InputPerWeek");
+		$head[$h][2] = 'inputperweek';
+		$h++;
+	}
+
+	if (empty($conf->global->PROJECT_DISABLE_TIMESHEET_PERTIME)) {
+		$head[$h][0] = DOL_URL_ROOT."/custom/doliproject/view/timespent_day.php".($param ? '?'.$param : '');
+		$head[$h][1] = $langs->trans("InputPerDay");
+		$head[$h][2] = 'inputperday';
+		$h++;
+	}
+
+	complete_head_from_modules($conf, $langs, null, $head, $h, 'project_timesheet');
+
+	complete_head_from_modules($conf, $langs, null, $head, $h, 'project_timesheet', 'remove');
+
+	return $head;
+}

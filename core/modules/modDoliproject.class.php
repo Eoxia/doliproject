@@ -177,7 +177,7 @@ class modDoliproject extends DolibarrModules
 			'titre'    => $langs->trans('AddTimeSpent'),
 			'mainmenu' => 'project',
 			'leftmenu' => 'timespent',
-			'url'      => '/doliproject/view/timespent.php',
+			'url'      => '/doliproject/view/timespent_day.php',
 			'langs'    => 'doliproject@doliproject', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'position' => 48520 + $r,
 			'enabled'  => '$conf->doliproject->enabled', // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled.

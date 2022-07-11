@@ -407,6 +407,8 @@ $non_consumed_time = $current_workinghours->$today_workinghours - floor($already
 $non_consumed_hours = floor($non_consumed_time / 60);
 $non_consumed_minutes = ($non_consumed_time % 60);
 $non_consumed_minutes = $non_consumed_minutes < 10 ? 0 . $non_consumed_minutes : $non_consumed_minutes;
+$non_consumed_hours = $non_consumed_hours > 0 ? $non_consumed_hours : 0;
+$non_consumed_minutes = $non_consumed_minutes > 0 ? $non_consumed_minutes : 0;
 
 $onlyopenedproject = 1; // or -1
 $morewherefilter = '';
@@ -496,7 +498,7 @@ print '<input type="hidden" name="addtimeyear" value="'.$tmp['year'].'">';
 print '<input type="hidden" name="addtimemonth" value="'.$tmp['mon'].'">';
 print '<input type="hidden" name="addtimeday" value="'.$tmp['mday'].'">';
 
-$head = project_timesheet_prepare_head($mode, $usertoprocess);
+$head = doliproject_timesheet_prepare_head($mode, $usertoprocess);
 print dol_get_fiche_head($head, 'inputperday', $langs->trans('TimeSpent'), -1, $picto);
 
 // Show description of content
@@ -717,6 +719,7 @@ if (!$isavailable[$daytoparse]['morning'] && !$isavailable[$daytoparse]['afterno
 
 print '<th class="center'.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'">'.$langs->trans("Duration");
 print '<br>' . $langs->trans('DayWorkTime') . ' : ' . $worked_hours . ':' . $worked_minutes;
+
 print '<br>' . $langs->trans('NonConsumedTime') . ' : ' . $non_consumed_hours . ':' . $non_consumed_minutes;
 print '<input hidden class="non-consumed-time-hour" value="'. $non_consumed_hours .'">';
 print '<input hidden class="non-consumed-time-minute" value="'. $non_consumed_minutes .'">';
