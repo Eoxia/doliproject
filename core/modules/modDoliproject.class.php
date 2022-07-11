@@ -269,7 +269,7 @@ class modDoliproject extends DolibarrModules
 
 				$task->fk_project = $result;
 				$task->ref = $modTask->getNextValue('', null);;
-				$task->label = $langs->trans('AdditionalHour');
+				$task->label = $langs->trans('RTT');
 				$task->date_c = dol_now();
 				$task->create($user);
 			}
