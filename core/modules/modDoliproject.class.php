@@ -235,11 +235,13 @@ class modDoliproject extends DolibarrModules
 				$task = new Task($db);
 				$defaultref = '';
 				$obj = empty($conf->global->PROJECT_TASK_ADDON) ? 'mod_task_simple' : $conf->global->PROJECT_TASK_ADDON;
+
 				if (!empty($conf->global->PROJECT_TASK_ADDON) && is_readable(DOL_DOCUMENT_ROOT . "/core/modules/project/task/" . $conf->global->PROJECT_TASK_ADDON . ".php")) {
 					require_once DOL_DOCUMENT_ROOT . "/core/modules/project/task/" . $conf->global->PROJECT_TASK_ADDON . '.php';
 					$modTask = new $obj;
 					$defaultref = $modTask->getNextValue('', null);
 				}
+
 				$task->fk_project = $result;
 				$task->ref = $defaultref;
 				$task->label = $langs->trans('Holidays');
@@ -270,6 +272,21 @@ class modDoliproject extends DolibarrModules
 				$task->date_c = dol_now();
 				$task->create($user);
 			}
+
+		}
+		if ($conf->global->DOLIPROJECT_RTT_TASK < 1) {
+			$obj = empty($conf->global->PROJECT_TASK_ADDON) ? 'mod_task_simple' : $conf->global->PROJECT_TASK_ADDON;
+
+			if (!empty($conf->global->PROJECT_TASK_ADDON) && is_readable(DOL_DOCUMENT_ROOT . "/core/modules/project/task/" . $conf->global->PROJECT_TASK_ADDON . ".php")) {
+				require_once DOL_DOCUMENT_ROOT . "/core/modules/project/task/" . $conf->global->PROJECT_TASK_ADDON . '.php';
+				$modTask = new $obj;
+			}
+
+			$task->fk_project = $conf->global->DOLIPROJECT_HR_PROJECT;
+			$task->ref = $modTask->getNextValue('', null);;
+			$task->label = $langs->trans('RTT');
+			$task->date_c = dol_now();
+			$task->create($user);
 		}
 
 		if ($conf->global->DOLIPROJECT_TIMESPENT_BOOKMARK_SET < 1) {
