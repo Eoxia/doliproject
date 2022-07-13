@@ -92,15 +92,13 @@ class modDoliproject extends DolibarrModules
 		$this->warnings_activation_ext 	= array(); // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 		$this->const 					= array();
 
-		$r ++;
-		$this->const[$r][0] = "DOLIPROJECT_DEFAUT_TICKET_TIME";
-		$this->const[$r][1] = "chaine";
-		$this->const[$r][2] = '15';
-		$this->const[$r][3] = 'Default Time';
-		$this->const[$r][4] = 0;
-		$this->const[$r][5] = 'current';
-		$this->const[$r][6] = 0;
-
+		$this->const = array(
+			// CONST CONFIGURATION
+			1 => array('DOLIPROJECT_DEFAUT_TICKET_TIME', 'chaine', '15', 'Default Time', 0, 'current'),
+			2 => array('DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS', 'integer', 1, '', 0, 'current'),
+			3 => array('DOLIPROJECT_HR_PROJECT', 'integer', 0, '', 0, 'current'),
+			3 => array('DOLIPROJECT_TIMESPENT_BOOKMARK_SET', 'integer', 0, '', 0, 'current'),
+		);
 
 		if (!isset($conf->doliproject) || !isset($conf->doliproject->enabled)) {
 			$conf->doliproject = new stdClass();
