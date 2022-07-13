@@ -278,11 +278,12 @@ class modDoliproject extends DolibarrModules
 			$bookmark = new Bookmark($db);
 
 			$bookmark->title = $langs->trans('TimeSpent');
-			$bookmark->url = '/dolibarr/htdocs/custom/doliproject/view/timespent_day.php?mainmenu=project';
+			$bookmark->url = DOL_URL_ROOT . '/custom/doliproject/view/timespent_day.php?mainmenu=project';
 			$bookmark->target = 0;
 			$bookmark->position = 10;
 			$bookmark->create($user);
 		}
+
 		// Create extrafields during init
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		$extra_fields = new ExtraFields($this->db);
