@@ -417,8 +417,8 @@ $non_consumed_time = $current_workinghours->$today_workinghours - floor($already
 $non_consumed_hours = floor($non_consumed_time / 60);
 $non_consumed_minutes = ($non_consumed_time % 60);
 $non_consumed_minutes = $non_consumed_minutes < 10 ? 0 . $non_consumed_minutes : $non_consumed_minutes;
-$non_consumed_hours = $non_consumed_hours > 0 ? $non_consumed_hours : 0;
-$non_consumed_minutes = $non_consumed_minutes > 0 ? $non_consumed_minutes : 0;
+$non_consumed_hours = $non_consumed_hours > 0 ? $non_consumed_hours : '00';
+$non_consumed_minutes = $non_consumed_minutes > 0 ? $non_consumed_minutes : '00';
 
 $onlyopenedproject = 1; // or -1
 $morewherefilter = '';
