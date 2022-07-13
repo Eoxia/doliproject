@@ -432,9 +432,20 @@ function doliprojectLinesPerDay(&$inc, $parent, $fuser, $lines, &$level, &$proje
 				$thirdpartystatic->name = $lines[$i]->thirdparty_name;
 				$thirdpartystatic->email = $lines[$i]->thirdparty_email;
 
+				$addcolspan = 2;
+				if (!empty($arrayfields['timeconsumed']['checked'])) {
+					$addcolspan++;
+					$addcolspan++;
+				}
+				foreach ($arrayfields as $key => $val) {
+					if ($val['checked'] && substr($key, 0, 5) == 'efpt.') {
+						$addcolspan++;
+					}
+				}
+
 				if (empty($oldprojectforbreak) || ($oldprojectforbreak != -1 && $oldprojectforbreak != $projectstatic->id)) {
 					print '<tr class="oddeven trforbreak nobold project-line" id="project-'. $projectstatic->id .'">'."\n";
-					print '<td colspan="4">';
+					print '<td colspan="'. $addcolspan.'">';
 					print $projectstatic->getNomUrl(1, '', 0, '<strong>'.$langs->transnoentitiesnoconv("YourRole").':</strong> '.$projectsrole[$lines[$i]->fk_project]);
 					if ($thirdpartystatic->id > 0) {
 						print ' - '.$thirdpartystatic->getNomUrl(1);
@@ -443,7 +454,6 @@ function doliprojectLinesPerDay(&$inc, $parent, $fuser, $lines, &$level, &$proje
 						print ' - ';
 						print '<span class="secondary">'.$projectstatic->title.'</span>';
 					}
-
 
 					print '</td>';
 					print '<td style="text-align: center; ">';

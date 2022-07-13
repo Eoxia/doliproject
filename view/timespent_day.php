@@ -601,11 +601,9 @@ $varpage = empty($contextpage) ? $_SERVER["PHP_SELF"] : $contextpage;
 $selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage); // This also change content of $arrayfields
 
 // This must be after the $selectedfields
-$addcolspan = 0;
-if (!empty($arrayfields['t.planned_workload']['checked'])) {
+$addcolspan = 1;
+if (!empty($arrayfields['timeconsumed']['checked'])) {
 	$addcolspan++;
-}
-if (!empty($arrayfields['t.progress']['checked'])) {
 	$addcolspan++;
 }
 foreach ($arrayfields as $key => $val) {
@@ -630,12 +628,8 @@ $search_options_pattern = 'search_task_options_';
 $extrafieldsobjectkey = 'projet_task';
 $extrafieldsobjectprefix = 'efpt.';
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_input.tpl.php';
-if (!empty($arrayfields['t.planned_workload']['checked'])) {
-	print '<td class="liste_titre"></td>';
-}
-if (!empty($arrayfields['t.progress']['checked'])) {
-	print '<td class="liste_titre right"><input type="text" size="4" name="search_declared_progress" value="'.dol_escape_htmltag($search_declared_progress).'"></td>';
-}
+print '<td class="liste_titre"></td>';
+print '<td class="liste_titre right"><input type="text" size="4" name="search_declared_progress" value="'.dol_escape_htmltag($search_declared_progress).'"></td>';
 if (!empty($arrayfields['timeconsumed']['checked'])) {
 	print '<td class="liste_titre"></td>';
 	print '<td class="liste_titre"></td>';
@@ -745,7 +739,7 @@ $colspan = 2 + (empty($conf->global->PROJECT_TIMESHEET_DISABLEBREAK_ON_PROJECT) 
 
 if ($conf->use_javascript_ajax) {
 	print '<tr class="liste_total">';
-	print '<td class="liste_total" colspan="'.($colspan - 1 + $addcolspan).'">';
+	print '<td class="liste_total" colspan="'.($colspan - 2 + $addcolspan).'">';
 	print $langs->trans("Total");
 	print '</td>';
 	if (!empty($arrayfields['timeconsumed']['checked'])) {
@@ -807,7 +801,7 @@ if (count($tasksarray) > 0) {
 	// There is a diff between total shown on screen and total spent by user, so we add a line with all other cumulated time of user
 	if ($isdiff) {
 		print '<tr class="oddeven othertaskwithtime">';
-		print '<td colspan="'.($colspan - 1).'" class="opacitymedium">';
+		print '<td colspan="'.($colspan - 2).'" class="opacitymedium">';
 		print $langs->trans("OtherFilteredTasks");
 		print '</td>';
 		if (!empty($arrayfields['timeconsumed']['checked'])) {
@@ -833,7 +827,7 @@ if (count($tasksarray) > 0) {
 
 	if ($conf->use_javascript_ajax) {
 		print '<tr class="liste_total">';
-		print '<td class="liste_total" colspan="'.($colspan - 1 + $addcolspan).'">';
+		print '<td class="liste_total" colspan="'.($colspan - 2 + $addcolspan).'">';
 		print $langs->trans("Total");
 		print '</td>';
 		if (!empty($arrayfields['timeconsumed']['checked'])) {
