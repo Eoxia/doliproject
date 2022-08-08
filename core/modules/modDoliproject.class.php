@@ -286,6 +286,8 @@ class modDoliproject extends DolibarrModules
 				$task->label = $langs->trans('RTT');
 				$task->date_c = dol_now();
 				$task->create($user);
+
+				dolibarr_set_const($db, 'DOLIPROJECT_RTT_TASK', 1, 'integer', 0, '', $conf->entity);
 			}
 
 		}
