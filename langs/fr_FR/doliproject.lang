@@ -106,6 +106,9 @@ HRDescription = Projet comprenant les tâches liées aux ressources humaines
 DoliProjectNewTimeSpent = Temps consommé (en minutes)
 DivideTimeIntoTasks = Répartir entre les tâches du projet
 ShowOnlyFavoriteTasks = Afficher uniquement les tâches favorites
+SpendMoreTimeThanPlanned = Pointer plus de temps que planifié
+SpendMoreTimeThanPlannedHelp = Cette option permet de pointer plus de temps que le temps renseigné dans l'onglet "Horaires" de l'utilisateur
+ConsumedTime = Temps pointé
 
 #
 # Setup Page

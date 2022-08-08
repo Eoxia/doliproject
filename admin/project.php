@@ -116,6 +116,32 @@ if ( ! empty($conf->projet->enabled)) {
 print '</table>';
 print '</form>';
 
+//Time spent
+print load_fiche_titre($langs->transnoentities("TimeSpent"), '', '');
+
+print '<table class="noborder centpercent editmode">';
+
+print '<tr class="liste_titre">';
+print '<td>' . $langs->transnoentities("Parameters") . '</td>';
+print '<td class="center">' . $langs->transnoentities("Status") . '</td>';
+print '<td class="center">' . $langs->transnoentities("Action") . '</td>';
+print '<td class="center">' . $langs->transnoentities("ShortInfo") . '</td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>' . $langs->transnoentities("SpendMoreTimeThanPlanned") . '</td>';
+print '<td class="center">';
+print ajax_constantonoff('DOLIPROJECT_SPEND_MORE_TIME_THAN_PLANNED');
+print '</td>';
+print '<td class="center">';
+print '';
+print '</td>';
+print '<td class="center">';
+print $form->textwithpicto('', $langs->transnoentities("SpendMoreTimeThanPlannedHelp"), 1, 'help');
+print '</td>';
+print '</tr>';
+
+print '</table>';
+
 // Page end
 llxFooter();
 $db->close();

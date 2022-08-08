@@ -302,10 +302,12 @@ if ($action == 'addtime' && $user->rights->projet->lire && GETPOST('formfilterac
 		foreach($timespent_duration as $key => $val) {
 			$timespent_minutes += $val / 60;
 		}
-		if ($timespent_minutes > GETPOST('nonconsumedtime')) {
-			setEventMessages($langs->trans("TooMuchTimeSpent"), null, 'errors');
-			header('Location: '.$_SERVER["PHP_SELF"].'?'.($projectid ? 'id='.$projectid : '').($search_usertoprocessid ? '&search_usertoprocessid='.urlencode($search_usertoprocessid) : '').($mode ? '&mode='.$mode : '').'&year='.$yearofday.'&month='.$monthofday.'&day='.$dayofday);
-			exit;
+		if (!$conf->global->DOLIPROJECT_SPEND_MORE_TIME_THAN_PLANNED) {
+			if ($timespent_minutes > GETPOST('nonconsumedtime')) {
+				setEventMessages($langs->trans("TooMuchTimeSpent"), null, 'errors');
+				header('Location: '.$_SERVER["PHP_SELF"].'?'.($projectid ? 'id='.$projectid : '').($search_usertoprocessid ? '&search_usertoprocessid='.urlencode($search_usertoprocessid) : '').($mode ? '&mode='.$mode : '').'&year='.$yearofday.'&month='.$monthofday.'&day='.$dayofday);
+				exit;
+			}
 		}
 		foreach ($timespent_duration as $key => $val) {
 			$object->fetch($key);
@@ -441,6 +443,13 @@ $non_consumed_minutes = ($non_consumed_time % 60);
 $non_consumed_minutes = $non_consumed_minutes < 10 ? 0 . $non_consumed_minutes : $non_consumed_minutes;
 $non_consumed_hours = $non_consumed_hours > 0 ? $non_consumed_hours : '00';
 $non_consumed_minutes = $non_consumed_minutes > 0 ? $non_consumed_minutes : '00';
+
+$already_consumed_time = $already_consumed_time / 60;
+$consumed_hours = floor($already_consumed_time / 60);
+$consumed_minutes = $already_consumed_time % 60;
+$consumed_minutes = $consumed_minutes < 10 ? 0 . $consumed_minutes : $consumed_minutes;
+$consumed_hours = $consumed_hours > 0 ? $consumed_hours : '00';
+$consumed_minutes = $consumed_minutes > 0 ? $consumed_minutes : '00';
 
 $onlyopenedproject = 1; // or -1
 $morewherefilter = '';
@@ -746,7 +755,7 @@ if (!$isavailable[$daytoparse]['morning'] && !$isavailable[$daytoparse]['afterno
 
 print '<th class="center'.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'">'.$langs->trans("Duration");
 print '<br>' . $langs->trans('DayWorkTime') . ' : ' . $worked_hours . ':' . $worked_minutes;
-
+print '<br>' . $langs->trans('ConsumedTime') . ' : ' . $consumed_hours . ':' . $consumed_minutes ;
 print '<br>' . $langs->trans('NonConsumedTime') . ' : ' . $non_consumed_hours . ':' . $non_consumed_minutes;
 print '<input hidden class="non-consumed-time-hour" value="'. $non_consumed_hours .'">';
 print '<input hidden class="non-consumed-time-minute" value="'. $non_consumed_minutes .'">';
