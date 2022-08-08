@@ -398,7 +398,29 @@ if ($id) {
 	$project->fetch_thirdparty();
 }
 
-$wanted_date = GETPOST('year') ? GETPOST('year') . '-' . (GETPOST('month') > 10 ? GETPOST('month') : 0 . GETPOST('month')) . '-' . (GETPOST('day') > 10 ? GETPOST('day') : 0 . GETPOST('day')) : date("Y-m-d", dol_now());
+if (GETPOST('year')) {
+	$year_post = GETPOST('year');
+} else if (GETPOST('reyear')) {
+	$year_post = GETPOST('reyear');
+} else if (GETPOST('addtimeyear')) {
+	$year_post = GETPOST('addtimeyear');
+}
+if (GETPOST('month')) {
+	$month_post = GETPOST('month');
+} else if (GETPOST('remonth')) {
+	$month_post = GETPOST('remonth');
+} else if (GETPOST('addtimemonth')) {
+	$month_post = GETPOST('addtimemonth');
+}
+if (GETPOST('day')) {
+	$day_post = GETPOST('day');
+} else if (GETPOST('reday')) {
+	$day_post = GETPOST('reday');
+} else if (GETPOST('addtimeday')) {
+	$day_post = GETPOST('addtimeday');
+}
+
+$wanted_date = $year_post ? $year_post . '-' . ($month_post > 9 ? $month_post : 0 . $month_post) . '-' . ($day_post > 9 ? $day_post : 0 . $day_post) : date("Y-m-d", dol_now());
 $today_workinghours = 'workinghours_' .  strtolower(date("l", dol_strlen($wanted_date) > 0 ? strtotime($wanted_date) : dol_now()));
 
 $worked_hours = floor($current_workinghours->$today_workinghours / 60);
