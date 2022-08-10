@@ -617,10 +617,12 @@ class ActionsDoliproject
 		<script>
 			function toggleTaskFavoriteWithId (taskId) {
 				let token = $('#searchFormList').find('input[name="token"]').val();
-				console.log('coucou')
+				let querySeparator = '?';
+
+				document.URL.match(/\?/) ? querySeparator = '&' : 1
 
 				$.ajax({
-					url: document.URL + '&action=toggleTaskFavorite&taskId='+ taskId +'&token='+token,
+					url: document.URL + querySeparator + 'action=toggleTaskFavorite&taskId='+ taskId +'&token='+token,
 					type: "POST",
 					processData: false,
 					contentType: false,
