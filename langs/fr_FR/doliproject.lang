@@ -64,6 +64,8 @@ MessageTimeSpentCreate = Temps consommé crée
 MessageNoTaskLink = Pas de tâche affectée, pas de temps passé disponible
 
 DoliprojectTimeSpent=Rapport de temps passé
+ActionAC_TEL_IN = Appel téléphonique entrant
+ActionAC_TEL_OUT = Appel téléphonique sortant
 
 #
 # Temps consommé
