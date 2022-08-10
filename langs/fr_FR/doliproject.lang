@@ -116,3 +116,13 @@ ConsumedTime = Temps pointé
 # Setup Page
 #
 DOLIPROJECT_DEFAUT_TICKET_TIME = Temps passé par défaut
+
+
+#
+# Facture récurrente
+#
+RecurringInvoicesStatistics = Statistiques facture récurrentes
+NumberOfRecurringBills = Nb de factures récurrentes
+NumberOfRecurringBillsByMonth = Nb de factures récurrentes par mois
+AmountOfRecurringBills = Montant de factures récurrentes
+AmountOfRecurringBillsByMonthHT = Montant de factures récurrentes par mois (HT)

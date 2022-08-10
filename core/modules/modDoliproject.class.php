@@ -60,7 +60,7 @@ class modDoliproject extends DolibarrModules
 			'triggers' 					=> 1,
 			'login' 					=> 0,
 			'substitutions' 			=> 0,
-			'menus' 					=> 0,
+			'menus' 					=> 1,
 			'tpl' 						=> 0,
 			'barcode' 					=> 0,
 			'models' 					=> 0,
@@ -194,6 +194,20 @@ class modDoliproject extends DolibarrModules
 			'position' => 48520 + $r,
 			'enabled'  => '$conf->doliproject->enabled', // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled.
 			'perms'    => '$user->rights->doliproject->lire', // Use 'perms'=>'$user->rights->doliproject->digiriskconst->read' if you want your menu with a permission rules
+			'target'   => '',
+			'user'     => 2, // 0=Menu for internal users, 1=external users, 2=both
+		);
+		$this->menu[$r++] = array(
+			'fk_menu'  =>'fk_mainmenu=billing,fk_leftmenu=customers_bills', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'type'     => 'left', // This is a Top menu entry
+			'titre'    => $langs->trans('RecurringInvoicesStatistics'),
+			'mainmenu' => 'billing',
+			'leftmenu' => 'customers_bills',
+			'url'      => '/doliproject/view/recurringinvoicestatistics.php',
+			'langs'    => 'doliproject@doliproject', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'position' => 1000 + $r,
+			'enabled'  => '$conf->doliproject->enabled && $conf->facture->enabled', // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled.
+			'perms'    => '$user->rights->doliproject->lire && $user->rights->facture->lire', // Use 'perms'=>'$user->rights->doliproject->digiriskconst->read' if you want your menu with a permission rules
 			'target'   => '',
 			'user'     => 2, // 0=Menu for internal users, 1=external users, 2=both
 		);
