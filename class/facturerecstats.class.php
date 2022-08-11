@@ -122,13 +122,13 @@ class FactureRecStats extends DoliProjectStats
 	{
 		global $user;
 
-		$sql = "SELECT date_format(fr.datec,'%m') as dm, COUNT(*) as nb";
+		$sql = "SELECT date_format(fr.date_when,'%m') as dm, COUNT(*) as nb";
 		$sql .= " FROM ".$this->from;
 		if (empty($user->rights->societe->client->voir) && !$this->socid) {
 			$sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 		}
 		$sql .= $this->join;
-		$sql .= " WHERE fr.datec BETWEEN '".$this->db->idate(dol_get_first_day($year))."' AND '".$this->db->idate(dol_get_last_day($year))."'";
+		$sql .= " WHERE fr.date_when BETWEEN '".$this->db->idate(dol_get_first_day($year))."' AND '".$this->db->idate(dol_get_last_day($year))."'";
 		$sql .= " AND ".$this->where;
 		$sql .= " GROUP BY dm";
 		$sql .= $this->db->order('dm', 'DESC');
@@ -148,7 +148,7 @@ class FactureRecStats extends DoliProjectStats
 	{
 		global $user;
 
-		$sql = "SELECT date_format(fr.datec,'%Y') as dm, COUNT(*), SUM(c.".$this->field.")";
+		$sql = "SELECT date_format(fr.date_when,'%Y') as dm, COUNT(*), SUM(c.".$this->field.")";
 		$sql .= " FROM ".$this->from;
 		if (empty($user->rights->societe->client->voir) && !$this->socid) {
 			$sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
@@ -173,13 +173,13 @@ class FactureRecStats extends DoliProjectStats
 	{
 		global $user;
 
-		$sql = "SELECT date_format(datec,'%m') as dm, SUM(fr.".$this->field.")";
+		$sql = "SELECT date_format(date_when,'%m') as dm, SUM(fr.".$this->field.")";
 		$sql .= " FROM ".$this->from;
 		if (empty($user->rights->societe->client->voir) && !$this->socid) {
 			$sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 		}
 		$sql .= $this->join;
-		$sql .= " WHERE fr.datec BETWEEN '".$this->db->idate(dol_get_first_day($year))."' AND '".$this->db->idate(dol_get_last_day($year))."'";
+		$sql .= " WHERE fr.date_when BETWEEN '".$this->db->idate(dol_get_first_day($year))."' AND '".$this->db->idate(dol_get_last_day($year))."'";
 		$sql .= " AND ".$this->where;
 		$sql .= " GROUP BY dm";
 		$sql .= $this->db->order('dm', 'DESC');
@@ -199,13 +199,13 @@ class FactureRecStats extends DoliProjectStats
 	{
 		global $user;
 
-		$sql = "SELECT date_format(datec,'%m') as dm, AVG(fr.".$this->field.")";
+		$sql = "SELECT date_format(date_when,'%m') as dm, AVG(fr.".$this->field.")";
 		$sql .= " FROM ".$this->from;
 		if (empty($user->rights->societe->client->voir) && !$this->socid) {
 			$sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 		}
 		$sql .= $this->join;
-		$sql .= " WHERE fr.datec BETWEEN '".$this->db->idate(dol_get_first_day($year))."' AND '".$this->db->idate(dol_get_last_day($year))."'";
+		$sql .= " WHERE fr.date_when BETWEEN '".$this->db->idate(dol_get_first_day($year))."' AND '".$this->db->idate(dol_get_last_day($year))."'";
 		$sql .= " AND ".$this->where;
 		$sql .= " GROUP BY dm";
 		$sql .= $this->db->order('dm', 'DESC');
@@ -222,7 +222,7 @@ class FactureRecStats extends DoliProjectStats
 	{
 		global $user;
 
-		$sql = "SELECT date_format(datec,'%Y') as year, COUNT(*) as nb, SUM(fr.".$this->field.") as total, AVG(fr.".$this->field.") as avg";
+		$sql = "SELECT date_format(date_when,'%Y') as year, COUNT(*) as nb, SUM(fr.".$this->field.") as total, AVG(fr.".$this->field.") as avg";
 		$sql .= " FROM ".$this->from;
 		if (empty($user->rights->societe->client->voir) && !$this->socid) {
 			$sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
@@ -248,13 +248,13 @@ class FactureRecStats extends DoliProjectStats
 
 		$endYear = date('Y');
 		$startYear = $endYear - $numberYears;
-		$sql = "SELECT date_format(datec,'%Y') as dm, SUM(fr.".$this->field.")";
+		$sql = "SELECT date_format(date_when,'%Y') as dm, SUM(fr.".$this->field.")";
 		$sql .= " FROM ".$this->from;
 		if (empty($user->rights->societe->client->voir) && !$this->socid) {
 			$sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 		}
 		$sql .= $this->join;
-		$sql .= " WHERE fr.datec BETWEEN '".$this->db->idate(dol_get_first_day($startYear))."' AND '".$this->db->idate(dol_get_last_day($endYear))."'";
+		$sql .= " WHERE fr.date_when BETWEEN '".$this->db->idate(dol_get_first_day($startYear))."' AND '".$this->db->idate(dol_get_last_day($endYear))."'";
 		$sql .= " AND ".$this->where;
 		$sql .= " GROUP BY dm";
 		$sql .= $this->db->order('dm', 'ASC');
