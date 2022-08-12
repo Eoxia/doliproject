@@ -39,9 +39,11 @@ if ( ! $res && file_exists("../../main.inc.php")) $res    = @include "../../main
 if ( ! $res && file_exists("../../../main.inc.php")) $res = @include "../../../main.inc.php";
 if ( ! $res) die("Include of main fails");
 
+// Libraries
 require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
 require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/project.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
@@ -51,14 +53,17 @@ require_once DOL_DOCUMENT_ROOT.'/holiday/class/holiday.class.php';
 require_once DOL_DOCUMENT_ROOT.'/custom/doliproject/lib/doliproject_functions.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/custom/doliproject/class/workinghours.class.php';
 
+// Global variables definitions
+global $conf, $db, $hookmanager, $langs, $user;
+
 // Load translation files required by the page
 $langs->loadLangs(array('projects', 'users', 'companies'));
 
-$action = GETPOST('action', 'aZ09');
-$mode = GETPOST("mode", 'alpha');
-$id = GETPOST('id', 'int');
-$taskid = GETPOST('taskid', 'int');
-
+// Get parameters
+$action      = GETPOST('action', 'aZ09');
+$mode        = GETPOST("mode", 'alpha');
+$id          = GETPOST('id', 'int');
+$taskid      = GETPOST('taskid', 'int');
 $contextpage = GETPOST('contextpage', 'aZ') ?GETPOST('contextpage', 'aZ') : 'perweekcard';
 
 $mine = 0;
@@ -368,6 +373,13 @@ if ($action == 'addtime' && $user->rights->projet->lire && GETPOST('formfilterac
 	}
 }
 
+if ($action == 'showOnlyFavoriteTasks') {
+	if ($conf->global->DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS == 1) {
+		dolibarr_set_const($db, 'DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS', 0, 'integer', 0, '', $conf->entity);
+	} else {
+		dolibarr_set_const($db, 'DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS', 1, 'integer', 0, '', $conf->entity);
+	}
+}
 
 /*
  * View
@@ -425,9 +437,9 @@ $search_options_pattern = 'search_task_options_';
 $extrafieldsobjectkey = 'projet_task';
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_sql.tpl.php';
 
-$tasksarray = $taskstatic->getTasksArray(0, 0, ($project->id ? $project->id : 0), $socid, 0, $search_project_ref, $onlyopenedproject, $morewherefilter, ($search_usertoprocessid ? $search_usertoprocessid : 0), 0, $extrafields); // We want to see all tasks of open project i am allowed to see and that match filter, not only my tasks. Later only mine will be editable later.
+$tasksarray = getFavoriteTasksArray($taskstatic->id, 0, 0, ($project->id ? $project->id : 0), $socid, 0, $search_project_ref, $onlyopenedproject, $morewherefilter, ($search_usertoprocessid ? $search_usertoprocessid : 0), 0, $extrafields); // We want to see all tasks of open project i am allowed to see and that match filter, not only my tasks. Later only mine will be editable later.
 if ($morewherefilter) {	// Get all task without any filter, so we can show total of time spent for not visible tasks
-	$tasksarraywithoutfilter = $taskstatic->getTasksArray(0, 0, ($project->id ? $project->id : 0), $socid, 0, '', $onlyopenedproject, '', ($search_usertoprocessid ? $search_usertoprocessid : 0)); // We want to see all tasks of open project i am allowed to see and that match filter, not only my tasks. Later only mine will be editable later.
+	$tasksarraywithoutfilter = getFavoriteTasksArray($taskstatic->id, 0, 0, ($project->id ? $project->id : 0), $socid, 0, '', $onlyopenedproject, '', ($search_usertoprocessid ? $search_usertoprocessid : 0)); // We want to see all tasks of open project i am allowed to see and that match filter, not only my tasks. Later only mine will be editable later.
 }
 $projectsrole = $taskstatic->getUserRolesForProjectsOrTasks($usertoprocess, 0, ($project->id ? $project->id : 0), 0, $onlyopenedproject);
 $tasksrole = $taskstatic->getUserRolesForProjectsOrTasks(0, $usertoprocess, ($project->id ? $project->id : 0), 0, $onlyopenedproject);
@@ -517,7 +529,8 @@ print '<input type="submit" class="button valignmiddle smallonsmartphone" name="
 print '</div>';
 
 print '<div class="clearboth" style="padding-bottom: 20px;"></div>';
-
+print $langs->trans('ShowOnlyFavoriteTasks');
+print '<input type="checkbox"  class="show-only-favorite-tasks"'. ($conf->global->DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS ? ' checked' : '').' >';
 
 $startday = dol_mktime(12, 0, 0, $startdayarray['first_month'], $startdayarray['first_day'], $startdayarray['first_year']);
 
