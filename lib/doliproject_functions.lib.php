@@ -907,7 +907,6 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 					}
 					if (!empty($arrayfields['timeconsumed']['checked'])) {
 						$addcolspan++;
-						$addcolspan++;
 					}
 					foreach ($arrayfields as $key => $val) {
 						if ($val['checked'] && substr($key, 0, 5) == 'efpt.') {
@@ -916,7 +915,7 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 					}
 
 					print '<tr class="oddeven trforbreak nobold">'."\n";
-					print '<td colspan="'.(1 + $addcolspan + $dayInMonth).'">';
+					print '<td colspan="'.(2 + $addcolspan + $dayInMonth).'">';
 					print $projectstatic->getNomUrl(1, '', 0, '<strong>'.$langs->transnoentitiesnoconv("YourRole").':</strong> '.$projectsrole[$lines[$i]->fk_project]);
 					if ($thirdpartystatic->id > 0) {
 						print ' - '.$thirdpartystatic->getNomUrl(1);
@@ -1060,18 +1059,6 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 				}
 
 				if (!empty($arrayfields['timeconsumed']['checked'])) {
-					// Time spent by everybody
-					print '<td class="right">';
-					// $lines[$i]->duration is a denormalised field = summ of time spent by everybody for task. What we need is time consummed by user
-					if ($lines[$i]->duration) {
-						print '<a href="'.DOL_URL_ROOT.'/projet/tasks/time.php?id='.$lines[$i]->id.'">';
-						print convertSecondToTime($lines[$i]->duration, 'allhourmin');
-						print '</a>';
-					} else {
-						print '--:--';
-					}
-					print "</td>\n";
-
 					// Time spent by user
 					print '<td class="right">';
 					$tmptimespent = $taskstatic->getSummaryOfTimeSpent($fuser->id);

@@ -634,7 +634,6 @@ if (!empty($arrayfields['t.progress']['checked'])) {
 }
 if (!empty($arrayfields['timeconsumed']['checked'])) {
 	print '<td class="liste_titre"></td>';
-	print '<td class="liste_titre"></td>';
 }
 for ($idw = 0; $idw < $dayInMonth; $idw++) {
 	print '<td class="liste_titre"></td>';
@@ -665,12 +664,6 @@ if (!empty($arrayfields['t.progress']['checked'])) {
 	print '<th class="right minwidth75 maxwidth100" title="'.dol_escape_htmltag($langs->trans("ProgressDeclared")).'">'.$langs->trans("ProgressDeclared").'</th>';
 }
 if (!empty($arrayfields['timeconsumed']['checked'])) {
-	print '<th class="right maxwidth100">'.$langs->trans("TimeSpent").'<br>';
-	print '<span class="nowraponall">';
-	print '<span class="opacitymedium nopadding userimg"><img alt="Photo" class="photouserphoto userphoto" src="'.DOL_URL_ROOT.'/theme/common/everybody.png"></span>';
-	print '<span class="opacitymedium paddingleft">'.$langs->trans("Everybody").'</span>';
-	print '</span>';
-	print '</th>';
 	print '<th class="right maxwidth75 maxwidth100">'.$langs->trans("TimeSpent").($usertoprocess->firstname ? '<br><span class="nowraponall">'.$usertoprocess->getNomUrl(-2).'<span class="opacitymedium paddingleft">'.dol_trunc($usertoprocess->firstname, 10).'</span></span>' : '').'</th>';
 }
 for ($idw = 0; $idw < $dayInMonth; $idw++) {
@@ -716,7 +709,6 @@ if ($conf->use_javascript_ajax) {
 	print '<span class="opacitymediumbycolor">  - '.$langs->trans("ExpectedWorkedHours").': <strong>'.price($usertoprocess->weeklyhours, 1, $langs, 0, 0).'</strong></span>';
 	print '</td>';
 	if (!empty($arrayfields['timeconsumed']['checked'])) {
-		print '<td class="liste_total right"><div class="totalDayAll">&nbsp;</div></td>';
 		print '<td class="liste_total right"><div class="totalDayAll">&nbsp;</div></td>';
 	}
 	for ($idw = 0; $idw < $dayInMonth; $idw++) {
@@ -799,7 +791,6 @@ if (count($tasksarray) > 0) {
 		print '</td>';
 		if (!empty($arrayfields['timeconsumed']['checked'])) {
 			print '<td class="liste_total right"><div class="totalDayAll">&nbsp;</div></td>';
-			print '<td class="liste_total right"><div class="totalDayAll">&nbsp;</div></td>';
 		}
 		for ($idw = 0; $idw < $dayInMonth; $idw++) {
 			$cssweekend = '';
@@ -828,7 +819,6 @@ if (count($tasksarray) > 0) {
 		print '<span class="opacitymediumbycolor">  - '.$langs->trans("ExpectedWorkedHours").': <strong>'.price($usertoprocess->weeklyhours, 1, $langs, 0, 0).'</strong></span>';
 		print '</td>';
 		if (!empty($arrayfields['timeconsumed']['checked'])) {
-			print '<td class="liste_total right"><div class="totalDayAll">&nbsp;</div></td>';
 			print '<td class="liste_total right"><div class="totalDayAll">&nbsp;</div></td>';
 		}
 
