@@ -218,9 +218,12 @@ window.eoxiaJS.task.divideTimeSpent = function( event ) {
  */
 window.eoxiaJS.task.showOnlyFavoriteTasks = function( event ) {
 	let token = $('.id-container').find('input[name="token"]').val();
+	let querySeparator = '?';
+
+	document.URL.match(/\?/) ? querySeparator = '&' : 1
 
 	$.ajax({
-		url: document.URL + "&action=showOnlyFavoriteTasks&token=" + token,
+		url: document.URL + querySeparator + "action=showOnlyFavoriteTasks&token=" + token,
 		type: "POST",
 		processData: false,
 		contentType: false,
