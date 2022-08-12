@@ -112,6 +112,7 @@ SpendMoreTimeThanPlanned = Pointer plus de temps que planifié
 SpendMoreTimeThanPlannedHelp = Cette option permet de pointer plus de temps que le temps renseigné dans l'onglet "Horaires" de l'utilisateur
 ConsumedTime = Temps pointé
 ExpectedWorkedHoursMonth = Heures de travail prévues au mois de %s
+SpentWorkedHoursMonth = Heures de travail passées au mois de %s
 
 #
 # Setup Page

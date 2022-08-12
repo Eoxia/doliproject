@@ -829,16 +829,31 @@ if (count($tasksarray) > 0) {
 	}
 
 	if ($conf->use_javascript_ajax) {
+		$workinghoursMonth = 0;
 		print '<tr class="liste_total">';
 		print '<td class="liste_total" colspan="'.($colspan + $addcolspan).'">';
 		print $langs->trans("Total");
-		print '<span class="opacitymediumbycolor">  - '.$langs->trans("ExpectedWorkedHours").': <strong>'.price($usertoprocess->weeklyhours, 1, $langs, 0, 0).'</strong></span>';
+
+		$currentDayCurrent = date( 'd', $now);
+
+		for ($idw = 0; $idw < $currentDayCurrent; $idw++) {
+			$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
+			$currentDay = date( 'l', $dayinloopfromfirstdaytoshow);
+			$currentDay = 'workinghours_'.strtolower($currentDay);
+			$workinghoursMonth += $workinghoursArray->{$currentDay}/60;
+		}
+		print '<span class="opacitymediumbycolor">  - '.$langs->trans("SpentWorkedHoursMonth", dol_print_date(dol_mktime(0, 0, 0, $month, $day, $year), "%B %Y")).' : <strong>'.price($workinghoursMonth, 1, $langs, 0, 0).'</strong></span>';
 		print '</td>';
 		if (!empty($arrayfields['timeconsumed']['checked'])) {
 			print '<td class="liste_total right"><div class="totalDayAll">&nbsp;</div></td>';
 		}
 
 		for ($idw = 0; $idw < $dayInMonth; $idw++) {
+			$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
+			$currentDay = date( 'l', $dayinloopfromfirstdaytoshow);
+			$currentDay = 'workinghours_'.strtolower($currentDay);
+			$workinghoursMonth = $workinghoursArray->{$currentDay}*60;
+
 			$cssweekend = '';
 			if ((($idw + 1) < $numstartworkingday) || (($idw + 1) > $numendworkingday)) {	// This is a day is not inside the setup of working days, so we use a week-end css.
 				//$cssweekend = 'weekend';
@@ -855,7 +870,7 @@ if (count($tasksarray) > 0) {
 				$cssonholiday .= 'onholidayafternoon ';
 			}
 
-			print '<td class="liste_total '.$idw.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'" align="center"><div class="totalDay'.$idw.'">&nbsp;</div></td>';
+			print '<td class="liste_total '.$idw.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'" align="center"><div class="totalDay'.$idw.'">'.dol_print_date($workinghoursMonth, 'hour').'</div></td>';
 		}
 		print '<td class="liste_total center"><div class="totalDayAll">&nbsp;</div></td>';
 		print '</tr>';
