@@ -46,14 +46,15 @@ class FactureRecStats extends DoliProjectStats
 	/**
 	 * 	Constructor
 	 *
-	 * 	@param	DoliDB		$db			Database handler
-	 * 	@param 	int			$socid		Id third party for filter. This value must be forced during the new to external user company if user is an external user.
-	 * 	@param 	string		$mode	   	Option ('customer', 'supplier')
-	 * 	@param	int			$userid    	Id user for filter (creation user)
-	 * 	@param	int			$typentid   Id typent of thirdpary for filter
-	 * 	@param	int			$categid    Id category of thirdpary for filter
+	 * 	@param	DoliDB		$db			          Database handler
+	 * 	@param 	int			$socid		          Id third party for filter. This value must be forced during the new to external user company if user is an external user.
+	 * 	@param 	string		$mode	   	          Option ('customer', 'supplier')
+	 * 	@param	int			$userid    	          Id user for filter (creation user)
+	 * 	@param	int			$typentid             Id typent of thirdpary for filter
+	 * 	@param	int			$categid              Id category of thirdpary for filter
+	 * 	@param	int			$categinvoicerecid    Id category of Invoice rec for filter
 	 */
-	public function __construct($db, $socid, $mode, $userid = 0, $typentid = 0, $categid = 0)
+	public function __construct($db, $socid, $mode, $userid = 0, $typentid = 0, $categid = 0, $categinvoicerecid = 0)
 	{
 		global $user, $conf;
 
@@ -107,6 +108,12 @@ class FactureRecStats extends DoliProjectStats
 			$this->join .= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_societe as cs ON cs.fk_soc = fr.fk_soc';
 			$this->join .= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie as c ON c.rowid = cs.fk_categorie';
 			$this->where .= ' AND c.rowid = '.((int) $categid);
+		}
+
+		if ($categinvoicerecid) {
+			$this->join .= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_invoicerec as cir ON cir.fk_invoicerec = fr.rowid';
+			$this->join .= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie as c ON c.rowid = cir.fk_categorie';
+			$this->where .= ' AND c.rowid = '.((int) $categinvoicerecid);
 		}
 	}
 

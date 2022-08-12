@@ -517,6 +517,49 @@ class ActionsDoliproject
 					setEventMessages($ticket->error,$ticket->errors,'errors');
 				}
 				dol_htmloutput_events();
+			}  else if ((GETPOST('action') == '' || empty(GETPOST('action')) || GETPOST('action') == 'view')) {
+				require_once __DIR__ . '/../../../projet/class/task.class.php';
+
+				$task           = new Task($this->db);
+				$ticket         = new Ticket($this->db);
+
+				$ticket->fetch(GETPOST('id'));
+				$ticket->fetch_optionals();
+
+				$task_id = $ticket->array_options['options_fk_task'];
+
+				$task->fetch($task_id);
+
+				if (!empty($task_id) && $task_id > 0) { ?>
+					<script>
+						jQuery('#ticket_extras_fk_task_<?php echo $ticket->id ?>').html(<?php echo json_encode($task->getNomUrl(1, 'blank', 'task', 1)) ?>);
+					</script>
+				<?php }
+			} else if (GETPOST('action') == 'edit_extras') {
+				require_once __DIR__ . '/../../../projet/class/task.class.php';
+
+				$task           = new Task($this->db);
+				$ticket         = new Ticket($this->db);
+
+				$ticket->fetch(GETPOST('id'));
+				$ticket->fetch_optionals();
+
+				$alltasks = $task->getTasksArray(null, null, $ticket->fk_project);
+				if (is_array($alltasks) && !empty($alltasks)) {
+					foreach ($alltasks as $tasksingle) {
+						$taskArray[$tasksingle->id] = $tasksingle->ref . ' - ' . $tasksingle->label;
+					}
+				}
+
+				if (is_array($taskArray) && !empty($taskArray)) { ?>
+					<script>
+						var options = $('#options_fk_task option');
+
+						var values = $.map(options ,function(option) {
+							return option.text(<?php echo $taskArray ?>);
+						});
+					</script>
+				<?php }
 			}
 		}
 		if (in_array($parameters['currentcontext'], array('projecttaskcard'))) {
@@ -610,6 +653,25 @@ class ActionsDoliproject
 				}
 			}
 		}
+		if (in_array($parameters['currentcontext'], array('invoicereccard'))) {
+			if (GETPOST('action') == 'create') {
+				require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+
+				$form = new Form($this->db);
+
+				$invoice_id = GETPOST('facid');
+
+				// Categories
+				if ($conf->categorie->enabled) {
+					$html = '<tr><td class="valignmiddle">'.$langs->trans("Categories").'</td><td>';
+					$html .= $form->showCategories($invoice_id, 'invoice', 1);
+					$html .= '</td></tr>'; ?>
+					<script>
+						jQuery('.fiche').find('.tabBar').find('.border tr:last').first().html(<?php echo json_encode($html) ?>);
+					</script>;
+				<?php }
+			}
+		}
 		if (GETPOST('action') == 'toggleTaskFavorite') {
 			toggleTaskFavorite(GETPOST('taskId'), $user->id);
 		}
@@ -645,5 +707,114 @@ class ActionsDoliproject
 		</script>
 		<?php
 	}
-	/* Add here any other hooked methods... */
+
+	/**
+	 * Overloading the constructCategory function : replacing the parent's function with the one below
+	 *
+	 * @param   array           $parameters     Hook metadatas (context, etc...)
+	 * @param   CommonObject    $object         The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
+	 * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
+	 */
+	public function constructCategory($parameters, &$object)
+	{
+		$error = 0; // Error counter
+
+		if (in_array($parameters['currentcontext'], array('category', 'invoicecard', 'invoicereccard'))) { // do something only for the context 'somecontext1' or 'somecontext2'
+			$tags = array(
+				'invoice' => array(
+					'id' => 436370001,
+					'code' => 'invoice',
+					'obj_class' => 'Facture',
+					'obj_table' => 'facture',
+				),
+				'invoicerec' => array(
+					'id' => 436370002,
+					'code' => 'invoicerec',
+					'obj_class' => 'Facture',
+					'obj_table' => 'facture',
+				)
+			);
+		}
+
+		if (!$error) {
+			$this->results = $tags;
+			return 0; // or return 1 to replace standard code
+		} else {
+			$this->errors[] = 'Error message';
+			return -1;
+		}
+	}
+
+	public function formObjectOptions($parameters, &$object, &$action, $hookmanager)
+	{
+		global $conf, $langs;
+
+		if (in_array($parameters['currentcontext'], array('invoicecard'))) {
+			require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+
+			$form = new Form($this->db);
+
+			if ($action == 'create') {
+				if (!empty($conf->categorie->enabled)) {
+					// Categories
+					print '<tr><td>' . $langs->trans("Categories") . '</td><td>';
+					$cate_arbo = $form->select_all_categories('invoice', '', 'parent', 64, 0, 1);
+					print img_picto('', 'category') . $form->multiselectarray('categories', $cate_arbo, GETPOST('categories', 'array'), '', 0, 'quatrevingtpercent widthcentpercentminusx', 0, 0);
+					print "</td></tr>";
+				}
+			} else if ($action == 'edit') {
+//				// Tags-Categories
+//				if ($conf->categorie->enabled) {
+//					print '<tr><td>'.$langs->trans("Categories").'</td><td>';
+//					$cate_arbo = $form->select_all_categories('invoice', '', 'parent', 64, 0, 1);
+//					$c = new Categorie($this->db);
+//					$cats = $c->containing($object->id, 'invoice');
+//					$arrayselected = array();
+//					if (is_array($cats)) {
+//						foreach ($cats as $cat) {
+//							$arrayselected[] = $cat->id;
+//						}
+//					}
+//					print img_picto('', 'category').$form->multiselectarray('categories', $cate_arbo, $arrayselected, '', 0, 'quatrevingtpercent widthcentpercentminusx', 0, 0);
+//					print "</td></tr>";
+//				}
+			} else if($action == '') {
+				// Categories
+				if ($conf->categorie->enabled) {
+					print '<tr><td class="valignmiddle">'.$langs->trans("Categories").'</td><td>';
+					print $form->showCategories($object->id, 'invoice', 1);
+					print "</td></tr>";
+				}
+			}
+		}
+		if (in_array($parameters['currentcontext'], array('invoicereccard'))) {
+			require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+
+			$form = new Form($this->db);
+
+			if ($action == '') {
+				// Categories
+				if ($conf->categorie->enabled) {
+					print '<tr><td class="valignmiddle">'.$langs->trans("Categories").'</td><td>';
+					print $form->showCategories($object->id, 'invoicerec', 1);
+					print "</td></tr>";
+				}
+			}
+		}
+	}
+
+	public function afterCreationOfRecurringInvoice($parameters, &$object) {
+		if (in_array($parameters['currentcontext'], array('cron', 'cronjoblist'))) {
+			require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+			require_once __DIR__ . '/../lib/doliproject_functions.lib.php';
+			$cat = new Categorie($this->db);
+			$categories = $cat->containing($parameters['facturerec']->id, 'invoicerec');
+			if (is_array($categories) && !empty($categories)) {
+				foreach ($categories as $category) {
+					$categoryArray[] =  $category->id;
+				}
+			}
+			setCategoriesObject($categoryArray, 'invoice', false, $object);
+		}
+	}
 }

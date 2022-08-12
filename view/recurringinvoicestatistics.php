@@ -63,12 +63,14 @@ if ($mode == 'customer' && !$user->rights->facture->lire) {
 //	accessforbidden();
 //}
 
-$object_status = GETPOST('object_status', 'intcomma');
-$typent_id     = GETPOST('typent_id', 'int');
-$categ_id      = GETPOST('categ_id', 'categ_id');
-$userid        = GETPOST('userid', 'int');
-$socid         = GETPOST('socid', 'int');
-$custcats      = GETPOST('custcats', 'array');
+$object_status      = GETPOST('object_status', 'intcomma');
+$typent_id          = GETPOST('typent_id', 'int');
+$categ_id           = GETPOST('categ_id', 'categ_id');
+$categinvoicerec_id = GETPOST('categinvoicerec_id');
+$userid             = GETPOST('userid', 'int');
+$socid              = GETPOST('socid', 'int');
+$custcats           = GETPOST('custcats', 'array');
+$invoicereccats     = GETPOST('invoicereccats', 'array');
 
 // Security check
 if ($user->socid > 0) {
@@ -107,7 +109,7 @@ print load_fiche_titre($title, '', $picto);
 
 dol_mkdir($dir);
 
-$stats = new FactureRecStats($db, $socid, $mode, ($userid > 0 ? $userid : 0), ($typent_id > 0 ? $typent_id : 0), ($categ_id > 0 ? $categ_id : 0));
+$stats = new FactureRecStats($db, $socid, $mode, ($userid > 0 ? $userid : 0), ($typent_id > 0 ? $typent_id : 0), ($categ_id > 0 ? $categ_id : 0),  ($categinvoicerec_id > 0 ? $categinvoicerec_id : 0));
 if ($mode == 'customer') {
 	if ($object_status != '' && $object_status >= 0) {
 		$stats->where .= ' AND f.suspended IN ('.$db->sanitize($object_status).')';
@@ -116,7 +118,12 @@ if ($mode == 'customer') {
 		$stats->from .= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_societe as cat ON (fr.fk_soc = cat.fk_soc)';
 		$stats->where .= ' AND cat.fk_categorie IN ('.$db->sanitize(implode(',', $custcats)).')';
 	}
+	if (is_array($invoicereccats) && !empty($invoicereccats)) {
+		$stats->from .= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_invoicerec as catinv ON (fr.rowid = catinv.fk_invoicerec)';
+		$stats->where .= ' AND catinv.fk_categorie IN ('.$db->sanitize(implode(',', $invoicereccats)).')';
+	}
 }
+
 //if ($mode == 'supplier') {
 //	if ($object_status != '' && $object_status >= 0) {
 //		$stats->where .= ' AND f.fk_statut IN ('.$db->sanitize($object_status).')';
@@ -316,6 +323,24 @@ if (!empty($conf->category->enabled)) {
 	$cate_arbo = $form->select_all_categories($cat_type, null, 'parent', null, null, 1);
 	print img_picto('', 'category', 'class="pictofixedwidth"');
 	print $form->multiselectarray('custcats', $cate_arbo, GETPOST('custcats', 'array'), 0, 0, 'widthcentpercentminusx maxwidth300');
+	//print $formother->select_categories($cat_type, $categ_id, 'categ_id', true);
+	print '</td></tr>';
+}
+
+// Category invoice rec
+if (!empty($conf->category->enabled)) {
+	if ($mode == 'customer') {
+		$cat_type = 'invoice';
+		$cat_label = $langs->trans("Category").' '.lcfirst($langs->trans("RecurringInvoice"));
+	}
+//	if ($mode == 'supplier') {
+//		$cat_type = Categorie::TYPE_SUPPLIER;
+//		$cat_label = $langs->trans("Category").' '.lcfirst($langs->trans("Supplier"));
+//	}
+	print '<tr><td>'.$cat_label.'</td><td>';
+	$cate_arbo = $form->select_all_categories($cat_type, null, 'parent', null, null, 1);
+	print img_picto('', 'category', 'class="pictofixedwidth"');
+	print $form->multiselectarray('invoicereccats', $cate_arbo, GETPOST('invoicereccats', 'array'), 0, 0, 'widthcentpercentminusx maxwidth300');
 	//print $formother->select_categories($cat_type, $categ_id, 'categ_id', true);
 	print '</td></tr>';
 }

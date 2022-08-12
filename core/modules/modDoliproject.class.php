@@ -60,7 +60,7 @@ class modDoliproject extends DolibarrModules
 			'triggers' 					=> 1,
 			'login' 					=> 0,
 			'substitutions' 			=> 0,
-			'menus' 					=> 1,
+			'menus' 					=> 0,
 			'tpl' 						=> 0,
 			'barcode' 					=> 0,
 			'models' 					=> 0,
@@ -74,6 +74,11 @@ class modDoliproject extends DolibarrModules
 					  'projecttaskcard',
 					  'projecttaskscard',
 					  'tasklist',
+					  'category',
+					  'categoryindex',
+					  'invoicereccard',
+					  'cron',
+					  'cronjoblist'
 				  ),
 			),
 			'moduleforexternal' => 0,
@@ -210,6 +215,20 @@ class modDoliproject extends DolibarrModules
 			'perms'    => '$user->rights->doliproject->lire && $user->rights->facture->lire', // Use 'perms'=>'$user->rights->doliproject->digiriskconst->read' if you want your menu with a permission rules
 			'target'   => '',
 			'user'     => 2, // 0=Menu for internal users, 1=external users, 2=both
+		);
+		$this->menu[$r++] = array(
+			'fk_menu'  => 'fk_mainmenu=billing,fk_leftmenu=customers_bills',
+			'type'     => 'left',
+			'titre'    => $langs->trans('Categories'),
+			'mainmenu' => 'billing',
+			'leftmenu' => 'customers_bills',
+			'url'      => '/categories/index.php?type=invoice',
+			'langs'    => 'doliproject@doliproject',
+			'position' => 1100 + $r,
+			'enabled'  => '$conf->doliproject->enabled && $conf->categorie->enabled',
+			'perms'    => '$user->rights->doliproject->lire && $user->rights->facture->lire',
+			'target'   => '',
+			'user'     => 0,
 		);
 		/* END MODULEBUILDER TOPMENU */
 	}
