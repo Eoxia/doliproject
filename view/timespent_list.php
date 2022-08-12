@@ -526,7 +526,7 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 					if (!isset($totalarray['val'][$key])) {
 						$totalarray['val'][$key] = 0;
 					}
-					$totalarray['val'][$key] += $obj->{$key};
+					$totalarray['val'][$key] += convertSecondToTime($obj->{$key}, 'allhourmin');
 				}
 			}
 		}
