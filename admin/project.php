@@ -39,6 +39,7 @@ if (!$res) die("Include of main fails");
 // Libraries
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
+require_once DOL_DOCUMENT_ROOT . "/core/class/html.formother.class.php";
 require_once DOL_DOCUMENT_ROOT . "/core/class/html.formprojet.class.php";
 
 require_once '../lib/doliproject.lib.php';
@@ -71,11 +72,35 @@ if (($action == 'update' && ! GETPOST("cancel", 'alpha')) || ($action == 'update
 	}
 }
 
+if ($action == 'updateThemeColor') {
+	$val = (implode(',', (colorStringToArray(GETPOST('DOLIPROJECT_EXCEEDED_TIME_SPENT_COLOR'), array()))));
+	if ($val == '') {
+		dolibarr_del_const($db, 'DOLIPROJECT_EXCEEDED_TIME_SPENT_COLOR', $conf->entity);
+	} else {
+		dolibarr_set_const($db, 'DOLIPROJECT_EXCEEDED_TIME_SPENT_COLOR', $val, 'chaine', 0, '', $conf->entity);
+	}
+
+	$val = (implode(',', (colorStringToArray(GETPOST('DOLIPROJECT_NOT_EXCEEDED_TIME_SPENT_COLOR'), array()))));
+	if ($val == '') {
+		dolibarr_del_const($db, 'DOLIPROJECT_NOT_EXCEEDED_TIME_SPENT_COLOR', $conf->entity);
+	} else {
+		dolibarr_set_const($db, 'DOLIPROJECT_NOT_EXCEEDED_TIME_SPENT_COLOR', $val, 'chaine', 0, '', $conf->entity);
+	}
+
+	$val = (implode(',', (colorStringToArray(GETPOST('DOLIPROJECT_PERFECT_TIME_SPENT_COLOR'), array()))));
+	if ($val == '') {
+		dolibarr_del_const($db, 'DOLIPROJECT_PERFECT_TIME_SPENT_COLOR', $conf->entity);
+	} else {
+		dolibarr_set_const($db, 'DOLIPROJECT_PERFECT_TIME_SPENT_COLOR', $val, 'chaine', 0, '', $conf->entity);
+	}
+}
+
 /*
  * View
  */
 
 $form = new Form($db);
+$formother = new FormOther($db);
 if ( ! empty($conf->projet->enabled)) { $formproject = new FormProjets($db); }
 
 $page_name = "DoliprojectAbout";
@@ -141,6 +166,51 @@ print '</td>';
 print '</tr>';
 
 print '</table>';
+
+//Theme dasboard time spent
+print load_fiche_titre($langs->transnoentities("ThemeDashboardTimeSpent"), '', '');
+
+print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '" name="color_form">';
+print '<input type="hidden" name="token" value="' . newToken() . '">';
+print '<input type="hidden" name="action" value="updateThemeColor">';
+print '<table class="noborder centpercent editmode">';
+
+print '<tr class="liste_titre">';
+print '<td>' . $langs->transnoentities("Parameters") . '</td>';
+print '<td class="center">' . $langs->transnoentities("Value") . '</td>';
+print '</tr>';
+
+print '<tr class="oddeven">';
+print '<td>'.$langs->trans("ExceededTimeSpentColor").'</td>';
+print '<td>';
+print $formother->selectColor(colorArrayToHex(colorStringToArray((!empty($conf->global->DOLIPROJECT_EXCEEDED_TIME_SPENT_COLOR) ? $conf->global->DOLIPROJECT_EXCEEDED_TIME_SPENT_COLOR : ''), array()), ''), 'DOLIPROJECT_EXCEEDED_TIME_SPENT_COLOR', '', 1, '', '', 'doliprojectexceededtimespentcolor');
+print '<span class="nowraponall opacitymedium">'.$langs->trans("Default").'</span>: <strong>#FF0000</strong>';
+print '</td>';
+print '</tr>';
+
+print '<tr class="oddeven">';
+print '<td>'.$langs->trans("NotExceededTimeSpentColor").'</td>';
+print '<td>';
+print $formother->selectColor(colorArrayToHex(colorStringToArray((!empty($conf->global->DOLIPROJECT_NOT_EXCEEDED_TIME_SPENT_COLOR) ? $conf->global->DOLIPROJECT_NOT_EXCEEDED_TIME_SPENT_COLOR : ''), array()), ''), 'DOLIPROJECT_NOT_EXCEEDED_TIME_SPENT_COLOR', '', 1, '', '', 'doliprojectnotexceededtimespentcolor');
+print '<span class="nowraponall opacitymedium">'.$langs->trans("Default").'</span>: <strong>#FFA500</strong>';
+print '</td>';
+print '</tr>';
+
+print '<tr class="oddeven">';
+print '<td>'.$langs->trans("PerfectTimeSpentColor").'</td>';
+print '<td>';
+print $formother->selectColor(colorArrayToHex(colorStringToArray((!empty($conf->global->DOLIPROJECT_PERFECT_TIME_SPENT_COLOR) ? $conf->global->DOLIPROJECT_PERFECT_TIME_SPENT_COLOR : ''), array()), ''), 'DOLIPROJECT_PERFECT_TIME_SPENT_COLOR', '', 1, '', '', 'doliprojectperfecttimespentcolor');
+print '<span class="nowraponall opacitymedium">'.$langs->trans("Default").'</span>: <strong>#008000</strong>';
+print '</td>';
+print '</tr>';
+
+print '</table>';
+
+print '<div class="center">';
+print '<input class="button button-save reposition" type="submit" name="submit" value="' . $langs->trans("Save") . '">';
+print '</div>';
+
+print '</form>';
 
 // Page end
 llxFooter();

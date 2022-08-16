@@ -102,7 +102,10 @@ class modDoliproject extends DolibarrModules
 			1 => array('DOLIPROJECT_DEFAUT_TICKET_TIME', 'chaine', '15', 'Default Time', 0, 'current'),
 			2 => array('DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS', 'integer', 1, '', 0, 'current'),
 			3 => array('DOLIPROJECT_HR_PROJECT', 'integer', 0, '', 0, 'current'),
-			3 => array('DOLIPROJECT_TIMESPENT_BOOKMARK_SET', 'integer', 0, '', 0, 'current'),
+			4 => array('DOLIPROJECT_TIMESPENT_BOOKMARK_SET', 'integer', 0, '', 0, 'current'),
+			5 => array('DOLIPROJECT_EXCEEDED_TIME_SPENT_COLOR', 'chaine', '#FF0000', '', 0, 'current'),
+			6 => array('DOLIPROJECT_NOT_EXCEEDED_TIME_SPENT_COLOR', 'chaine', '#FFA500', '', 0, 'current'),
+			7 => array('DOLIPROJECT_PERFECT_TIME_SPENT_COLOR', 'chaine', '#008000', '', 0, 'current'),
 		);
 
 		if (!isset($conf->doliproject) || !isset($conf->doliproject->enabled)) {
