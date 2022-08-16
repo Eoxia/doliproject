@@ -1232,7 +1232,7 @@ function loadTimeSpentMonthByDay($datestart, $taskid = 0, $userid = 0, $project)
 				$project->monthWorkLoad[$day] += $obj->task_duration;
 				$project->monthWorkLoadPerTask[$day][$obj->fk_task] += $obj->task_duration;
 			}
-			$weekalreadyfound[$day] = 1;
+			$daylareadyfound[$day] = 1;
 			$i++;
 		}
 		$project->db->free($resql);
