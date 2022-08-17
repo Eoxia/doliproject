@@ -755,7 +755,7 @@ if ($conf->use_javascript_ajax) {
 			$cssonholiday .= 'onholidayafternoon ';
 		}
 
-		print '<td class="liste_total '.$idw.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'" align="center"><div class="'.$idw.'">'.dol_print_date($workinghoursMonth, 'hour').'</div></td>';
+		print '<td class="liste_total '.$idw.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'" align="center"><div class="'.$idw.'">'.(($workinghoursMonth != 0) ? convertSecondToTime($workinghoursMonth, 'allhourmin') : '00:00').'</div></td>';
 	}
 	print '<td class="liste_total"></td>';
 	print '</tr>';
@@ -892,7 +892,7 @@ if (count($tasksarray) > 0) {
 				$cssonholiday .= 'onholidayafternoon ';
 			}
 
-			print '<td class="liste_total '.$idw.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'" align="center"><div class="'.$idw.'">'.dol_print_date($workinghoursMonth, 'hour').'</div></td>';
+			print '<td class="liste_total '.$idw.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'" align="center"><div class="'.$idw.'">'.(($workinghoursMonth != 0) ? convertSecondToTime($workinghoursMonth, 'allhourmin') : '00:00').'</div></td>';
 		}
 		print '</tr>';
 
@@ -989,7 +989,7 @@ if (count($tasksarray) > 0) {
 				$cssonholiday .= 'onholidayafternoon ';
 			}
 
-			print '<td class="liste_total bold '.$idw.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'" align="center" style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'"><div class="'.$idw.'">'.convertSecondToTime(abs($difftime), 'allhourmin').'</div></td>';
+			print '<td class="liste_total bold '.$idw.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'" align="center" style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'"><div class="'.$idw.'">'.(($difftime != 0) ? convertSecondToTime(abs($difftime), 'allhourmin') : '00:00').'</div></td>';
 		}
 		print '</tr>';
 	}
