@@ -712,9 +712,11 @@ if ($conf->use_javascript_ajax) {
 	print $langs->trans("Total");
 	for ($idw = 0; $idw < $dayInMonth; $idw++) {
 		$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
-		$currentDay = date( 'l', $dayinloopfromfirstdaytoshow);
-		$currentDay = 'workinghours_'.strtolower($currentDay);
-		$workinghoursMonth += $workinghoursArray->{$currentDay}/60;
+		if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+			$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+			$currentDay = 'workinghours_' . strtolower($currentDay);
+			$workinghoursMonth += $workinghoursArray->{$currentDay} / 60;
+		}
 	}
 	print '<span class="opacitymediumbycolor">  - '.$langs->trans("ExpectedWorkedHoursMonth", dol_print_date(dol_mktime(0, 0, 0, $month, $day, $year), "%B %Y")).' : <strong>'.price($workinghoursMonth, 1, $langs, 0, 0).'</strong></span>';
 	print '</td>';
@@ -723,9 +725,13 @@ if ($conf->use_javascript_ajax) {
 	}
 	for ($idw = 0; $idw < $dayInMonth; $idw++) {
 		$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
-		$currentDay = date( 'l', $dayinloopfromfirstdaytoshow);
-		$currentDay = 'workinghours_'.strtolower($currentDay);
-		$workinghoursMonth = $workinghoursArray->{$currentDay}*60;
+		if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+			$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+			$currentDay = 'workinghours_' . strtolower($currentDay);
+			$workinghoursMonth = $workinghoursArray->{$currentDay} * 60;
+		} else {
+			$workinghoursMonth = 0;
+		}
 
 		$cssweekend = '';
 		if ((($idw + 1) < $numstartworkingday) || (($idw + 1) > $numendworkingday)) {	// This is a day is not inside the setup of working days, so we use a week-end css.
@@ -842,9 +848,11 @@ if (count($tasksarray) > 0) {
 
 		for ($idw = 0; $idw < $currentDayCurrent; $idw++) {
 			$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
-			$currentDay = date( 'l', $dayinloopfromfirstdaytoshow);
-			$currentDay = 'workinghours_'.strtolower($currentDay);
-			$workinghoursMonth += $workinghoursArray->{$currentDay}/60;
+			if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+				$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+				$currentDay = 'workinghours_' . strtolower($currentDay);
+				$workinghoursMonth += $workinghoursArray->{$currentDay} / 60;
+			}
 		}
 		$totalspenttime = $workinghoursMonth;
 		print '<span class="opacitymediumbycolor">  - '.$langs->trans("SpentWorkedHoursMonth", dol_print_date(dol_mktime(0, 0, 0, $month, $day, $year), "%B %Y")).' : <strong>'.price($workinghoursMonth, 1, $langs, 0, 0).'</strong></span>';
@@ -855,9 +863,13 @@ if (count($tasksarray) > 0) {
 
 		for ($idw = 0; $idw < $currentDayCurrent; $idw++) {
 			$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
-			$currentDay = date( 'l', $dayinloopfromfirstdaytoshow);
-			$currentDay = 'workinghours_'.strtolower($currentDay);
-			$workinghoursMonth = $workinghoursArray->{$currentDay}*60;
+			if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+				$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+				$currentDay = 'workinghours_' . strtolower($currentDay);
+				$workinghoursMonth = $workinghoursArray->{$currentDay} * 60;
+			} else {
+				$workinghoursMonth = 0;
+			}
 
 			$cssweekend = '';
 			if ((($idw + 1) < $numstartworkingday) || (($idw + 1) > $numendworkingday)) {	// This is a day is not inside the setup of working days, so we use a week-end css.
@@ -894,9 +906,13 @@ if (count($tasksarray) > 0) {
 
 		for ($idw = 0; $idw < $currentDayCurrent; $idw++) {
 			$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
-			$currentDay = date( 'l', $dayinloopfromfirstdaytoshow);
-			$currentDay = 'workinghours_'.strtolower($currentDay);
-			$workinghoursMonth = $workinghoursArray->{$currentDay}*60;
+			if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+				$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+				$currentDay = 'workinghours_' . strtolower($currentDay);
+				$workinghoursMonth = $workinghoursArray->{$currentDay} * 60;
+			} else {
+				$workinghoursMonth = 0;
+			}
 
 			$cssweekend = '';
 			if ((($idw + 1) < $numstartworkingday) || (($idw + 1) > $numendworkingday)) {	// This is a day is not inside the setup of working days, so we use a week-end css.
@@ -937,9 +953,13 @@ if (count($tasksarray) > 0) {
 
 		for ($idw = 0; $idw < $currentDayCurrent; $idw++) {
 			$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
-			$currentDay = date( 'l', $dayinloopfromfirstdaytoshow);
-			$currentDay = 'workinghours_'.strtolower($currentDay);
-			$workinghoursMonth = $workinghoursArray->{$currentDay}*60;
+			if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+				$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+				$currentDay = 'workinghours_' . strtolower($currentDay);
+				$workinghoursMonth = $workinghoursArray->{$currentDay} * 60;
+			} else {
+				$workinghoursMonth = 0;
+			}
 			$difftime = $workinghoursMonth - $totalforvisibletasks[$dayinloopfromfirstdaytoshow];
 			if  ($difftime < 0) {
 				$morecss = colorStringToArray($conf->global->DOLIPROJECT_EXCEEDED_TIME_SPENT_COLOR);
