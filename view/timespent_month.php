@@ -718,7 +718,7 @@ if ($conf->use_javascript_ajax) {
 			$workinghoursMonth += $workinghoursArray->{$currentDay} / 60;
 		}
 	}
-	print '<span class="opacitymediumbycolor">  - '.$langs->trans("ExpectedWorkedHoursMonth", dol_print_date(dol_mktime(0, 0, 0, $month, $day, $year), "%B %Y")).' : <strong>'.price($workinghoursMonth, 1, $langs, 0, 0).'</strong></span>';
+	print '<span class="opacitymediumbycolor">  - '.$langs->trans("ExpectedWorkedHoursMonth", dol_print_date(dol_mktime(0, 0, 0, $month, $day, $year), "%B %Y")).' : <strong><a href="'. DOL_URL_ROOT . '/custom/doliproject/view/workinghours_card.php?id=' . $usertoprocess->id.'" target="_blank">'.price($workinghoursMonth, 1, $langs, 0, 0).'</a></strong></span>';
 	print '</td>';
 	if (!empty($arrayfields['timeconsumed']['checked'])) {
 		print '<td class="liste_total"></td>';
