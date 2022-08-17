@@ -855,7 +855,7 @@ if (count($tasksarray) > 0) {
 			}
 		}
 		$totalspenttime = $workinghoursMonth;
-		print '<span class="opacitymediumbycolor">  - '.$langs->trans("SpentWorkedHoursMonth", dol_print_date(dol_mktime(0, 0, 0, $month, $day, $year), "%B %Y")).' : <strong>'.price($workinghoursMonth, 1, $langs, 0, 0).'</strong></span>';
+		print '<span class="opacitymediumbycolor">  - '.$langs->trans("SpentWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), dol_print_date($now, "dayreduceformat")).' : <strong>'.price($workinghoursMonth, 1, $langs, 0, 0).'</strong></span>';
 		print '</td>';
 		if (!empty($arrayfields['timeconsumed']['checked'])) {
 			print '<td class="liste_total right"></td>';
@@ -898,7 +898,7 @@ if (count($tasksarray) > 0) {
 		foreach ($totalforvisibletasks as $task) {
 			$totalconsumedtime += $task;
 		}
-		print '<span class="opacitymediumbycolor">  - '.$langs->trans("ConsumedWorkedHoursMonth", dol_print_date(dol_mktime(0, 0, 0, $month, $day, $year), "%B %Y")).' : <strong>'.convertSecondToTime($totalconsumedtime, 'allhourmin').'</strong></span>';
+		print '<span class="opacitymediumbycolor">  - '.$langs->trans("ConsumedWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), dol_print_date($now, "dayreduceformat")).' : <strong>'.convertSecondToTime($totalconsumedtime, 'allhourmin').'</strong></span>';
 		print '</td>';
 		if (!empty($arrayfields['timeconsumed']['checked'])) {
 			print '<td class="liste_total right"><strong>'.convertSecondToTime($totalconsumedtime, 'allhourmin').'</strong></td>';
@@ -945,7 +945,7 @@ if (count($tasksarray) > 0) {
 		} else if ($difftotaltime == 0) {
 			$morecss = colorStringToArray($conf->global->DOLIPROJECT_PERFECT_TIME_SPENT_COLOR);
 		}
-		print '<span class="opacitymediumbycolor">  - '.$langs->trans("DiffSpentAndConsumedWorkedHoursMonth", dol_print_date(dol_mktime(0, 0, 0, $month, $day, $year), "dayreduceformat")).' : <strong style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'">'.convertSecondToTime(abs($difftotaltime), 'allhourmin').'</strong></span>';
+		print '<span class="opacitymediumbycolor">  - '.$langs->trans("DiffSpentAndConsumedWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), dol_print_date($now, "dayreduceformat")).' : <strong style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'">'.convertSecondToTime(abs($difftotaltime), 'allhourmin').'</strong></span>';
 		print '</td>';
 		if (!empty($arrayfields['timeconsumed']['checked'])) {
 			print '<td class="liste_total right" style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'"><strong>'.convertSecondToTime(abs($difftotaltime), 'allhourmin').'</strong></td>';
