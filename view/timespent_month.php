@@ -100,6 +100,7 @@ $sortorder = GETPOST('sortorder', 'aZ09comma');
 // Define firstdaytoshow and lastdaytoshow (warning: lastdaytoshow is last second to show + 1)
 $firstdaytoshow    =  dol_get_first_day($year, $month);
 $firstdaytoshowgmt =  dol_get_first_day($year, $month, true);
+$lastdaytoshow     =  dol_get_last_day($year, $month);
 
 $prev = dol_get_prev_month($month, $year);
 $prev_year  = $prev['year'];
@@ -850,8 +851,15 @@ if (count($tasksarray) > 0) {
 		print $langs->trans("Total");
 
 		$currentDayCurrent = date( 'd', $now);
+		$currentMonth = date( 'm', $now);
 
-		for ($idw = 0; $idw < $currentDayCurrent; $idw++) {
+		if ($currentMonth == $month) {
+			$dayInMonthCurrent = $currentDayCurrent;
+		} else {
+			$dayInMonthCurrent = $dayInMonth;
+		}
+
+		for ($idw = 0; $idw < $dayInMonthCurrent; $idw++) {
 			$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
 			if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
 				$currentDay = date('l', $dayinloopfromfirstdaytoshow);
@@ -860,13 +868,13 @@ if (count($tasksarray) > 0) {
 			}
 		}
 		$totalspenttime = $workinghoursMonth;
-		print '<span class="opacitymediumbycolor">  - '.$langs->trans("SpentWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), dol_print_date($now, "dayreduceformat")).' : <strong>'.price($workinghoursMonth, 1, $langs, 0, 0).'</strong></span>';
+		print '<span class="opacitymediumbycolor">  - '.$langs->trans("SpentWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))).' : <strong>'.price($workinghoursMonth, 1, $langs, 0, 0).'</strong></span>';
 		print '</td>';
 		if (!empty($arrayfields['timeconsumed']['checked'])) {
 			print '<td class="liste_total right"></td>';
 		}
 
-		for ($idw = 0; $idw < $currentDayCurrent; $idw++) {
+		for ($idw = 0; $idw < $dayInMonthCurrent; $idw++) {
 			$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
 			if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
 				$currentDay = date('l', $dayinloopfromfirstdaytoshow);
@@ -894,6 +902,9 @@ if (count($tasksarray) > 0) {
 
 			print '<td class="liste_total '.$idw.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'" align="center"><div class="'.$idw.'">'.(($workinghoursMonth != 0) ? convertSecondToTime($workinghoursMonth, 'allhourmin') : '00:00').'</div></td>';
 		}
+		if ($dayInMonth == $dayInMonthCurrent) {
+			print '<td class="liste_total"></td>';
+		}
 		print '</tr>';
 
 		print '<tr class="liste_total">';
@@ -903,13 +914,13 @@ if (count($tasksarray) > 0) {
 		foreach ($totalforvisibletasks as $task) {
 			$totalconsumedtime += $task;
 		}
-		print '<span class="opacitymediumbycolor">  - '.$langs->trans("ConsumedWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), dol_print_date($now, "dayreduceformat")).' : <strong>'.convertSecondToTime($totalconsumedtime, 'allhourmin').'</strong></span>';
+		print '<span class="opacitymediumbycolor">  - '.$langs->trans("ConsumedWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))).' : <strong>'.convertSecondToTime($totalconsumedtime, 'allhourmin').'</strong></span>';
 		print '</td>';
 		if (!empty($arrayfields['timeconsumed']['checked'])) {
 			print '<td class="liste_total right"><strong>'.convertSecondToTime($totalconsumedtime, 'allhourmin').'</strong></td>';
 		}
 
-		for ($idw = 0; $idw < $currentDayCurrent; $idw++) {
+		for ($idw = 0; $idw < $dayInMonthCurrent; $idw++) {
 			$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
 			if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
 				$currentDay = date('l', $dayinloopfromfirstdaytoshow);
@@ -937,6 +948,9 @@ if (count($tasksarray) > 0) {
 
 			print '<td class="liste_total '.$idw.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'" align="center"><div class="totalDay'.$idw.'">'.dol_print_date($workinghoursMonth, 'hour').'</div></td>';
 		}
+		if ($dayInMonth == $dayInMonthCurrent) {
+			print '<td class="liste_total"></td>';
+		}
 		print '</tr>';
 
 		print '<tr class="liste_total">';
@@ -950,13 +964,13 @@ if (count($tasksarray) > 0) {
 		} else if ($difftotaltime == 0) {
 			$morecss = colorStringToArray($conf->global->DOLIPROJECT_PERFECT_TIME_SPENT_COLOR);
 		}
-		print '<span class="opacitymediumbycolor">  - '.$langs->trans("DiffSpentAndConsumedWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), dol_print_date($now, "dayreduceformat")).' : <strong style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'">'.convertSecondToTime(abs($difftotaltime), 'allhourmin').'</strong></span>';
+		print '<span class="opacitymediumbycolor">  - '.$langs->trans("DiffSpentAndConsumedWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))).' : <strong style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'">'.convertSecondToTime(abs($difftotaltime), 'allhourmin').'</strong></span>';
 		print '</td>';
 		if (!empty($arrayfields['timeconsumed']['checked'])) {
 			print '<td class="liste_total right" style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'"><strong>'.convertSecondToTime(abs($difftotaltime), 'allhourmin').'</strong></td>';
 		}
 
-		for ($idw = 0; $idw < $currentDayCurrent; $idw++) {
+		for ($idw = 0; $idw < $dayInMonthCurrent; $idw++) {
 			$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
 			if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
 				$currentDay = date('l', $dayinloopfromfirstdaytoshow);
@@ -990,6 +1004,9 @@ if (count($tasksarray) > 0) {
 			}
 
 			print '<td class="liste_total bold '.$idw.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'" align="center" style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'"><div class="'.$idw.'">'.(($difftime != 0) ? convertSecondToTime(abs($difftime), 'allhourmin') : '00:00').'</div></td>';
+		}
+		if ($dayInMonth == $dayInMonthCurrent) {
+			print '<td class="liste_total"></td>';
 		}
 		print '</tr>';
 	}
