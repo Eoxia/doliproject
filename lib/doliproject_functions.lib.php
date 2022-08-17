@@ -993,7 +993,13 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 					$oldprojectforbreak = $projectstatic->id;
 				}
 
-				print '<tr class="oddeven" data-taskid="'.$lines[$i]->id.'">'."\n";
+				if ($conf->global->DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS) {
+					$taskfavorite = isTaskFavorite($lines[$i]->id, $fuser->id);
+				} else {
+					$taskfavorite = 1;
+				}
+
+				print '<tr class="oddeven"'.(!$taskfavorite ? 'style="display:none;"': '').'data-taskid="'.$lines[$i]->id.'" >'."\n";
 
 				// User
 				/*

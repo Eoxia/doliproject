@@ -422,7 +422,8 @@ $search_options_pattern = 'search_task_options_';
 $extrafieldsobjectkey = 'projet_task';
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_sql.tpl.php';
 
-$tasksarray = getFavoriteTasksArray($taskstatic->id, 0, 0, ($project->id ? $project->id : 0), $socid, 0, $search_project_ref, $onlyopenedproject, $morewherefilter, ($search_usertoprocessid ? $search_usertoprocessid : 0), 0, $extrafields); // We want to see all tasks of open project i am allowed to see and that match filter, not only my tasks. Later only mine will be editable later.
+$tasksarray = $taskstatic->getTasksArray(0, 0, ($project->id ? $project->id : 0), $socid, 0, '', $onlyopenedproject, '', ($search_usertoprocessid ? $search_usertoprocessid : 0), 0, $extrafields);
+//$tasksarray = getFavoriteTasksArray($taskstatic->id, 0, 0, ($project->id ? $project->id : 0), $socid, 0, $search_project_ref, $onlyopenedproject, $morewherefilter, ($search_usertoprocessid ? $search_usertoprocessid : 0), 0, $extrafields); // We want to see all tasks of open project i am allowed to see and that match filter, not only my tasks. Later only mine will be editable later.
 if (!empty($conf->global->DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS)) {	// Get all task without any filter, so we can show total of time spent for not visible tasks
 	$tasksarraywithoutfilter = $taskstatic->getTasksArray(0, 0, ($project->id ? $project->id : 0), $socid, 0, '', $onlyopenedproject, '', ($search_usertoprocessid ? $search_usertoprocessid : 0)); // We want to see all tasks of open project i am allowed to see and that match filter, not only my tasks. Later only mine will be editable later.
 }
@@ -512,6 +513,11 @@ print '</div>';
 print '<div class="clearboth" style="padding-bottom: 20px;"></div>';
 print $langs->trans('ShowOnlyFavoriteTasks');
 print '<input type="checkbox"  class="show-only-favorite-tasks"'. ($conf->global->DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS ? ' checked' : '').' >';
+if ($conf->global->DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS) {
+	print '<br>';
+	print '<div class="opacitymedium"><i class="fas fa-exclamation-triangle"></i>'.' '.$langs->trans('WarningShowOnlyFavoriteTasks').'</div>';
+}
+
 
 $numendworkingday = 0;
 $numstartworkingday = 0;
@@ -756,7 +762,6 @@ if ($conf->use_javascript_ajax) {
 }
 
 
-
 // By default, we can edit only tasks we are assigned to
 $restrictviewformytask = ((!isset($conf->global->PROJECT_TIME_SHOW_TASK_NOT_ASSIGNED)) ? 2 : $conf->global->PROJECT_TIME_SHOW_TASK_NOT_ASSIGNED);
 if (count($tasksarray) > 0) {
@@ -767,9 +772,9 @@ if (count($tasksarray) > 0) {
 	$j = 0;
 	$level = 0;
 	$totalforvisibletasks = projectLinesPerDayOnMonth($j, $firstdaytoshow, $usertoprocess, 0, $tasksarray, $level, $projectsrole, $tasksrole, $mine, $restrictviewformytask, $isavailable, 0, $arrayfields, $extrafields, $dayInMonth);
-	if (is_array($tasksarraywithoutfilter) && count($tasksarraywithoutfilter)) {
-		//$totalforalltasks = projectLinesPerDayOnMonth($j, $firstdaytoshow, $usertoprocess, 0, $tasksarraywithoutfilter, $level, $projectsrole, $tasksrole, $mine, $restrictviewformytask, $isavailable, 0, $arrayfields, $extrafields, $dayInMonth);
-	}
+//	if (is_array($tasksarraywithoutfilter) && count($tasksarraywithoutfilter)) {
+//		$totalforalltasks = projectLinesPerDayOnMonth($j, $firstdaytoshow, $usertoprocess, 0, $tasksarraywithoutfilter, $level, $projectsrole, $tasksrole, $mine, $restrictviewformytask, $isavailable, 0, $arrayfields, $extrafields, $dayInMonth);
+//	}
 	//var_dump($totalforvisibletasks);
 
 

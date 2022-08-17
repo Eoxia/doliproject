@@ -114,7 +114,8 @@ ConsumedTime = Temps pointé
 ExpectedWorkedHoursMonth = Heures de travail prévues au mois de %s
 SpentWorkedHoursMonth = Heures de travail passées du %s au %s
 ConsumedWorkedHoursMonth = Heures de travail consommées du %s au %s
-DiffSpentAndConsumedWorkedHoursMonth = Différence d'heures de travail passées/consomées du %s au %s
+DiffSpentAndConsumedWorkedHoursMonth = Différence d'heures de travail passées/consommées du %s au %s
+WarningShowOnlyFavoriteTasks = Attention quand l'option 'Afficher uniquement les tâches favorites' est activée, les valeurs totales récupèrent l'ensembles des tâches.
 
 #
 # Setup Page
@@ -130,3 +131,6 @@ NumberOfRecurringBills = Nb de factures récurrentes
 NumberOfRecurringBillsByMonth = Nb de factures récurrentes par mois
 AmountOfRecurringBills = Montant de factures récurrentes
 AmountOfRecurringBillsByMonthHT = Montant de factures récurrentes par mois (HT)
+ExceededTimeSpentColor = Couleur temps consommés dépassés
+NotExceededTimeSpentColor = Couleur temps consommés pas dépassés ou non pointés
+PerfectTimeSpentColor = Couleur temps consommés parfait
