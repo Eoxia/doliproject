@@ -562,7 +562,7 @@ class ActionsDoliproject
 				<?php }
 			}
 		}
-		if (in_array($parameters['currentcontext'], array('projecttaskcard'))) {
+		if (in_array($parameters['currentcontext'], array('projecttaskcard', 'projecttasktime'))) {
 			require_once __DIR__ . '/../lib/doliproject_functions.lib.php';
 
 			if (GETPOST('action') == 'toggleTaskFavorite') {
@@ -577,7 +577,7 @@ class ActionsDoliproject
 			?>
 			<script>
 				function toggleTaskFavorite () {
-					let token = $('.fichecenter').find('input[name="token"]').val();
+					let token = $('.fiche').find('input[name="token"]').val();
 					$.ajax({
 						url: document.URL + '&action=toggleTaskFavorite&token='+token,
 						type: "POST",
