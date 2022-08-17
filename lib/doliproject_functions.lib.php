@@ -928,7 +928,7 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 					}
 					if ($projectstatic->title) {
 						print ' - ';
-						print '<span class="secondary">'.$projectstatic->title.'</span>';
+						print '<span class="secondary" title="'.$projectstatic->title.'">'.dol_trunc($projectstatic->title, '64').'</span>';
 					}
 
 					/*$colspan=5+(empty($conf->global->PROJECT_TIMESHEET_DISABLEBREAK_ON_PROJECT)?0:2);
@@ -1041,7 +1041,7 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 				print $taskstatic->getNomUrl(1, 'withproject', 'time');
 				// Label task
 				print '<br>';
-				print '<span class="opacitymedium">'.$taskstatic->label.'</span>';
+				print '<span class="opacitymedium" title="'.$taskstatic->label.'">'.dol_trunc($taskstatic->label, '64').'</span>';
 				for ($k = 0; $k < $level; $k++) {
 					print "</div>";
 				}
