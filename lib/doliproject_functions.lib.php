@@ -914,7 +914,13 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 						}
 					}
 
-					print '<tr class="oddeven trforbreak nobold">'."\n";
+					if ($conf->global->DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS) {
+						$taskfavorite = isTaskFavorite($lines[$i]->id, $fuser->id);
+					} else {
+						$taskfavorite = 1;
+					}
+
+					print '<tr class="oddeven trforbreak nobold"'.(!$taskfavorite ? 'style="display:none;"': '').'>'."\n";
 					print '<td colspan="'.(2 + $addcolspan + $dayInMonth).'">';
 					print $projectstatic->getNomUrl(1, '', 0, '<strong>'.$langs->transnoentitiesnoconv("YourRole").':</strong> '.$projectsrole[$lines[$i]->fk_project]);
 					if ($thirdpartystatic->id > 0) {
@@ -1067,7 +1073,18 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 				if (!empty($arrayfields['timeconsumed']['checked'])) {
 					// Time spent by user
 					print '<td class="right">';
-					$tmptimespent = $taskstatic->getSummaryOfTimeSpent($fuser->id);
+					$firstday = dol_print_date($firstdaytoshow, 'dayrfc');
+					$currentMonth = date( 'm', dol_now());
+					$year  = GETPOST('reyear', 'int') ?GETPOST('reyear', 'int') : (GETPOST("year", 'int') ?GETPOST("year", "int") : date("Y"));
+					$month = GETPOST('remonth', 'int') ?GETPOST('remonth', 'int') : (GETPOST("month", 'int') ?GETPOST("month", "int") : date("m"));
+					if ($currentMonth == $month) {
+						$lastday = dol_print_date(dol_now(), 'dayrfc');
+					} else {
+						$lastdaytoshow =  dol_get_last_day($year, $month);
+						$lastday = dol_print_date($lastdaytoshow, 'dayrfc');
+					}
+					$filter = ' AND t.task_datehour BETWEEN ' . "'" . $firstday . "'" . ' AND ' . "'" . $lastday . "'";
+					$tmptimespent = $taskstatic->getSummaryOfTimeSpent($fuser->id, $filter);
 					if ($tmptimespent['total_duration']) {
 						print convertSecondToTime($tmptimespent['total_duration'], 'allhourmin');
 					} else {
