@@ -52,6 +52,11 @@ function doliprojectAdminPrepareHead()
 	$head[$h][2] = 'about';
 	$h++;
 
+	$head[$h][0] = dol_buildpath("/doliproject/admin/project.php", 1);
+	$head[$h][1] = $langs->trans("ProjectsAndTasks");
+	$head[$h][2] = 'projecttasks';
+	$h++;
+
 	// Show more tabs from modules
 	// Entries must be declared in modules descriptor with line
 	//$this->tabs = array(

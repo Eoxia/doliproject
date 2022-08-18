@@ -1,5 +1,4 @@
-<?php
-/* Copyright (C) 2020 SuperAdmin <gagluiome@gmail.com>
+/* Copyright (C) 2021 EOXIA <dev@eoxia.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,46 +16,222 @@
  * Library javascript to enable Browser notifications
  */
 
-if (!defined('NOREQUIREUSER'))  define('NOREQUIREUSER', '1');
-if (!defined('NOREQUIREDB'))    define('NOREQUIREDB', '1');
-if (!defined('NOREQUIRESOC'))   define('NOREQUIRESOC', '1');
-if (!defined('NOREQUIRETRAN'))  define('NOREQUIRETRAN', '1');
-if (!defined('NOCSRFCHECK'))    define('NOCSRFCHECK', 1);
-if (!defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL', 1);
-if (!defined('NOLOGIN'))        define('NOLOGIN', 1);
-if (!defined('NOREQUIREMENU'))  define('NOREQUIREMENU', 1);
-if (!defined('NOREQUIREHTML'))  define('NOREQUIREHTML', 1);
-if (!defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX', '1');
+/**
+ * \file    js/digiriskdolibarr.js.php
+ * \ingroup digiriskdolibarr
+ * \brief   JavaScript file for module DigiriskDolibarr.
+ */
+
+/* Javascript library of module DigiriskDolibarr */
+
+'use strict';
+/**
+ * @namespace EO_Framework_Init
+ *
+ * @author Eoxia <dev@eoxia.com>
+ * @copyright 2015-2021 Eoxia
+ */
+
+if ( ! window.eoxiaJS ) {
+	/**
+	 * [eoxiaJS description]
+	 *
+	 * @memberof EO_Framework_Init
+	 *
+	 * @type {Object}
+	 */
+	window.eoxiaJS = {};
+
+	/**
+	 * [scriptsLoaded description]
+	 *
+	 * @memberof EO_Framework_Init
+	 *
+	 * @type {Boolean}
+	 */
+	window.eoxiaJS.scriptsLoaded = false;
+}
+
+if ( ! window.eoxiaJS.scriptsLoaded ) {
+	/**
+	 * [description]
+	 *
+	 * @memberof EO_Framework_Init
+	 *
+	 * @returns {void} [description]
+	 */
+	window.eoxiaJS.init = function() {
+		window.eoxiaJS.load_list_script();
+	};
+
+	/**
+	 * [description]
+	 *
+	 * @memberof EO_Framework_Init
+	 *
+	 * @returns {void} [description]
+	 */
+	window.eoxiaJS.load_list_script = function() {
+		if ( ! window.eoxiaJS.scriptsLoaded) {
+			var key = undefined, slug = undefined;
+			for ( key in window.eoxiaJS ) {
+
+				if ( window.eoxiaJS[key].init ) {
+					window.eoxiaJS[key].init();
+				}
+
+				for ( slug in window.eoxiaJS[key] ) {
+
+					if ( window.eoxiaJS[key] && window.eoxiaJS[key][slug] && window.eoxiaJS[key][slug].init ) {
+						window.eoxiaJS[key][slug].init();
+					}
+
+				}
+			}
+
+			window.eoxiaJS.scriptsLoaded = true;
+		}
+	};
+
+	/**
+	 * [description]
+	 *
+	 * @memberof EO_Framework_Init
+	 *
+	 * @returns {void} [description]
+	 */
+	window.eoxiaJS.refresh = function() {
+		var key = undefined;
+		var slug = undefined;
+		for ( key in window.eoxiaJS ) {
+			if ( window.eoxiaJS[key].refresh ) {
+				window.eoxiaJS[key].refresh();
+			}
+
+			for ( slug in window.eoxiaJS[key] ) {
+
+				if ( window.eoxiaJS[key] && window.eoxiaJS[key][slug] && window.eoxiaJS[key][slug].refresh ) {
+					window.eoxiaJS[key][slug].refresh();
+				}
+			}
+		}
+	};
+
+	$( document ).ready( window.eoxiaJS.init );
+}
 
 
 /**
- * \file    doliproject/js/doliproject.js.php
- * \ingroup doliproject
- * \brief   JavaScript file for module Doliproject.
+ * Initialise l'objet "task" ainsi que la méthode "init" obligatoire pour la bibliothèque EoxiaJS.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
  */
+window.eoxiaJS.task = {};
 
-// Load Dolibarr environment
-$res = 0;
-// Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (!$res && !empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res = @include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
-// Try main.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
-$tmp = empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME']; $tmp2 = realpath(__FILE__); $i = strlen($tmp) - 1; $j = strlen($tmp2) - 1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] == $tmp2[$j]) { $i--; $j--; }
-if (!$res && $i > 0 && file_exists(substr($tmp, 0, ($i + 1))."/main.inc.php")) $res = @include substr($tmp, 0, ($i + 1))."/main.inc.php";
-if (!$res && $i > 0 && file_exists(substr($tmp, 0, ($i + 1))."/../main.inc.php")) $res = @include substr($tmp, 0, ($i + 1))."/../main.inc.php";
-// Try main.inc.php using relative path
-if (!$res && file_exists("../../main.inc.php")) $res = @include "../../main.inc.php";
-if (!$res && file_exists("../../../main.inc.php")) $res = @include "../../../main.inc.php";
-if (!$res) die("Include of main fails");
+/**
+ * La méthode appelée automatiquement par la bibliothèque EoxiaJS.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @return {void}
+ */
+window.eoxiaJS.task.init = function() {
+	window.eoxiaJS.task.event();
+};
 
-// Define js type
-header('Content-Type: application/javascript');
-// Important: Following code is to cache this file to avoid page request by browser at each Dolibarr page access.
-// You can use CTRL+F5 to refresh your browser cache.
-if (empty($dolibarr_nocache)) header('Cache-Control: max-age=3600, public, must-revalidate');
-else header('Cache-Control: no-cache');
-?>
+/**
+ * La méthode contenant tous les événements pour le task.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @return {void}
+ */
+window.eoxiaJS.task.event = function() {
+	$( document ).on( 'click', '.auto-fill-timespent', window.eoxiaJS.task.addTimeSpent );
+	$( document ).on( 'click', '.auto-fill-timespent-project', window.eoxiaJS.task.divideTimeSpent );
+	$( document ).on( 'click', '.show-only-favorite-tasks', window.eoxiaJS.task.showOnlyFavoriteTasks );
+};
 
-/* Javascript library of module Doliproject */
+/**
+ * Remplit automatiquement le temps à pointer disponible sur une tâche
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param  {MouseEvent} event [description]
+ * @return {void}
+ */
+window.eoxiaJS.task.addTimeSpent = function( event ) {
+	let nonConsumedMinutes = $('.non-consumed-time-minute').val()
+	let nonConsumedHours = $('.non-consumed-time-hour').val()
+	$('.inputhour').val('')
+	$('.inputminute').val('')
+	$(this).closest('.duration').find('.inputhour').val(nonConsumedHours)
+	$(this).closest('.duration').find('.inputminute').val(nonConsumedMinutes)
+};
 
+/**
+ * Répartit automatiquement le temps à pointer disponible entre les tâches du projet
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param  {MouseEvent} event [description]
+ * @return {void}
+ */
+window.eoxiaJS.task.divideTimeSpent = function( event ) {
+	let projectId = $(this).closest('.project-line').attr('id')
+
+	let taskMinute = 0
+	let taskHour = 0
+
+	let nonConsumedMinutes = $('.non-consumed-time-minute').val()
+	let nonConsumedHours = $('.non-consumed-time-hour').val()
+	let totalTimeInMinutes = +nonConsumedMinutes + +nonConsumedHours*60
+
+	let taskLinkedCounter = $('.'+projectId).length
+	let minutesToSpend = parseInt(totalTimeInMinutes/taskLinkedCounter)
+
+	$('.inputhour').val('')
+	$('.inputminute').val('')
+
+	$('.'+projectId).each(function() {
+		taskHour = parseInt(minutesToSpend/60)
+		taskMinute = minutesToSpend%60
+
+		$(this).find('.inputhour').val(taskHour)
+		$(this).find('.inputminute').val(taskMinute)
+	})
+};
+
+/**
+ * Active/désactive la configuration pour n'afficher que les tâches favorites
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param  {MouseEvent} event [description]
+ * @return {void}
+ */
+window.eoxiaJS.task.showOnlyFavoriteTasks = function( event ) {
+	let token = $('.id-container').find('input[name="token"]').val();
+	let querySeparator = '?';
+
+	document.URL.match(/\?/) ? querySeparator = '&' : 1
+
+	$.ajax({
+		url: document.URL + querySeparator + "action=showOnlyFavoriteTasks&token=" + token,
+		type: "POST",
+		processData: false,
+		contentType: false,
+		success: function ( resp ) {
+			window.location.reload()
+		},
+		error: function ( ) {
+		}
+	});
+};
 
