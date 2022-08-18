@@ -117,6 +117,7 @@ ConsumedWorkedHoursMonth = Heures de travail consommées du %s au %s
 DiffSpentAndConsumedWorkedHoursMonth = Différence d'heures de travail passées/consommées du %s au %s
 WarningShowOnlyFavoriteTasks = Attention quand l'option 'Afficher uniquement les tâches favorites' est activée, les valeurs totales récupèrent l'ensembles des tâches.
 ExpectedWorkedHoursWeek = Heures de travail prévues du %s au %s
+ThemeDashboardTimeSpent = Thème du Rapport de pointage de temps
 
 #
 # Setup Page
@@ -135,3 +136,4 @@ AmountOfRecurringBillsByMonthHT = Montant de factures récurrentes par mois (HT)
 ExceededTimeSpentColor = Couleur temps consommés dépassés
 NotExceededTimeSpentColor = Couleur temps consommés pas dépassés ou non pointés
 PerfectTimeSpentColor = Couleur temps consommés parfait
+InvoicesCategoriesArea = Espace des tags/catégories des factures
