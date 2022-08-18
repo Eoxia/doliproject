@@ -122,7 +122,7 @@ if ( ! window.eoxiaJS.scriptsLoaded ) {
 
 
 /**
- * Initialise l'objet "risk" ainsi que la méthode "init" obligatoire pour la bibliothèque EoxiaJS.
+ * Initialise l'objet "task" ainsi que la méthode "init" obligatoire pour la bibliothèque EoxiaJS.
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -150,11 +150,13 @@ window.eoxiaJS.task.init = function() {
  * @return {void}
  */
 window.eoxiaJS.task.event = function() {
-	$( document ).on( 'click', '.tabBar', window.eoxiaJS.task.toggleTaskFavorite );
+	$( document ).on( 'click', '.auto-fill-timespent', window.eoxiaJS.task.addTimeSpent );
+	$( document ).on( 'click', '.auto-fill-timespent-project', window.eoxiaJS.task.divideTimeSpent );
+	$( document ).on( 'click', '.show-only-favorite-tasks', window.eoxiaJS.task.showOnlyFavoriteTasks );
 };
 
 /**
- * Lors du clic sur un taskCategory, remplaces le contenu du toggle et met l'image du risque sélectionné.
+ * Remplit automatiquement le temps à pointer disponible sur une tâche
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -162,18 +164,74 @@ window.eoxiaJS.task.event = function() {
  * @param  {MouseEvent} event [description]
  * @return {void}
  */
-window.eoxiaJS.task.toggleTaskFavorite = function( event ) {
-console.log('fgff')
+window.eoxiaJS.task.addTimeSpent = function( event ) {
+	let nonConsumedMinutes = $('.non-consumed-time-minute').val()
+	let nonConsumedHours = $('.non-consumed-time-hour').val()
+	$('.inputhour').val('')
+	$('.inputminute').val('')
+	$(this).closest('.duration').find('.inputhour').val(nonConsumedHours)
+	$(this).closest('.duration').find('.inputminute').val(nonConsumedMinutes)
+};
+
+/**
+ * Répartit automatiquement le temps à pointer disponible entre les tâches du projet
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param  {MouseEvent} event [description]
+ * @return {void}
+ */
+window.eoxiaJS.task.divideTimeSpent = function( event ) {
+	let projectId = $(this).closest('.project-line').attr('id')
+
+	let taskMinute = 0
+	let taskHour = 0
+
+	let nonConsumedMinutes = $('.non-consumed-time-minute').val()
+	let nonConsumedHours = $('.non-consumed-time-hour').val()
+	let totalTimeInMinutes = +nonConsumedMinutes + +nonConsumedHours*60
+
+	let taskLinkedCounter = $('.'+projectId).length
+	let minutesToSpend = parseInt(totalTimeInMinutes/taskLinkedCounter)
+
+	$('.inputhour').val('')
+	$('.inputminute').val('')
+
+	$('.'+projectId).each(function() {
+		taskHour = parseInt(minutesToSpend/60)
+		taskMinute = minutesToSpend%60
+
+		$(this).find('.inputhour').val(taskHour)
+		$(this).find('.inputminute').val(taskMinute)
+	})
+};
+
+/**
+ * Active/désactive la configuration pour n'afficher que les tâches favorites
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param  {MouseEvent} event [description]
+ * @return {void}
+ */
+window.eoxiaJS.task.showOnlyFavoriteTasks = function( event ) {
+	let token = $('.id-container').find('input[name="token"]').val();
+	let querySeparator = '?';
+
+	document.URL.match(/\?/) ? querySeparator = '&' : 1
+
 	$.ajax({
-		url: document.URL + '&action=toggleTaskFavorite&token='+token,
+		url: document.URL + querySeparator + "action=showOnlyFavoriteTasks&token=" + token,
 		type: "POST",
 		processData: false,
 		contentType: false,
 		success: function ( resp ) {
-
+			window.location.reload()
 		},
-		error: function ( resp ) {
-
+		error: function ( ) {
 		}
 	});
 };
+

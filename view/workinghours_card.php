@@ -86,29 +86,6 @@ if (($action == 'update' && ! GETPOST("cancel", 'alpha')) || ($action == 'update
 	$object->schedule_saturday     = GETPOST('schedule_saturday', 'string');
 	$object->schedule_sunday       = GETPOST('schedule_sunday', 'string');
 
-	if (((int) GETPOST('workinghours_monday')) == 0) {
-		setEventMessages($langs->trans('WrongWorkingHoursFormat', $langs->trans('MondayWorkingHours')), null, 'errors');
-	}
-	if (((int) GETPOST('workinghours_tuesday')) == 0) {
-		setEventMessages($langs->trans('WrongWorkingHoursFormat', $langs->trans('TuesdayWorkingHours')), null, 'errors');
-	}
-	if (((int) GETPOST('workinghours_wednesday')) == 0) {
-		setEventMessages($langs->trans('WrongWorkingHoursFormat', $langs->trans('WednesdayWorkingHours')), null, 'errors');
-	}
-	if (((int) GETPOST('workinghours_thursday')) == 0) {
-		setEventMessages($langs->trans('WrongWorkingHoursFormat', $langs->trans('ThursdayWorkingHours')), null, 'errors');
-	}
-	if (((int) GETPOST('workinghours_friday')) == 0) {
-		setEventMessages($langs->trans('WrongWorkingHoursFormat', $langs->trans('FridayWorkingHours')), null, 'errors');
-	}
-	if (((int) GETPOST('workinghours_saturday')) == 0) {
-		setEventMessages($langs->trans('WrongWorkingHoursFormat', $langs->trans('SaturdayWorkingHours')), null, 'errors');
-	}
-	if (((int) GETPOST('workinghours_sunday')) == 0) {
-		setEventMessages($langs->trans('WrongWorkingHoursFormat', $langs->trans('SundayWorkingHours')), null, 'errors');
-	}
-
-
 	$object->workinghours_monday       = GETPOST('workinghours_monday', 'integer');
 	$object->workinghours_tuesday      = GETPOST('workinghours_tuesday', 'integer');
 	$object->workinghours_wednesday    = GETPOST('workinghours_wednesday', 'integer');
@@ -178,72 +155,87 @@ print '<table class="noborder centpercent editmode">';
 print '<tr class="liste_titre"><th class="titlefield wordbreak">' . $langs->trans("Day") . '</th><th style="width: 300px">' . $langs->trans("Schedule") . '</th><th>'. $langs->trans('WorkingHours(min)') .'</th></tr>' . "\n";
 
 print '<tr class="oddeven"><td>';
-print $form->textwithpicto($langs->trans("Monday"), $langs->trans("WorkingHoursFormatDesc"));
+print $form->textwithpicto($langs->trans("Monday"), '');
 print '</td><td>';
 print '<input name="schedule_monday" id="schedule_monday" class="minwidth100" value="' . ($object->schedule_monday ?: GETPOST("schedule_monday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print $form->textwithpicto('', $langs->trans("OpeningHoursFormatDesc"));
 print '</td>';
+
 print '<td>';
-print '<input type="integer" name="workinghours_monday" id="workinghours_monday" class="minwidth100" value="' . ($object->workinghours_monday ?: GETPOST("workinghours_monday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print '<input type="number" name="workinghours_monday" id="workinghours_monday" class="minwidth100" value="' . ($object->workinghours_monday ?: GETPOST("workinghours_monday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print $form->textwithpicto('', $langs->trans("WorkingHoursFormatDesc"));
 print '</td>';
 print '</tr>' . "\n";
 
 print '<tr class="oddeven"><td>';
-print $form->textwithpicto($langs->trans("Tuesday"), $langs->trans("WorkingHoursFormatDesc"));
+print $form->textwithpicto($langs->trans("Tuesday"),'');
 print '</td><td>';
 print '<input name="schedule_tuesday" id="schedule_tuesday" class="minwidth100" value="' . ($object->schedule_tuesday ?: GETPOST("schedule_tuesday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print $form->textwithpicto('', $langs->trans("OpeningHoursFormatDesc"));
 print '</td>';
 print '<td>';
-print '<input type="integer" name="workinghours_tuesday" id="workinghours_tuesday" class="minwidth100" value="' . ($object->workinghours_tuesday ?: GETPOST("workinghours_tuesday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print '<input type="number" name="workinghours_tuesday" id="workinghours_tuesday" class="minwidth100" value="' . ($object->workinghours_tuesday ?: GETPOST("workinghours_tuesday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print $form->textwithpicto('', $langs->trans("WorkingHoursFormatDesc"));
 print '</td>';
 print '</tr>' . "\n";
 
 print '<tr class="oddeven"><td>';
-print $form->textwithpicto($langs->trans("Wednesday"), $langs->trans("WorkingHoursFormatDesc"));
+print $form->textwithpicto($langs->trans("Wednesday"),'');
 print '</td><td>';
 print '<input name="schedule_wednesday" id="schedule_wednesday" class="minwidth100" value="' . ($object->schedule_wednesday ?: GETPOST("schedule_wednesday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print $form->textwithpicto('', $langs->trans("OpeningHoursFormatDesc"));
 print '</td>';
 print '<td>';
-print '<input type="integer" name="workinghours_wednesday" id="workinghours_wednesday" class="minwidth100" value="' . ($object->workinghours_wednesday ?: GETPOST("workinghours_wednesday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print '<input type="number" name="workinghours_wednesday" id="workinghours_wednesday" class="minwidth100" value="' . ($object->workinghours_wednesday ?: GETPOST("workinghours_wednesday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print $form->textwithpicto('', $langs->trans("WorkingHoursFormatDesc"));
 print '</td>';
 print '</tr>' . "\n";
 
 print '<tr class="oddeven"><td>';
-print $form->textwithpicto($langs->trans("Thursday"), $langs->trans("WorkingHoursFormatDesc"));
+print $form->textwithpicto($langs->trans("Thursday"),'');
 print '</td><td>';
 print '<input name="schedule_thursday" id="schedule_thursday" class="minwidth100" value="' . ($object->schedule_thursday ?: GETPOST("schedule_thursday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print $form->textwithpicto('', $langs->trans("OpeningHoursFormatDesc"));
 print '</td>';
 print '<td>';
-print '<input type="integer" name="workinghours_thursday" id="workinghours_thursday" class="minwidth100" value="' . ($object->workinghours_thursday ?: GETPOST("workinghours_thursday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print '<input type="number" name="workinghours_thursday" id="workinghours_thursday" class="minwidth100" value="' . ($object->workinghours_thursday ?: GETPOST("workinghours_thursday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print $form->textwithpicto('', $langs->trans("WorkingHoursFormatDesc"));
 print '</td>';
 print '</tr>' . "\n";
 
 print '<tr class="oddeven"><td>';
-print $form->textwithpicto($langs->trans("Friday"), $langs->trans("WorkingHoursFormatDesc"));
+print $form->textwithpicto($langs->trans("Friday"), '');
 print '</td><td>';
 print '<input name="schedule_friday" id="schedule_friday" class="minwidth100" value="' . ($object->schedule_friday ?: GETPOST("schedule_friday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print $form->textwithpicto('', $langs->trans("OpeningHoursFormatDesc"));
 print '</td>';
 print '<td>';
-print '<input type="integer" name="workinghours_friday" id="workinghours_friday" class="minwidth100" value="' . ($object->workinghours_friday ?: GETPOST("workinghours_friday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print '<input type="number" name="workinghours_friday" id="workinghours_friday" class="minwidth100" value="' . ($object->workinghours_friday ?: GETPOST("workinghours_friday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print $form->textwithpicto('', $langs->trans("WorkingHoursFormatDesc"));
 print '</td>';
 print '</tr>' . "\n";
 
 print '<tr class="oddeven"><td>';
-print $form->textwithpicto($langs->trans("Saturday"), $langs->trans("WorkingHoursFormatDesc"));
+print $form->textwithpicto($langs->trans("Saturday"), '');
 print '</td><td>';
 print '<input name="schedule_saturday" id="schedule_saturday" class="minwidth100" value="' . ($object->schedule_saturday ?: GETPOST("schedule_saturday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print $form->textwithpicto('', $langs->trans("OpeningHoursFormatDesc"));
 print '</td>';
 print '<td>';
-print '<input type="integer" name="workinghours_saturday" id="workinghours_saturday" class="minwidth100" value="' . ($object->workinghours_saturday ?: GETPOST("workinghours_saturday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print '<input type="number" name="workinghours_saturday" id="workinghours_saturday" class="minwidth100" value="' . ($object->workinghours_saturday ?: GETPOST("workinghours_saturday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print $form->textwithpicto('', $langs->trans("WorkingHoursFormatDesc"));
 print '</td>';
 print '</tr>' . "\n";
 
 print '<tr class="oddeven"><td>';
-print $form->textwithpicto($langs->trans("Sunday"), $langs->trans("WorkingHoursFormatDesc"));
+print $form->textwithpicto($langs->trans("Sunday"),'');
 print '</td><td>';
 print '<input name="schedule_sunday" id="schedule_sunday" class="minwidth100" value="' . ($object->schedule_sunday ?: GETPOST("schedule_sunday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print $form->textwithpicto('', $langs->trans("OpeningHoursFormatDesc"));
 print '</td>';
 print '<td>';
-print '<input type="integer" name="workinghours_sunday" id="workinghours_sunday" class="minwidth100" value="' . ($object->workinghours_sunday ?: GETPOST("workinghours_sunday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print '<input type="number" name="workinghours_sunday" id="workinghours_sunday" class="minwidth100" value="' . ($object->workinghours_sunday ?: GETPOST("workinghours_sunday", 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '>';
+print $form->textwithpicto('', $langs->trans("WorkingHoursFormatDesc"));
 print '</td>';
 print '</tr>' . "\n";
 

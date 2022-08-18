@@ -43,7 +43,7 @@ class modDoliproject extends DolibarrModules
 		global $langs, $conf;
 		$this->db = $db;
 
-		$this->numero = 500000; // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve an id number for your module
+		$this->numero = 436370; // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve an id number for your module
 		$this->rights_class 			= 'doliproject';
 		$this->family 					= "other";
 		$this->module_position 			= '90';
@@ -52,9 +52,9 @@ class modDoliproject extends DolibarrModules
 		$this->descriptionlong 			= "Doliproject description (Long)";
 		$this->editor_name 				= 'Eoxia';
 		$this->editor_url 				= 'https://eoxia.com';
-		$this->version 					= '1.1.1';
+		$this->version 					= '1.3.0';
 		$this->const_name 				= 'MAIN_MODULE_'.strtoupper($this->name);
-		$this->picto 					= 'generic';
+		$this->picto 					= 'doliproject256px@doliproject';
 
 		$this->module_parts 			= array(
 			'triggers' 					=> 1,
@@ -72,6 +72,14 @@ class modDoliproject extends DolibarrModules
 				      'invoicecard',
 					  'ticketcard',
 					  'projecttaskcard',
+					  'projecttaskscard',
+					  'tasklist',
+					  'category',
+					  'categoryindex',
+					  'invoicereccard',
+					  'cron',
+					  'cronjoblist',
+					  'projecttasktime'
 				  ),
 			),
 			'moduleforexternal' => 0,
@@ -80,7 +88,7 @@ class modDoliproject extends DolibarrModules
 		$this->dirs 					= array("/doliproject/temp");
 		$this->config_page_url 			= array("setup.php@doliproject");
 		$this->hidden 					= false;
-		$this->depends 					= array('modProjet');
+		$this->depends 					= array('modProjet', 'modBookmark', 'modHoliday');
 		$this->requiredby 				= array(); // List of module class names as string to disable if this one is disabled. Example: array('modModuleToDisable1', ...)
 		$this->conflictwith 			= array(); // List of module class names as string this module is in conflict with. Example: array('modModuleToDisable1', ...)
 		$this->langfiles 				= array("doliproject@doliproject");
@@ -90,15 +98,16 @@ class modDoliproject extends DolibarrModules
 		$this->warnings_activation_ext 	= array(); // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 		$this->const 					= array();
 
-		$r ++;
-		$this->const[$r][0] = "DOLIPROJECT_DEFAUT_TICKET_TIME";
-		$this->const[$r][1] = "chaine";
-		$this->const[$r][2] = '15';
-		$this->const[$r][3] = 'Default Time';
-		$this->const[$r][4] = 0;
-		$this->const[$r][5] = 'current';
-		$this->const[$r][6] = 0;
-
+		$this->const = array(
+			// CONST CONFIGURATION
+			1 => array('DOLIPROJECT_DEFAUT_TICKET_TIME', 'chaine', '15', 'Default Time', 0, 'current'),
+			2 => array('DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS', 'integer', 1, '', 0, 'current'),
+			3 => array('DOLIPROJECT_HR_PROJECT', 'integer', 0, '', 0, 'current'),
+			4 => array('DOLIPROJECT_TIMESPENT_BOOKMARK_SET', 'integer', 0, '', 0, 'current'),
+			5 => array('DOLIPROJECT_EXCEEDED_TIME_SPENT_COLOR', 'chaine', '#FF0000', '', 0, 'current'),
+			6 => array('DOLIPROJECT_NOT_EXCEEDED_TIME_SPENT_COLOR', 'chaine', '#FFA500', '', 0, 'current'),
+			7 => array('DOLIPROJECT_PERFECT_TIME_SPENT_COLOR', 'chaine', '#008000', '', 0, 'current'),
+		);
 
 		if (!isset($conf->doliproject) || !isset($conf->doliproject->enabled)) {
 			$conf->doliproject = new stdClass();
@@ -142,12 +151,12 @@ class modDoliproject extends DolibarrModules
 		/* BEGIN MODULEBUILDER TOPMENU */
 		$r = 0;
 		$this->menu[$r++] = array(
-			// 'fk_menu'=>'', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			// 'type'=>'top', // This is a Top menu entry
-			// 'titre'=>'ModuleDoliprojectName',
-			// 'mainmenu'=>'doliproject',
-			// 'leftmenu'=>'',
-			// 'url'=>'/doliproject/doliprojectindex.php',
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=timespent', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'type'=>'left', // This is a Top menu entry
+			'titre'=>'DoliprojectTimeSpent',
+			'mainmenu'=>'project',
+			'leftmenu'=>'doliproject_timespent_list',
+			'url'=>'/doliproject/view/timespent_list.php',
 			'langs'=>'doliproject@doliproject', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'position'=>1000 + $r,
 			'enabled'=>'$conf->doliproject->enabled', // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled.
@@ -156,32 +165,74 @@ class modDoliproject extends DolibarrModules
 			'user'=>2, // 0=Menu for internal users, 1=external users, 2=both
 		);
 		$this->menu[$r++] = array(
-			'fk_menu'  => '', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'     => 'top', // This is a Top menu entry
-			'titre'    => 'Doliproject',
-			'mainmenu' => 'doliproject',
-			'leftmenu' => '',
-			'url'      => '/doliproject/doliprojectindex.php',
-			'langs'    => 'doliproject@doliproject', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position' => 48520 + $r,
-			'enabled'  => '$conf->doliproject->enabled', // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled.
-			'perms'    => '$user->rights->doliproject->lire', // Use 'perms'=>'$user->rights->doliproject->level1->level2' if you want your menu with a permission rules
-			'target'   => '',
-			'user'     => 2, // 0=Menu for internal users, 1=external users, 2=both
-		);
-		$this->menu[$r++] = array(
-			'fk_menu'  => 'fk_mainmenu=doliproject', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'fk_menu'  =>'fk_mainmenu=project,fk_leftmenu=timespent', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'type'     => 'left', // This is a Top menu entry
-			'titre'    => '<i class="far fa-clock"></i>  ' . $langs->trans('TimeSpent'),
-			'mainmenu' => 'doliproject',
-			'leftmenu' => '',
-			'url'      => '/doliproject/view/timespent.php',
+			'titre'    => $langs->trans('AddTimeSpent'),
+			'mainmenu' => 'project',
+			'leftmenu' => 'timespent',
+			'url'      => '/doliproject/view/timespent_day.php',
 			'langs'    => 'doliproject@doliproject', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'position' => 48520 + $r,
 			'enabled'  => '$conf->doliproject->enabled', // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled.
 			'perms'    => '$user->rights->doliproject->lire', // Use 'perms'=>'$user->rights->doliproject->digiriskconst->read' if you want your menu with a permission rules
 			'target'   => '',
 			'user'     => 2, // 0=Menu for internal users, 1=external users, 2=both
+		);
+		$this->menu[$r++] = array(
+			'fk_menu'=>'fk_mainmenu=hrm,fk_leftmenu=timespent', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'type'=>'left', // This is a Top menu entry
+			'titre'=>'DoliprojectTimeSpent',
+			'mainmenu'=>'hrm',
+			'leftmenu'=>'doliproject_timespent_list',
+			'url'=>'/doliproject/view/timespent_list.php',
+			'langs'=>'doliproject@doliproject', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'position'=>1000 + $r,
+			'enabled'=>'$conf->doliproject->enabled', // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled.
+			'perms'=>'1', // Use 'perms'=>'$user->rights->doliproject->myobject->read' if you want your menu with a permission rules
+			'target'=>'',
+			'user'=>2, // 0=Menu for internal users, 1=external users, 2=both
+		);
+		$this->menu[$r++] = array(
+			'fk_menu'  =>'fk_mainmenu=hrm,fk_leftmenu=timespent', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'type'     => 'left', // This is a Top menu entry
+			'titre'    => $langs->trans('AddTimeSpent'),
+			'mainmenu' => 'hrm',
+			'leftmenu' => 'timespent',
+			'url'      => '/doliproject/view/timespent_day.php',
+			'langs'    => 'doliproject@doliproject', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'position' => 48520 + $r,
+			'enabled'  => '$conf->doliproject->enabled', // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled.
+			'perms'    => '$user->rights->doliproject->lire', // Use 'perms'=>'$user->rights->doliproject->digiriskconst->read' if you want your menu with a permission rules
+			'target'   => '',
+			'user'     => 2, // 0=Menu for internal users, 1=external users, 2=both
+		);
+		$this->menu[$r++] = array(
+			'fk_menu'  =>'fk_mainmenu=billing,fk_leftmenu=customers_bills', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'type'     => 'left', // This is a Top menu entry
+			'titre'    => $langs->trans('RecurringInvoicesStatistics'),
+			'mainmenu' => 'billing',
+			'leftmenu' => 'customers_bills',
+			'url'      => '/doliproject/view/recurringinvoicestatistics.php',
+			'langs'    => 'doliproject@doliproject', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'position' => 1000 + $r,
+			'enabled'  => '$conf->doliproject->enabled && $conf->facture->enabled', // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled.
+			'perms'    => '$user->rights->doliproject->lire && $user->rights->facture->lire', // Use 'perms'=>'$user->rights->doliproject->digiriskconst->read' if you want your menu with a permission rules
+			'target'   => '',
+			'user'     => 2, // 0=Menu for internal users, 1=external users, 2=both
+		);
+		$this->menu[$r++] = array(
+			'fk_menu'  => 'fk_mainmenu=billing,fk_leftmenu=customers_bills',
+			'type'     => 'left',
+			'titre'    => $langs->trans('Categories'),
+			'mainmenu' => 'billing',
+			'leftmenu' => 'customers_bills',
+			'url'      => '/categories/index.php?type=invoice',
+			'langs'    => 'doliproject@doliproject',
+			'position' => 1100 + $r,
+			'enabled'  => '$conf->doliproject->enabled && $conf->categorie->enabled',
+			'perms'    => '$user->rights->doliproject->lire && $user->rights->facture->lire',
+			'target'   => '',
+			'user'     => 0,
 		);
 		/* END MODULEBUILDER TOPMENU */
 	}
@@ -196,10 +247,118 @@ class modDoliproject extends DolibarrModules
 	 */
 	public function init($options = '')
 	{
-		global $conf, $langs;
+		global $conf, $langs, $db, $user;
+		$langs->load('doliproject@doliproject');
 
 		$result = $this->_load_tables('/doliproject/sql/');
 		if ($result < 0) return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
+
+		if ($conf->global->DOLIPROJECT_HR_PROJECT < 1) {
+
+			require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
+			require_once DOL_DOCUMENT_ROOT . '/projet/class/task.class.php';
+			require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
+			require_once DOL_DOCUMENT_ROOT . '/core/modules/project/mod_project_simple.php';
+
+			$project = new Project($db);
+			$projectRef  = new $conf->global->PROJECT_ADDON();
+
+			$project->ref         = $projectRef->getNextValue('', $project);
+			$project->title       = $langs->trans('HumanResources') . ' - ' . $conf->global->MAIN_INFO_SOCIETE_NOM;
+			$project->description = $langs->trans('HRDescription');
+			$project->date_c      = dol_now();
+			$currentYear          = dol_print_date(dol_now(), '%Y');
+			$fiscalMonthStart     = $conf->global->SOCIETE_FISCAL_MONTH_START;
+			$startdate            = dol_mktime('0', '0', '0', $fiscalMonthStart ? $fiscalMonthStart : '1', '1', $currentYear);
+			$project->date_start  = $startdate;
+
+			$project->usage_task = 1;
+
+			$startdateAddYear      = dol_time_plus_duree($startdate, 1, 'y');
+			$startdateAddYearMonth = dol_time_plus_duree($startdateAddYear, -1, 'd');
+			$enddate               = dol_print_date($startdateAddYearMonth, 'dayrfc');
+			$project->date_end     = $enddate;
+			$project->statut       = 1;
+
+			$result = $project->create($user);
+
+			if ($result > 0) {
+				dolibarr_set_const($db, 'DOLIPROJECT_HR_PROJECT', $result, 'integer', 0, '', $conf->entity);
+				$task = new Task($db);
+				$defaultref = '';
+				$obj = empty($conf->global->PROJECT_TASK_ADDON) ? 'mod_task_simple' : $conf->global->PROJECT_TASK_ADDON;
+
+				if (!empty($conf->global->PROJECT_TASK_ADDON) && is_readable(DOL_DOCUMENT_ROOT . "/core/modules/project/task/" . $conf->global->PROJECT_TASK_ADDON . ".php")) {
+					require_once DOL_DOCUMENT_ROOT . "/core/modules/project/task/" . $conf->global->PROJECT_TASK_ADDON . '.php';
+					$modTask = new $obj;
+					$defaultref = $modTask->getNextValue('', null);
+				}
+
+				$task->fk_project = $result;
+				$task->ref = $defaultref;
+				$task->label = $langs->trans('Holidays');
+				$task->date_c = dol_now();
+				$task->create($user);
+
+				$task->fk_project = $result;
+				$task->ref = $modTask->getNextValue('', null);;
+				$task->label = $langs->trans('PaidHolidays');
+				$task->date_c = dol_now();
+				$task->create($user);
+
+				$task->fk_project = $result;
+				$task->ref = $modTask->getNextValue('', null);;
+				$task->label = $langs->trans('SickLeave');
+				$task->date_c = dol_now();
+				$task->create($user);
+
+				$task->fk_project = $result;
+				$task->ref = $modTask->getNextValue('', null);;
+				$task->label = $langs->trans('PublicHoliday');
+				$task->date_c = dol_now();
+				$task->create($user);
+
+				$task->fk_project = $result;
+				$task->ref = $modTask->getNextValue('', null);;
+				$task->label = $langs->trans('RTT');
+				$task->date_c = dol_now();
+				$task->create($user);
+
+				dolibarr_set_const($db, 'DOLIPROJECT_RTT_TASK', 1, 'integer', 0, '', $conf->entity);
+			}
+
+		}
+		if ($conf->global->DOLIPROJECT_RTT_TASK < 1) {
+			require_once DOL_DOCUMENT_ROOT . '/projet/class/task.class.php';
+
+			$task = new Task($db);
+			$obj = empty($conf->global->PROJECT_TASK_ADDON) ? 'mod_task_simple' : $conf->global->PROJECT_TASK_ADDON;
+
+			if (!empty($conf->global->PROJECT_TASK_ADDON) && is_readable(DOL_DOCUMENT_ROOT . "/core/modules/project/task/" . $conf->global->PROJECT_TASK_ADDON . ".php")) {
+				require_once DOL_DOCUMENT_ROOT . "/core/modules/project/task/" . $conf->global->PROJECT_TASK_ADDON . '.php';
+				$modTask = new $obj;
+			}
+
+			$task->fk_project = $conf->global->DOLIPROJECT_HR_PROJECT;
+			$task->ref = $modTask->getNextValue('', null);;
+			$task->label = $langs->trans('RTT');
+			$task->date_c = dol_now();
+			$rtt_task_id = $task->create($user);
+
+			dolibarr_set_const($db, 'DOLIPROJECT_RTT_TASK', $rtt_task_id, 'integer', 0, '', $conf->entity);
+		}
+
+		if ($conf->global->DOLIPROJECT_TIMESPENT_BOOKMARK_SET < 1) {
+			include_once DOL_DOCUMENT_ROOT.'/bookmarks/class/bookmark.class.php';
+
+			$bookmark = new Bookmark($db);
+
+			$bookmark->title = $langs->trans('TimeSpent');
+			$bookmark->url = DOL_URL_ROOT . '/custom/doliproject/view/timespent_day.php?mainmenu=project';
+			$bookmark->target = 0;
+			$bookmark->position = 10;
+			$bookmark->create($user);
+		}
 
 		// Create extrafields during init
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
@@ -211,10 +370,10 @@ class modDoliproject extends DolibarrModules
 		$param['options']['Facture:compta/facture/class/facture.class.php'] = NULL;
 		$extra_fields->addExtraField('fk_facture_name', 'Facture', 'link', 100, NULL, 'projet_task', 1, 0, NULL, $param, 1, 1, 1); //extrafields task
 		unset($param);
-		$extra_fields->update('fk_task', 'Tâche', 'sellist', '', 'ticket', 0, 0, 100, 'a:1:{s:7:"options";a:1:{s:110:"projet_task:ref:rowid::entity = $ENTITY$ AND fk_projet = ($SEL$ fk_project FROM llx_ticket WHERE rowid = $ID$)";N;}}', 1, 1, 'preg_match(\'/public/\',$_SERVER[\'PHP_SELF\'])?0:1');
-		$extra_fields->addExtraField('fk_task', 'Tâche', 'sellist', 100, NULL, 'ticket', 0, 0, NULL, 'a:1:{s:7:"options";a:1:{s:110:"projet_task:ref:rowid::entity = $ENTITY$ AND fk_projet = ($SEL$ fk_project FROM llx_ticket WHERE rowid = $ID$)";N;}}', 1, 1, 'preg_match(\'/public/\',$_SERVER[\'PHP_SELF\'])?0:1'); //extrafields ticket
+		$extra_fields->update('fk_task', 'Tâche', 'sellist', '', 'ticket', 0, 0, 100, 'a:1:{s:7:"options";a:1:{s:110:"projet_task:ref:rowid::entity = $ENTITY$ AND fk_projet = ($SEL$ fk_project FROM '. MAIN_DB_PREFIX .'ticket WHERE rowid = $ID$)";N;}}', 1, 1, '1');
+		$extra_fields->addExtraField('fk_task', 'Tâche', 'sellist', 100, NULL, 'ticket', 0, 0, NULL, 'a:1:{s:7:"options";a:1:{s:110:"projet_task:ref:rowid::entity = $ENTITY$ AND fk_projet = ($SEL$ fk_project FROM '. MAIN_DB_PREFIX .'ticket WHERE rowid = $ID$)";N;}}', 1, 1, '1'); //extrafields ticket
 
-		return $this->_init($sql, $options);
+		return $this->_init(array(), $options);
 	}
 
 	/**

@@ -63,6 +63,10 @@ ErrorServiceTime = Le temps du(des) service(s) est nul
 MessageTimeSpentCreate = Temps consommé crée
 MessageNoTaskLink = Pas de tâche affectée, pas de temps passé disponible
 
+DoliprojectTimeSpent=Rapport de temps passé
+ActionAC_TEL_IN = Appel téléphonique entrant
+ActionAC_TEL_OUT = Appel téléphonique sortant
+
 #
 # Temps consommé
 #
@@ -74,6 +78,7 @@ Thursday = Jeudi
 Friday = Vendredi
 Saturday = Samedi
 Sunday = Dimanche
+Schedule = Horaires
 MondayWorkingHours = Heures de travail du lundi
 TuesdayWorkingHours = Heures de travail du mardi
 WednesdayWorkingHours = Heures de travail du mercredi
@@ -81,13 +86,54 @@ ThursdayWorkingHours = Heures de travail du jeudi
 FridayWorkingHours = Heures de travail du vendredi
 SaturdayWorkingHours = Heures de travail du samedi
 SundayWorkingHours = Heures de travail du dimanche
+WorkingHoursFormatDesc = Renseigner le temps travaillé par jour (en minutes)
 UserWorkingHours = Horaires de l'utilisateur
 WrongWorkingHoursFormat = Mauvais format pour les heures travaillées : %s
 UserWorkingHoursSaved = Horaires de l'utilisateurs sauvegardés
 WorkingHours(min) = Temps travaillé (en minutes)
+DayWorkTime = Temps du jour
+NonConsumedTime = Temps non pointé
 TimeSpent = Temps consommé
+Holidays = Congés
+PaidHolidays = Congés payés
+SickLeave = Congés maladie
+PublicHoliday = Jour férié
+AdditionalHour = Heure supplémentaire
+TooMuchTimeSpent = Vous avez pointé plus de temps que le temps non pointé disponible
+AddTimeSpent = Pointage de temps
+HumanResources = Ressources humaines
+ProjectsAndTasks = Projets et tâches
+HRProject = Projet Ressources Humaines
+HRDescription = Projet comprenant les tâches liées aux ressources humaines
+DoliProjectNewTimeSpent = Temps consommé (en minutes)
+DivideTimeIntoTasks = Répartir entre les tâches du projet
+ShowOnlyFavoriteTasks = Afficher uniquement les tâches favorites
+SpendMoreTimeThanPlanned = Pointer plus de temps que planifié
+SpendMoreTimeThanPlannedHelp = Cette option permet de pointer plus de temps que le temps renseigné dans l'onglet "Horaires" de l'utilisateur
+ConsumedTime = Temps pointé
+ExpectedWorkedHoursMonth = Heures de travail prévues au mois de %s
+SpentWorkedHoursMonth = Heures de travail passées du %s au %s
+ConsumedWorkedHoursMonth = Heures de travail consommées du %s au %s
+DiffSpentAndConsumedWorkedHoursMonth = Différence d'heures de travail passées/consommées du %s au %s
+WarningShowOnlyFavoriteTasks = Attention quand l'option 'Afficher uniquement les tâches favorites' est activée, les valeurs totales récupèrent l'ensembles des tâches.
+ExpectedWorkedHoursWeek = Heures de travail prévues du %s au %s
+ThemeDashboardTimeSpent = Thème du Rapport de pointage de temps
 
 #
 # Setup Page
 #
 DOLIPROJECT_DEFAUT_TICKET_TIME = Temps passé par défaut
+
+
+#
+# Facture récurrente
+#
+RecurringInvoicesStatistics = Statistiques facture récurrentes
+NumberOfRecurringBills = Nb de factures récurrentes
+NumberOfRecurringBillsByMonth = Nb de factures récurrentes par mois
+AmountOfRecurringBills = Montant de factures récurrentes
+AmountOfRecurringBillsByMonthHT = Montant de factures récurrentes par mois (HT)
+ExceededTimeSpentColor = Couleur temps consommés dépassés
+NotExceededTimeSpentColor = Couleur temps consommés pas dépassés ou non pointés
+PerfectTimeSpentColor = Couleur temps consommés parfait
+InvoicesCategoriesArea = Espace des tags/catégories des factures
