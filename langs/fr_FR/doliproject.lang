@@ -116,6 +116,7 @@ SpentWorkedHoursMonth = Heures de travail passées du %s au %s
 ConsumedWorkedHoursMonth = Heures de travail consommées du %s au %s
 DiffSpentAndConsumedWorkedHoursMonth = Différence d'heures de travail passées/consommées du %s au %s
 WarningShowOnlyFavoriteTasks = Attention quand l'option 'Afficher uniquement les tâches favorites' est activée, les valeurs totales récupèrent l'ensembles des tâches.
+ExpectedWorkedHoursWeek = Heures de travail prévues du %s au %s
 
 #
 # Setup Page

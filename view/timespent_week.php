@@ -437,7 +437,7 @@ $search_options_pattern = 'search_task_options_';
 $extrafieldsobjectkey = 'projet_task';
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_sql.tpl.php';
 
-$tasksarray = getFavoriteTasksArray($taskstatic->id, 0, 0, ($project->id ? $project->id : 0), $socid, 0, $search_project_ref, $onlyopenedproject, $morewherefilter, ($search_usertoprocessid ? $search_usertoprocessid : 0), 0, $extrafields); // We want to see all tasks of open project i am allowed to see and that match filter, not only my tasks. Later only mine will be editable later.
+$tasksarray = $taskstatic->getTasksArray( 0, 0, ($project->id ? $project->id : 0), $socid, 0, $search_project_ref, $onlyopenedproject, $morewherefilter, ($search_usertoprocessid ? $search_usertoprocessid : 0), 0, $extrafields); // We want to see all tasks of open project i am allowed to see and that match filter, not only my tasks. Later only mine will be editable later.
 if ($morewherefilter) {	// Get all task without any filter, so we can show total of time spent for not visible tasks
 	$tasksarraywithoutfilter = getFavoriteTasksArray($taskstatic->id, 0, 0, ($project->id ? $project->id : 0), $socid, 0, '', $onlyopenedproject, '', ($search_usertoprocessid ? $search_usertoprocessid : 0)); // We want to see all tasks of open project i am allowed to see and that match filter, not only my tasks. Later only mine will be editable later.
 }
@@ -531,6 +531,10 @@ print '</div>';
 print '<div class="clearboth" style="padding-bottom: 20px;"></div>';
 print $langs->trans('ShowOnlyFavoriteTasks');
 print '<input type="checkbox"  class="show-only-favorite-tasks"'. ($conf->global->DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS ? ' checked' : '').' >';
+if ($conf->global->DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS) {
+	print '<br>';
+	print '<div class="opacitymedium"><i class="fas fa-exclamation-triangle"></i>'.' '.$langs->trans('WarningShowOnlyFavoriteTasks').'</div>';
+}
 
 $startday = dol_mktime(12, 0, 0, $startdayarray['first_month'], $startdayarray['first_day'], $startdayarray['first_year']);
 
@@ -730,17 +734,39 @@ print "</tr>\n";
 
 $colspan = 1 + (empty($conf->global->PROJECT_TIMESHEET_DISABLEBREAK_ON_PROJECT) ? 0 : 2);
 
+$workinghours = new Workinghours($db);
+$workinghoursArray = $workinghours->fetchCurrentWorkingHours($usertoprocess->id, 'user');
+$workinghoursWeek = 0;
+
 if ($conf->use_javascript_ajax) {
 	print '<tr class="liste_total">';
 	print '<td class="liste_total" colspan="'.($colspan + $addcolspan).'">';
 	print $langs->trans("Total");
-	print '<span class="opacitymediumbycolor">  - '.$langs->trans("ExpectedWorkedHours").': <strong>'.price($usertoprocess->weeklyhours, 1, $langs, 0, 0).'</strong></span>';
+	$lastdaytoshow = dol_time_plus_duree($firstdaytoshow, 6, 'd');
+	for ($idw = 0; $idw < 7; $idw++) {
+		$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
+		if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+			$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+			$currentDay = 'workinghours_' . strtolower($currentDay);
+			$workinghoursWeek += $workinghoursArray->{$currentDay} / 60;
+		}
+	}
+	print '<span class="opacitymediumbycolor">  - '.$langs->trans("ExpectedWorkedHoursWeek", dol_print_date($firstdaytoshow, "dayreduceformat"), dol_print_date($lastdaytoshow, "dayreduceformat")).' : <strong><a href="'. DOL_URL_ROOT . '/custom/doliproject/view/workinghours_card.php?id=' . $usertoprocess->id.'" target="_blank">'.price($workinghoursWeek, 1, $langs, 0, 0).'</a></strong></span>';
 	print '</td>';
 	if (!empty($arrayfields['timeconsumed']['checked'])) {
 		print '<td class="liste_total"></td>';
 		print '<td class="liste_total"></td>';
 	}
 	for ($idw = 0; $idw < 7; $idw++) {
+		$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
+		if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+			$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+			$currentDay = 'workinghours_' . strtolower($currentDay);
+			$workinghoursWeek = $workinghoursArray->{$currentDay} * 60;
+		} else {
+			$workinghoursWeek = 0;
+		}
+
 		$cssweekend = '';
 		if ((($idw + 1) < $numstartworkingday) || (($idw + 1) > $numendworkingday)) {	// This is a day is not inside the setup of working days, so we use a week-end css.
 			$cssweekend = 'weekend';
@@ -756,9 +782,9 @@ if ($conf->use_javascript_ajax) {
 		} elseif (!$isavailable[$tmpday]['afternoon']) {
 			$cssonholiday .= 'onholidayafternoon ';
 		}
-		print '<td class="liste_total hide'.$idw.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'" align="center"><div class="totalDay'.$idw.'">&nbsp;</div></td>';
+		print '<td class="liste_total hide'.$idw.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'" align="center"><div class="'.$idw.'">'.(($workinghoursWeek != 0) ? convertSecondToTime($workinghoursWeek, 'allhourmin') : '00:00').'</div></td>';
 	}
-	print '<td class="liste_total center"><div class="totalDayAll">&nbsp;</div></td>';
+	print '<td class="liste_total"></td>';
 	print '</tr>';
 }
 
@@ -773,7 +799,7 @@ if (count($tasksarray) > 0) {
 
 	$j = 0;
 	$level = 0;
-	$totalforvisibletasks = projectLinesPerWeek($j, $firstdaytoshow, $usertoprocess, 0, $tasksarray, $level, $projectsrole, $tasksrole, $mine, $restrictviewformytask, $isavailable, 0, $arrayfields, $extrafields);
+	$totalforvisibletasks = projectLinesPerWeekDoliProject($j, $firstdaytoshow, $usertoprocess, 0, $tasksarray, $level, $projectsrole, $tasksrole, $mine, $restrictviewformytask, $isavailable, 0, $arrayfields, $extrafields);
 	//var_dump($totalforvisibletasks);
 
 	// Show total for all other tasks
@@ -846,14 +872,42 @@ if (count($tasksarray) > 0) {
 		print '<tr class="liste_total">';
 		print '<td class="liste_total" colspan="'.($colspan + $addcolspan).'">';
 		print $langs->trans("Total");
-		print '<span class="opacitymediumbycolor">  - '.$langs->trans("ExpectedWorkedHours").': <strong>'.price($usertoprocess->weeklyhours, 1, $langs, 0, 0).'</strong></span>';
+		$CurrentDate = dol_getdate($now);
+		$currentWeek = getWeekNumber($CurrentDate['mday'], $CurrentDate['mon'], $CurrentDate['year']);
+		if ($currentWeek == $week) {
+			$firstDay = date( 'd', $firstdaytoshow);
+			$currentDay = date( 'd', $now);
+			$nbday = $currentDay - $firstDay + 1;
+		} else {
+			$nbday = 7;
+		}
+
+		for ($idw = 0; $idw < $nbday; $idw++) {
+			$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
+			if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+				$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+				$currentDay = 'workinghours_' . strtolower($currentDay);
+				$workinghoursWeek += $workinghoursArray->{$currentDay} / 60;
+			}
+		}
+		$totalspenttime = $workinghoursWeek;
+		print '<span class="opacitymediumbycolor">  - '.$langs->trans("SpentWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), (($nbday == 7) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))).' : <strong>'.price($workinghoursWeek, 1, $langs, 0, 0).'</strong></span>';
 		print '</td>';
 		if (!empty($arrayfields['timeconsumed']['checked'])) {
 			print '<td class="liste_total"></td>';
 			print '<td class="liste_total"></td>';
 		}
 
-		for ($idw = 0; $idw < 7; $idw++) {
+		for ($idw = 0; $idw < $nbday; $idw++) {
+			$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
+			if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+				$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+				$currentDay = 'workinghours_' . strtolower($currentDay);
+				$workinghoursWeek = $workinghoursArray->{$currentDay} * 60;
+			} else {
+				$workinghoursWeek = 0;
+			}
+
 			$cssweekend = '';
 			if ((($idw + 1) < $numstartworkingday) || (($idw + 1) > $numendworkingday)) {	// This is a day is not inside the setup of working days, so we use a week-end css.
 				$cssweekend = 'weekend';
@@ -870,9 +924,117 @@ if (count($tasksarray) > 0) {
 				$cssonholiday .= 'onholidayafternoon ';
 			}
 
-			print '<td class="liste_total hide'.$idw.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'" align="center"><div class="totalDay'.$idw.'">&nbsp;</div></td>';
+			print '<td class="liste_total hide'.$idw.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'" align="center"><div class="'.$idw.'">'.(($workinghoursWeek != 0) ? convertSecondToTime($workinghoursWeek, 'allhourmin') : '00:00').'</div></td>';
 		}
-		print '<td class="liste_total center"><div class="totalDayAll">&nbsp;</div></td>';
+		if ($nbday == 7) {
+			print '<td class="liste_total"></td>';
+		}
+		print '</tr>';
+
+
+		print '<tr class="liste_total">';
+		print '<td class="liste_total" colspan="'.($colspan + $addcolspan).'">';
+		print $langs->trans("Total");
+
+		foreach ($totalforvisibletasks as $task) {
+			$totalconsumedtime += $task;
+		}
+		print '<span class="opacitymediumbycolor">  - '.$langs->trans("ConsumedWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"),  (($nbday == 7) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))).' : <strong>'.convertSecondToTime($totalconsumedtime, 'allhourmin').'</strong></span>';
+		print '</td>';
+		if (!empty($arrayfields['timeconsumed']['checked'])) {
+			print '<td class="liste_total"></td>';
+			print '<td class="liste_total right"><strong>'.convertSecondToTime($totalconsumedtime, 'allhourmin').'</strong></td>';
+		}
+
+		for ($idw = 0; $idw < $nbday; $idw++) {
+			$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
+			if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+				$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+				$currentDay = 'workinghours_' . strtolower($currentDay);
+				$workinghoursWeek = $workinghoursArray->{$currentDay} * 60;
+			} else {
+				$workinghoursWeek = 0;
+			}
+
+			$cssweekend = '';
+			if ((($idw + 1) < $numstartworkingday) || (($idw + 1) > $numendworkingday)) {	// This is a day is not inside the setup of working days, so we use a week-end css.
+				$cssweekend = 'weekend';
+			}
+
+			$tmpday = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
+
+			$cssonholiday = '';
+			if (!$isavailable[$tmpday]['morning'] && !$isavailable[$tmpday]['afternoon']) {
+				$cssonholiday .= 'onholidayallday ';
+			} elseif (!$isavailable[$tmpday]['morning']) {
+				$cssonholiday .= 'onholidaymorning ';
+			} elseif (!$isavailable[$tmpday]['afternoon']) {
+				$cssonholiday .= 'onholidayafternoon ';
+			}
+
+			print '<td class="liste_total hide'.$idw.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'" align="center"><div class="totalDay'.$idw.'">'.dol_print_date($workinghoursWeek, 'hour').'</div></td>';
+		}
+		if ($nbday == 7) {
+			print '<td class="liste_total"></td>';
+		}
+		print '</tr>';
+
+		print '<tr class="liste_total">';
+		print '<td class="liste_total" colspan="'.($colspan + $addcolspan).'">';
+		print $langs->trans("Total");
+		$difftotaltime = $totalspenttime * 60 * 60 - $totalconsumedtime;
+		if  ($difftotaltime < 0) {
+			$morecss = colorStringToArray($conf->global->DOLIPROJECT_EXCEEDED_TIME_SPENT_COLOR);
+		} else if ($difftotaltime > 0) {
+			$morecss = colorStringToArray($conf->global->DOLIPROJECT_NOT_EXCEEDED_TIME_SPENT_COLOR);
+		} else if ($difftotaltime == 0) {
+			$morecss = colorStringToArray($conf->global->DOLIPROJECT_PERFECT_TIME_SPENT_COLOR);
+		}
+		print '<span class="opacitymediumbycolor">  - '.$langs->trans("DiffSpentAndConsumedWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), (($nbday == 7) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))).' : <strong style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'">'.(($difftotaltime != 0) ? convertSecondToTime(abs($difftotaltime), 'allhourmin') : '00:00').'</strong></span>';
+		print '</td>';
+		if (!empty($arrayfields['timeconsumed']['checked'])) {
+			print '<td class="liste_total"></td>';
+			print '<td class="liste_total right" style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'"><strong>'.(($difftotaltime != 0) ? convertSecondToTime(abs($difftotaltime), 'allhourmin') : '00:00').'</strong></td>';
+		}
+
+		for ($idw = 0; $idw < $nbday; $idw++) {
+			$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
+			if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+				$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+				$currentDay = 'workinghours_' . strtolower($currentDay);
+				$workinghoursWeek = $workinghoursArray->{$currentDay} * 60;
+			} else {
+				$workinghoursWeek = 0;
+			}
+			$difftime = $workinghoursWeek - $totalforvisibletasks[$dayinloopfromfirstdaytoshow];
+			if  ($difftime < 0) {
+				$morecss = colorStringToArray($conf->global->DOLIPROJECT_EXCEEDED_TIME_SPENT_COLOR);
+			} else if ($difftime > 0) {
+				$morecss = colorStringToArray($conf->global->DOLIPROJECT_NOT_EXCEEDED_TIME_SPENT_COLOR);
+			} else if ($difftime == 0) {
+				$morecss = colorStringToArray($conf->global->DOLIPROJECT_PERFECT_TIME_SPENT_COLOR);
+			}
+			$cssweekend = '';
+			if ((($idw + 1) < $numstartworkingday) || (($idw + 1) > $numendworkingday)) {	// This is a day is not inside the setup of working days, so we use a week-end css.
+				$cssweekend = 'weekend';
+			}
+
+			$tmpday = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
+
+			$cssonholiday = '';
+			if (!$isavailable[$tmpday]['morning'] && !$isavailable[$tmpday]['afternoon']) {
+				$cssonholiday .= 'onholidayallday ';
+			} elseif (!$isavailable[$tmpday]['morning']) {
+				$cssonholiday .= 'onholidaymorning ';
+			} elseif (!$isavailable[$tmpday]['afternoon']) {
+				$cssonholiday .= 'onholidayafternoon ';
+			}
+
+			print '<td class="liste_total bold '.$idw.($cssonholiday ? ' '.$cssonholiday : '').($cssweekend ? ' '.$cssweekend : '').'" align="center" style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'"><div class="'.$idw.'">'.(($difftime != 0) ? convertSecondToTime(abs($difftime), 'allhourmin') : '00:00').'</div></td>';
+		}
+		if ($nbday == 7) {
+			print '<td class="liste_total"></td>';
+		}
 		print '</tr>';
 	}
 } else {
