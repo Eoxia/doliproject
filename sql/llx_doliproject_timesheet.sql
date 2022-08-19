@@ -18,7 +18,8 @@ CREATE TABLE llx_doliproject_timesheet(
 	-- BEGIN MODULEBUILDER FIELDS
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
 	ref varchar(128) DEFAULT '(PROV)' NOT NULL, 
-	ref_ext varchar(128), 
+	ref_ext varchar(128),
+    entity          integer DEFAULT 1 NOT NULL,
 	label varchar(255), 
 	description text, 
 	note_public text, 
