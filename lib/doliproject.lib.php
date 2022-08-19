@@ -57,6 +57,11 @@ function doliprojectAdminPrepareHead()
 	$head[$h][2] = 'projecttasks';
 	$h++;
 
+	$head[$h][0] = dol_buildpath("/doliproject/admin/timesheetdocument.php", 1);
+	$head[$h][1] = '<i class="fas fa-file"></i>  ' . $langs->trans("TimeSheetDocument");
+	$head[$h][2] = 'timesheetdocument';
+	$h++;
+
 	// Show more tabs from modules
 	// Entries must be declared in modules descriptor with line
 	//$this->tabs = array(

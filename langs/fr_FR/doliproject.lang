@@ -137,3 +137,25 @@ ExceededTimeSpentColor = Couleur temps consommés dépassés
 NotExceededTimeSpentColor = Couleur temps consommés pas dépassés ou non pointés
 PerfectTimeSpentColor = Couleur temps consommés parfait
 InvoicesCategoriesArea = Espace des tags/catégories des factures
+
+#
+# TimeSheetDocument - Fiche de navette
+#
+
+# Right - Droit
+
+# Trigger - Déclencheur
+TimeSheetDocumentGeneratedWithDolibarr = Fiche de navette générée avec Dolibarr
+
+# Mod Numbering - Modèle de numérotation
+DoliProjectTimeSheetDocumentDocumentNumberingModule = Modèle de numérotation des fiches de navette de DoliProject
+DoliProjectTimeSheetDocumentStandardModel = Renvoie le numéro sous la forme TSDn où n est un compteur séquentiel sans rupture et sans remise à 0.
+
+# ODT Template - Template ODT
+DoliProjectTemplateDocumentTimeSheetDocument = Modèle de documents des fiches de navette de DoliProject
+TimeSheetDocumentCustomDoliProjectTemplate = ODT custom des fiches de navette
+TimeSheetDocumentDoliProjectTemplate = ODT par défaut des fiches de navette
+
+# Data - Donnée
+TimeSheetDocument = Fiche de Navette
+
