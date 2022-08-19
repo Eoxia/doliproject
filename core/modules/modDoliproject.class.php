@@ -63,7 +63,7 @@ class modDoliproject extends DolibarrModules
 			'menus' 					=> 0,
 			'tpl' 						=> 0,
 			'barcode' 					=> 0,
-			'models' 					=> 0,
+			'models' 					=> 1,
 			'theme' 					=> 0,
 			'css' 						=> array(),
 			'js' => array("/doliproject/js/doliproject.js.php"),
@@ -107,6 +107,18 @@ class modDoliproject extends DolibarrModules
 			5 => array('DOLIPROJECT_EXCEEDED_TIME_SPENT_COLOR', 'chaine', '#FF0000', '', 0, 'current'),
 			6 => array('DOLIPROJECT_NOT_EXCEEDED_TIME_SPENT_COLOR', 'chaine', '#FFA500', '', 0, 'current'),
 			7 => array('DOLIPROJECT_PERFECT_TIME_SPENT_COLOR', 'chaine', '#008000', '', 0, 'current'),
+
+			// CONST TIME SHEET
+			10 => array('MAIN_AGENDA_ACTIONAUTO_TIMESHEET_CREATE', 'integer', 1, '', 0, 'current'),
+			11 => array('MAIN_AGENDA_ACTIONAUTO_TIMESHEET_EDIT', 'integer', 1, '', 0, 'current'),
+			12 => array('DOLIPROJECT_TIMESHEET_ADDON', 'chaine', 'mod_timesheet_standard', '', 0, 'current'),
+
+			// CONST TIMESHEET DOCUMENT
+			20 => array('MAIN_AGENDA_ACTIONAUTO_TIMESHEETDOCUMENT_CREATE', 'integer', 1, '', 0, 'current'),
+			21 => array('DOLIPROJECT_TIMESHEETDOCUMENT_ADDON', 'chaine', 'mod_timesheetdocument_standard', '', 0, 'current'),
+			22 => array('DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_ODT_PATH', 'chaine', 'DOL_DOCUMENT_ROOT/custom/doliproject/documents/doctemplates/timesheetdocument/', '', 0, 'current'),
+			23 => array('DOLIPROJECT_TIMESHEETDOCUMENT_CUSTOM_ADDON_ODT_PATH', 'chaine', 'DOL_DATA_ROOT/ecm/doliproject/timesheetdocument/', '', 0, 'current'),
+			24 => array('DOLIPROJECT_TIMESHEETDOCUMENT_DEFAULT_MODEL', 'chaine', 'timesheetdocument_odt', '', 0, 'current'),
 		);
 
 		if (!isset($conf->doliproject) || !isset($conf->doliproject->enabled)) {
@@ -141,6 +153,30 @@ class modDoliproject extends DolibarrModules
 		$this->rights[$r][1] = 'Delete objects of Doliproject'; // Permission label
 		$this->rights[$r][4] = 'delete'; // In php code, permission will be checked by test if ($user->rights->doliproject->level1->level2)
 		$r++;
+
+		/* TIMESHEET PERMISSIONS */
+		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1);
+		$this->rights[$r][1] = $langs->trans('ReadTimeSheet');
+		$this->rights[$r][4] = 'timesheet';
+		$this->rights[$r][5] = 'read';
+		$r++;
+		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1);
+		$this->rights[$r][1] = $langs->transnoentities('CreateTimeSheet');
+		$this->rights[$r][4] = 'timesheet';
+		$this->rights[$r][5] = 'write';
+		$r++;
+		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1);
+		$this->rights[$r][1] = $langs->trans('DeleteTimeSheet');
+		$this->rights[$r][4] = 'timesheet';
+		$this->rights[$r][5] = 'delete';
+		$r++;
+
+		/* ADMINPAGE PANEL ACCESS PERMISSIONS */
+		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1);
+		$this->rights[$r][1] = $langs->transnoentities('ReadAdminPage');
+		$this->rights[$r][4] = 'adminpage';
+		$this->rights[$r][5] = 'read';
+
 		/* END MODULEBUILDER PERMISSIONS */
 
 		// Main menu entries to add
@@ -164,6 +200,7 @@ class modDoliproject extends DolibarrModules
 			'target'=>'',
 			'user'=>2, // 0=Menu for internal users, 1=external users, 2=both
 		);
+
 		$this->menu[$r++] = array(
 			'fk_menu'  =>'fk_mainmenu=project,fk_leftmenu=timespent', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'type'     => 'left', // This is a Top menu entry
@@ -178,6 +215,7 @@ class modDoliproject extends DolibarrModules
 			'target'   => '',
 			'user'     => 2, // 0=Menu for internal users, 1=external users, 2=both
 		);
+
 		$this->menu[$r++] = array(
 			'fk_menu'=>'fk_mainmenu=hrm,fk_leftmenu=timespent', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'type'=>'left', // This is a Top menu entry
@@ -192,6 +230,7 @@ class modDoliproject extends DolibarrModules
 			'target'=>'',
 			'user'=>2, // 0=Menu for internal users, 1=external users, 2=both
 		);
+
 		$this->menu[$r++] = array(
 			'fk_menu'  =>'fk_mainmenu=hrm,fk_leftmenu=timespent', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'type'     => 'left', // This is a Top menu entry
@@ -206,6 +245,7 @@ class modDoliproject extends DolibarrModules
 			'target'   => '',
 			'user'     => 2, // 0=Menu for internal users, 1=external users, 2=both
 		);
+
 		$this->menu[$r++] = array(
 			'fk_menu'  =>'fk_mainmenu=billing,fk_leftmenu=customers_bills', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'type'     => 'left', // This is a Top menu entry
@@ -220,6 +260,7 @@ class modDoliproject extends DolibarrModules
 			'target'   => '',
 			'user'     => 2, // 0=Menu for internal users, 1=external users, 2=both
 		);
+
 		$this->menu[$r++] = array(
 			'fk_menu'  => 'fk_mainmenu=billing,fk_leftmenu=customers_bills',
 			'type'     => 'left',
@@ -233,6 +274,69 @@ class modDoliproject extends DolibarrModules
 			'perms'    => '$user->rights->doliproject->lire && $user->rights->facture->lire',
 			'target'   => '',
 			'user'     => 0,
+		);
+
+		$this->menu[$r++]=array(
+			'fk_menu'  => 'fk_mainmenu=doliproject',
+			'type'     => 'top',
+			'titre'    => $langs->trans('DoliProject'),
+			'mainmenu' => 'doliproject',
+			'leftmenu' => '',
+			'url'      => '/doliproject/doliprojectindex.php',
+			'langs'    => 'doliproject@doliproject',
+			'position' => 1100 + $r,
+			'enabled'  => '$conf->doliproject->enabled',
+			'perms'    => '$user->rights->doliproject->lire',
+			'target'   => '',
+			'user'     => 2,
+		);
+
+		$this->menu[$r++]=array(
+			'fk_menu'  => 'fk_mainmenu=doliproject',
+			'type'     => 'left',
+			'prefix'   => '<i class="fas fa-calendar-check"></i> ',
+			'titre'    => $langs->trans('TimeSheet'),
+			'mainmenu' => 'doliproject',
+			'leftmenu' => 'timesheet',
+			'url'      => '/doliproject/view/timesheet/timesheet_list.php',
+			'langs'    => 'doliproject@doliproject',
+			'position' => 1100 + $r,
+			'enabled'  => '$conf->doliproject->enabled',
+			'perms'    => '$user->rights->doliproject->lire',
+			'target'   => '',
+			'user'     => 2,
+		);
+
+		$this->menu[$r++] = array(
+			'fk_menu'  => 'fk_mainmenu=doliproject',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'type'     => 'left',			                // This is a Left menu entry
+			'titre'    => $langs->trans('DoliProjectConfig'),
+			'prefix'   => '<i class="fas fa-cog"></i>  ',
+			'mainmenu' => 'doliproject',
+			'leftmenu' => 'doliprojectconfig',
+			'url'      => '/doliproject/admin/setup.php',
+			'langs'    => 'doliproject@doliproject',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'position' => 48520 + $r,
+			'enabled'  => '$conf->doliproject->enabled',  // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'perms'    => '$user->rights->doliproject->adminpage->read',			                // Use 'perms'=>'$user->rights->doliproject->level1->level2' if you want your menu with a permission rules
+			'target'   => '',
+			'user'     => 0,				                // 0=Menu for internal users, 1=external users, 2=both
+		);
+
+		$this->menu[$r++] = array(
+			'fk_menu'  => 'fk_mainmenu=doliproject',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'type'     => 'left',			                // This is a Left menu entry
+			'titre'    => $langs->transnoentities('MinimizeMenu'),
+			'prefix'   => '<i class="fas fa-chevron-circle-left"></i> ',
+			'mainmenu' => 'doliproject',
+			'leftmenu' => '',
+			'url'      => '',
+			'langs'    => '',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'position' => 48520 + $r,
+			'enabled'  => '$conf->doliproject->enabled',  // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'perms'    => 1,			                // Use 'perms'=>'$user->rights->doliproject->level1->level2' if you want your menu with a permission rules
+			'target'   => '',
+			'user'     => 0,				                // 0=Menu for internal users, 1=external users, 2=both
 		);
 		/* END MODULEBUILDER TOPMENU */
 	}
@@ -372,6 +476,10 @@ class modDoliproject extends DolibarrModules
 		unset($param);
 		$extra_fields->update('fk_task', 'Tâche', 'sellist', '', 'ticket', 0, 0, 100, 'a:1:{s:7:"options";a:1:{s:110:"projet_task:ref:rowid::entity = $ENTITY$ AND fk_projet = ($SEL$ fk_project FROM '. MAIN_DB_PREFIX .'ticket WHERE rowid = $ID$)";N;}}', 1, 1, '1');
 		$extra_fields->addExtraField('fk_task', 'Tâche', 'sellist', 100, NULL, 'ticket', 0, 0, NULL, 'a:1:{s:7:"options";a:1:{s:110:"projet_task:ref:rowid::entity = $ENTITY$ AND fk_projet = ($SEL$ fk_project FROM '. MAIN_DB_PREFIX .'ticket WHERE rowid = $ID$)";N;}}', 1, 1, '1'); //extrafields ticket
+
+		// Document templates
+		delDocumentModel('timesheetdocument_odt', 'timesheetdocument');
+		addDocumentModel('timesheetdocument_odt', 'timesheetdocument', 'ODT templates', 'DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_ODT_PATH');
 
 		return $this->_init(array(), $options);
 	}
