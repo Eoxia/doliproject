@@ -1,10 +1,5 @@
 <?php
-/* Copyright (C) 2010-2012 	Laurent Destailleur <eldy@users.sourceforge.net>
- * Copyright (C) 2012		Juanjo Menent		<jmenent@2byte.es>
- * Copyright (C) 2014		Marcos García		<marcosgdf@gmail.com>
- * Copyright (C) 2016		Charlie Benke		<charlie@patas-monkey.com>
- * Copyright (C) 2018-2019  Philippe Grand      <philippe.grand@atoo-net.com>
- * Copyright (C) 2018       Frédéric France     <frederic.france@netlogic.fr>
+/* Copyright (C) 2022 EOXIA <dev@eoxia.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,23 +17,23 @@
  */
 
 /**
- *	\file       htdocs/core/modules/doliproject/doc/doc_generic_myobject_odt.modules.php
+ *	\file       core/modules/doliproject/timesheetdocument/doc_timesheetdocument_odt.modules.php
  *	\ingroup    doliproject
- *	\brief      File of class to build ODT documents for myobjects
+ *	\brief      File of class to build ODT documents for timesheets
  */
 
-dol_include_once('/doliproject/core/modules/doliproject/modules_myobject.php');
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/doc.lib.php';
 
+require_once __DIR__ . '/modules_timesheetdocument.php';
 
 /**
  *	Class to build documents using ODF templates generator
  */
-class doc_generic_myobject_odt extends ModelePDFMyObject
+class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 {
 	/**
 	 * Issuer
@@ -48,15 +43,14 @@ class doc_generic_myobject_odt extends ModelePDFMyObject
 
 	/**
 	 * @var array Minimum version of PHP required by module.
-	 * e.g.: PHP ≥ 5.5 = array(5, 5)
+	 * e.g.: PHP ≥ 5.6 = array(5, 6)
 	 */
-	public $phpmin = array(5, 5);
+	public $phpmin = array(5, 6);
 
 	/**
 	 * @var string Dolibarr version of the loaded document
 	 */
 	public $version = 'dolibarr';
-
 
 	/**
 	 *	Constructor
@@ -71,9 +65,9 @@ class doc_generic_myobject_odt extends ModelePDFMyObject
 		$langs->loadLangs(array("main", "companies"));
 
 		$this->db = $db;
-		$this->name = "ODT templates";
+		$this->name = $langs->trans('TimeSheetDocumentDoliProjectTemplate');
 		$this->description = $langs->trans("DocumentModelOdt");
-		$this->scandir = 'DOLIPROJECT_MYOBJECT_ADDON_PDF_ODT_PATH'; // Name of constant that is used to save list of directories to scan
+		$this->scandir = 'DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_PDF_ODT_PATH'; // Name of constant that is used to save list of directories to scan
 
 		// Page size for A4 format
 		$this->type = 'odt';
@@ -85,22 +79,23 @@ class doc_generic_myobject_odt extends ModelePDFMyObject
 		$this->marge_haute = 0;
 		$this->marge_basse = 0;
 
-		$this->option_logo = 1; // Affiche logo
-		$this->option_tva = 0; // Gere option tva COMMANDE_TVAOPTION
-		$this->option_modereg = 0; // Affiche mode reglement
-		$this->option_condreg = 0; // Affiche conditions reglement
-		$this->option_codeproduitservice = 0; // Affiche code produit-service
-		$this->option_multilang = 1; // Dispo en plusieurs langues
-		$this->option_escompte = 0; // Affiche si il y a eu escompte
+		$this->option_logo = 1; // Display logo
+		$this->option_tva = 0; // Manage the vat option FACTURE_TVAOPTION
+		$this->option_modereg = 0; // Display payment mode
+		$this->option_condreg = 0; // Display payment terms
+		$this->option_codeproduitservice = 0; // Display product-service code
+		$this->option_multilang = 1; // Available in several languages
+		$this->option_escompte = 0; // Displays if there has been a discount
 		$this->option_credit_note = 0; // Support credit notes
 		$this->option_freetext = 1; // Support add of a personalised text
 		$this->option_draft_watermark = 0; // Support add of a watermark on drafts
 
-		// Recupere emetteur
+		// Get source company
 		$this->emetteur = $mysoc;
-		if (!$this->emetteur->country_code) $this->emetteur->country_code = substr($langs->defaultlang, -2); // By default if not defined
+		if (!$this->emetteur->country_code) {
+			$this->emetteur->country_code = substr($langs->defaultlang, -2); // By default if not defined
+		}
 	}
-
 
 	/**
 	 *	Return description of a module
@@ -120,27 +115,31 @@ class doc_generic_myobject_odt extends ModelePDFMyObject
 		$texte = $this->description.".<br>\n";
 		$texte .= '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
 		$texte .= '<input type="hidden" name="token" value="'.newToken().'">';
+		$texte .= '<input type="hidden" name="page_y" value="">';
 		$texte .= '<input type="hidden" name="action" value="setModuleOptions">';
-		$texte .= '<input type="hidden" name="param1" value="DOLIPROJECT_MYOBJECT_ADDON_PDF_ODT_PATH">';
-		$texte .= '<table class="nobordernopadding" width="100%">';
+		$texte .= '<input type="hidden" name="param1" value="DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_PDF_ODT_PATH">';
+		$texte .= '<table class="nobordernopadding centpercent">';
 
 		// List of directories area
 		$texte .= '<tr><td>';
 		$texttitle = $langs->trans("ListOfDirectories");
-		$listofdir = explode(',', preg_replace('/[\r\n]+/', ',', trim($conf->global->DOLIPROJECT_MYOBJECT_ADDON_PDF_ODT_PATH)));
+		$listofdir = explode(',', preg_replace('/[\r\n]+/', ',', trim($conf->global->DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_PDF_ODT_PATH)));
 		$listoffiles = array();
-		foreach ($listofdir as $key=>$tmpdir)
-		{
+		foreach ($listofdir as $key => $tmpdir) {
 			$tmpdir = trim($tmpdir);
 			$tmpdir = preg_replace('/DOL_DATA_ROOT/', DOL_DATA_ROOT, $tmpdir);
+			$tmpdir = preg_replace('/DOL_DOCUMENT_ROOT/', DOL_DOCUMENT_ROOT, $tmpdir);
 			if (!$tmpdir) {
-				unset($listofdir[$key]); continue;
+				unset($listofdir[$key]);
+				continue;
 			}
-			if (!is_dir($tmpdir)) $texttitle .= img_warning($langs->trans("ErrorDirNotFound", $tmpdir), 0);
-			else
-			{
+			if (!is_dir($tmpdir)) {
+				$texttitle .= img_warning($langs->trans("ErrorDirNotFound", $tmpdir), 0);
+			} else {
 				$tmpfiles = dol_dir_list($tmpdir, 'files', 0, '\.(ods|odt)');
-				if (count($tmpfiles)) $listoffiles = array_merge($listoffiles, $tmpfiles);
+				if (count($tmpfiles)) {
+					$listoffiles = array_merge($listoffiles, $tmpfiles);
+				}
 			}
 		}
 		$texthelp = $langs->trans("ListOfDirectoriesForModelGenODT");
@@ -151,37 +150,46 @@ class doc_generic_myobject_odt extends ModelePDFMyObject
 		$texte .= $form->textwithpicto($texttitle, $texthelp, 1, 'help', '', 1);
 		$texte .= '<div><div style="display: inline-block; min-width: 100px; vertical-align: middle;">';
 		$texte .= '<textarea class="flat" cols="60" name="value1">';
-		$texte .= $conf->global->DOLIPROJECT_MYOBJECT_ADDON_PDF_ODT_PATH;
+		$texte .= $conf->global->DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_PDF_ODT_PATH;
 		$texte .= '</textarea>';
 		$texte .= '</div><div style="display: inline-block; vertical-align: middle;">';
-		$texte .= '<input type="submit" class="button" value="'.$langs->trans("Modify").'" name="Button">';
+		$texte .= '<input type="submit" class="button small reposition" name="Button" value="'.$langs->trans("Modify").'">';
 		$texte .= '<br></div></div>';
 
 		// Scan directories
 		$nbofiles = count($listoffiles);
-		if (!empty($conf->global->DOLIPROJECT_MYOBJECT_ADDON_PDF_ODT_PATH))
-		{
-			$texte .= $langs->trans("NumberOfModelFilesFound").': <b>';
+		if (!empty($conf->global->DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_PDF_ODT_PATH)) {
+			$texte .= $langs->trans("DoliProjectNumberOfModelFilesFound").': <b>';
 			//$texte.=$nbofiles?'<a id="a_'.get_class($this).'" href="#">':'';
 			$texte .= count($listoffiles);
 			//$texte.=$nbofiles?'</a>':'';
 			$texte .= '</b>';
 		}
 
-		if ($nbofiles)
-		{
+		if ($nbofiles) {
 			$texte .= '<div id="div_'.get_class($this).'" class="hidden">';
-			foreach ($listoffiles as $file)
-			{
-				$texte .= $file['name'].'<br>';
+			foreach ($listoffiles as $file) {
+				$texte .= '- '.$file['name'];
+				$texte .= ' <a href="'.DOL_URL_ROOT.'/document.php?modulepart=doctemplates&file=doliproject_timesheet/'.urlencode(basename($file['name'])).'">'.img_picto('', 'listlight').'</a>';
+				$texte .= ' &nbsp; <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?modulepart=doctemplates&keyforuploaddir=COMPANY_ADDON_PDF_ODT_PATH&action=deletefile&token='.newToken().'&file='.urlencode(basename($file['name'])).'">'.img_picto('', 'delete').'</a>';
+				$texte .= '<br>';
 			}
 			$texte .= '</div>';
 		}
 
 		$texte .= '</td>';
 
+		// Add input to upload a new template file.
+		$texte .= '<div>'.$langs->trans("UploadNewTemplate").' <input type="file" name="uploadfile">';
+		$texte .= '<input type="hidden" value="DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_PDF_ODT_PATH" name="keyforuploaddir">';
+		$texte .= '<input type="submit" class="button small reposition" value="'.dol_escape_htmltag($langs->trans("Upload")).'" name="upload">';
+		$texte .= '</div>';
+		$texte .= '</td>';
+
 		$texte .= '<td rowspan="2" class="tdtop hideonsmartphone">';
+		$texte .= '<span class="opacitymedium">';
 		$texte .= $langs->trans("ExampleOfDirectoriesForModelGen");
+		$texte .= '</span>';
 		$texte .= '</td>';
 		$texte .= '</tr>';
 
@@ -195,7 +203,7 @@ class doc_generic_myobject_odt extends ModelePDFMyObject
 	/**
 	 *  Function to build a document on disk using the generic odt module.
 	 *
-	 *	@param		Commande	$object				Object source to build document
+	 *	@param		TimeSheet	$object				Object source to build document
 	 *	@param		Translate	$outputlangs		Lang output object
 	 * 	@param		string		$srctemplatepath	Full path of source filename for generator using a template file
 	 *  @param		int			$hidedetails		Do not show line details
@@ -208,75 +216,75 @@ class doc_generic_myobject_odt extends ModelePDFMyObject
 		// phpcs:enable
 		global $user, $langs, $conf, $mysoc, $hookmanager;
 
-		if (empty($srctemplatepath))
-		{
+		if (empty($srctemplatepath)) {
 			dol_syslog("doc_generic_odt::write_file parameter srctemplatepath empty", LOG_WARNING);
 			return -1;
 		}
 
 		// Add odtgeneration hook
-		if (!is_object($hookmanager))
-		{
+		if (!is_object($hookmanager)) {
 			include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
 			$hookmanager = new HookManager($this->db);
 		}
 		$hookmanager->initHooks(array('odtgeneration'));
 		global $action;
 
-		if (!is_object($outputlangs)) $outputlangs = $langs;
+		if (!is_object($outputlangs)) {
+			$outputlangs = $langs;
+		}
 		$sav_charset_output = $outputlangs->charset_output;
 		$outputlangs->charset_output = 'UTF-8';
 
 		$outputlangs->loadLangs(array("main", "dict", "companies", "bills"));
 
-		if ($conf->commande->dir_output)
-		{
+		if ($conf->doliproject->dir_output) {
 			// If $object is id instead of object
-			if (!is_object($object))
-			{
+			if (!is_object($object)) {
 				$id = $object;
-				$object = new Commande($this->db);
+				$object = new TimeSheet($this->db);
 				$result = $object->fetch($id);
-				if ($result < 0)
-				{
+				if ($result < 0) {
 					dol_print_error($this->db, $object->error);
 					return -1;
 				}
 			}
 
-			$dir = $conf->commande->multidir_output[isset($object->entity) ? $object->entity : 1];
-			$objectref = dol_sanitizeFileName($object->ref);
-			if (!preg_match('/specimen/i', $objectref)) $dir .= "/".$objectref;
-			$file = $dir."/".$objectref.".odt";
+			$object->fetch_thirdparty();
 
-			if (!file_exists($dir))
-			{
-				if (dol_mkdir($dir) < 0)
-				{
+			$objectref = dol_sanitizeFileName($object->ref);
+			$dir = $conf->doliproject->multidir_output[isset($object->entity) ? $object->entity : 1] . '/timesheetdocument/' . $objectref;
+
+//			if (!preg_match('/specimen/i', $objectref)) {
+//				$dir .= "/".$objectref;
+//			}
+
+			if (!file_exists($dir)) {
+				if (dol_mkdir($dir) < 0) {
 					$this->error = $langs->transnoentities("ErrorCanNotCreateDir", $dir);
 					return -1;
 				}
 			}
 
-			if (file_exists($dir))
-			{
+			if (file_exists($dir)) {
 				//print "srctemplatepath=".$srctemplatepath;	// Src filename
 				$newfile = basename($srctemplatepath);
 				$newfiletmp = preg_replace('/\.od(t|s)/i', '', $newfile);
 				$newfiletmp = preg_replace('/template_/i', '', $newfiletmp);
 				$newfiletmp = preg_replace('/modele_/i', '', $newfiletmp);
-				$newfiletmp = $objectref.'_'.$newfiletmp;
-				//$file=$dir.'/'.$newfiletmp.'.'.dol_print_date(dol_now(),'%Y%m%d%H%M%S').'.odt';
+
+				$date = dol_print_date(dol_now(),'dayxcard');
+
+				$newfiletmp = $objectref . '_' . $date . '_' . $newfiletmp . '_' . $conf->global->MAIN_INFO_SOCIETE_NOM;
+
 				// Get extension (ods or odt)
 				$newfileformat = substr($newfile, strrpos($newfile, '.') + 1);
-				if (!empty($conf->global->MAIN_DOC_USE_TIMING))
-				{
+				if (!empty($conf->global->MAIN_DOC_USE_TIMING)) {
 					$format = $conf->global->MAIN_DOC_USE_TIMING;
-					if ($format == '1') $format = '%Y%m%d%H%M%S';
+					if ($format == '1') {
+						$format = '%Y%m%d%H%M%S';
+					}
 					$filename = $newfiletmp.'-'.dol_print_date(dol_now(), $format).'.'.$newfileformat;
-				}
-				else
-				{
+				} else {
 					$filename = $newfiletmp.'.'.$newfileformat;
 				}
 				$file = $dir.'/'.$filename;
@@ -286,41 +294,44 @@ class doc_generic_myobject_odt extends ModelePDFMyObject
 				//print "conf->societe->dir_temp=".$conf->societe->dir_temp;
 
 				dol_mkdir($conf->doliproject->dir_temp);
-
+				if (!is_writable($conf->doliproject->dir_temp)) {
+					$this->error = "Failed to write in temp directory ".$conf->doliproject->dir_temp;
+					dol_syslog('Error in write_file: '.$this->error, LOG_ERR);
+					return -1;
+				}
 
 				// If CUSTOMER contact defined on order, we use it
 				$usecontact = false;
 				$arrayidcontact = $object->getIdContact('external', 'CUSTOMER');
-				if (count($arrayidcontact) > 0)
-				{
+				if (count($arrayidcontact) > 0) {
 					$usecontact = true;
 					$result = $object->fetch_contact($arrayidcontact[0]);
 				}
 
 				// Recipient name
 				$contactobject = null;
-				if (!empty($usecontact))
-				{
-					// On peut utiliser le nom de la societe du contact
-					if (!empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) $socobject = $object->contact;
-					else {
+				if (!empty($usecontact)) {
+					// We can use the company of contact instead of thirdparty company
+					if ($object->contact->socid != $object->thirdparty->id && (!isset($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT) || !empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT))) {
+						$object->contact->fetch_thirdparty();
+						$socobject = $object->contact->thirdparty;
+						$contactobject = $object->contact;
+					} else {
 						$socobject = $object->thirdparty;
-						// if we have a CUSTOMER contact and we dont use it as recipient we store the contact object for later use
+						// if we have a CUSTOMER contact and we dont use it as thirdparty recipient we store the contact object for later use
 						$contactobject = $object->contact;
 					}
-				}
-				else
-				{
+				} else {
 					$socobject = $object->thirdparty;
 				}
 
 				// Make substitution
 				$substitutionarray = array(
-				'__FROM_NAME__' => $this->emetteur->name,
-				'__FROM_EMAIL__' => $this->emetteur->email,
-				'__TOTAL_TTC__' => $object->total_ttc,
-				'__TOTAL_HT__' => $object->total_ht,
-				'__TOTAL_VAT__' => $object->total_vat
+					'__FROM_NAME__' => $this->emetteur->name,
+					'__FROM_EMAIL__' => $this->emetteur->email,
+					'__TOTAL_TTC__' => $object->total_ttc,
+					'__TOTAL_HT__' => $object->total_ht,
+					'__TOTAL_VAT__' => $object->total_tva
 				);
 				complete_substitutions_array($substitutionarray, $langs, $object);
 				// Call the ODTSubstitution hook
@@ -330,8 +341,7 @@ class doc_generic_myobject_odt extends ModelePDFMyObject
 				// Line of free text
 				$newfreetext = '';
 				$paramfreetext = 'ORDER_FREE_TEXT';
-				if (!empty($conf->global->$paramfreetext))
-				{
+				if (!empty($conf->global->$paramfreetext)) {
 					$newfreetext = make_substitutions($conf->global->$paramfreetext, $substitutionarray);
 				}
 
@@ -341,15 +351,13 @@ class doc_generic_myobject_odt extends ModelePDFMyObject
 					$odfHandler = new odf(
 						$srctemplatepath,
 						array(
-						'PATH_TO_TMP'	  => $conf->commande->dir_temp,
+						'PATH_TO_TMP'	  => $conf->doliproject->dir_temp,
 						'ZIP_PROXY'		  => 'PclZipProxy', // PhpZipProxy or PclZipProxy. Got "bad compression method" error when using PhpZipProxy.
 						'DELIMITER_LEFT'  => '{',
 						'DELIMITER_RIGHT' => '}'
 						)
 					);
-				}
-				catch (Exception $e)
-				{
+				} catch (Exception $e) {
 					$this->error = $e->getMessage();
 					dol_syslog($e->getMessage(), LOG_INFO);
 					return -1;
@@ -364,9 +372,7 @@ class doc_generic_myobject_odt extends ModelePDFMyObject
 				// Make substitutions into odt of freetext
 				try {
 					$odfHandler->setVars('free_text', $newfreetext, true, 'UTF-8');
-				}
-				catch (OdfException $e)
-				{
+				} catch (OdfException $e) {
 					dol_syslog($e->getMessage(), LOG_INFO);
 				}
 
@@ -380,7 +386,9 @@ class doc_generic_myobject_odt extends ModelePDFMyObject
 				$array_other = $this->get_substitutionarray_other($outputlangs);
 				// retrieve contact information for use in object as contact_xxx tags
 				$array_thirdparty_contact = array();
-				if ($usecontact && is_object($contactobject)) $array_thirdparty_contact = $this->get_substitutionarray_contact($contactobject, $outputlangs, 'contact');
+				if ($usecontact && is_object($contactobject)) {
+					$array_thirdparty_contact = $this->get_substitutionarray_contact($contactobject, $outputlangs, 'contact');
+				}
 
 				$tmparray = array_merge($substitutionarray, $array_object_from_properties, $array_user, $array_soc, $array_thirdparty, $array_objet, $array_other, $array_thirdparty_contact);
 				complete_substitutions_array($tmparray, $outputlangs, $object);
@@ -389,60 +397,121 @@ class doc_generic_myobject_odt extends ModelePDFMyObject
 				$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray);
 				$reshook = $hookmanager->executeHooks('ODTSubstitution', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
 
-				foreach ($tmparray as $key=>$value)
-				{
+				$usertmp     = new User($this->db);
+				$task        = new Task($this->db);
+				$project     = new Project($this->db);
+				$extrafields = new ExtraFields($this->db);
+
+				$usertmp->fetch($object->fk_user_assign);
+				$now = dol_now();
+
+				$datestart       = dol_getdate($object->date_start, false, 'Europe/Paris');
+				$firstdaytoshow  = dol_get_first_day($datestart['year'], $datestart['mon']);
+				$dayInMonth      = cal_days_in_month(CAL_GREGORIAN, $datestart['mon'], $datestart['year']);
+
+				$tasksarray = $task->getTasksArray(0, 0, ($project->id ?: 0), 0, 0, '', '', '',  $object->fk_user_assign, 0, $extrafields);
+
+				$j = 0;
+				$level = 0;
+				$totalforvisibletasks = projectLinesPerDayOnMonth($j, $firstdaytoshow, $object->fk_user_assign, 0, $tasksarray, $level, $projectsrole, $tasksrole, 0, $restrictviewformytask, $isavailable, 0, $arrayfields, $extrafields, $dayInMonth);
+
+				echo '<pre>'; print_r( $totalforvisibletasks ); echo '</pre>'; exit;
+
+
+
+				$tmparray['employee_firstname'] = $usertmp->firstname;
+				$tmparray['employee_lastname']  = $usertmp->lastname;
+				$tmparray['date_start']         = dol_print_date($object->date_start, 'day', 'tzuser');
+				$tmparray['date_end']           = dol_print_date($object->date_end, 'day', 'tzuser');
+				$tmparray['note_public']        = $object->note_public;
+
+				$tmparray['month_year']        = dol_print_date($object->date_start, "%B %Y", 'tzuser');
+
+				foreach ($tmparray as $key => $value) {
 					try {
-						if (preg_match('/logo$/', $key)) // Image
-						{
-							if (file_exists($value)) $odfHandler->setImage($key, $value);
-							else $odfHandler->setVars($key, 'ErrorFileNotFound', true, 'UTF-8');
-						}
-						else    // Text
-						{
+						if (preg_match('/logo$/', $key)) {
+							// Image
+							if (file_exists($value)) {
+								$odfHandler->setImage($key, $value);
+							} else {
+								$odfHandler->setVars($key, 'ErrorFileNotFound', true, 'UTF-8');
+							}
+						} else {
+							// Text
 							$odfHandler->setVars($key, $value, true, 'UTF-8');
 						}
-					}
-					catch (OdfException $e)
-					{
+					} catch (OdfException $e) {
 						dol_syslog($e->getMessage(), LOG_INFO);
 					}
 				}
 				// Replace tags of lines
-				try
-				{
+				try {
 					$foundtagforlines = 1;
 					try {
-						$listlines = $odfHandler->setSegment('lines');
-					}
-					catch (OdfException $e)
-					{
+						$listlines = $odfHandler->setSegment('days');
+					} catch (OdfException $e) {
 						// We may arrive here if tags for lines not present into template
 						$foundtagforlines = 0;
 						dol_syslog($e->getMessage(), LOG_INFO);
 					}
-					if ($foundtagforlines)
-					{
+					if ($foundtagforlines) {
 						$linenumber = 0;
-						foreach ($object->lines as $line)
-						{
-							$linenumber++;
-							$tmparray = $this->get_substitutionarray_lines($line, $outputlangs, $linenumber);
-							complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
+						for ($idw = 0; $idw <= $dayInMonth; $idw++) {
+							$dayinloopfromfirstdaytoshow = dol_time_plus_duree($object->date_start, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
+							$tmparray['day'.$idw] = dol_print_date($dayinloopfromfirstdaytoshow, '%a');
+						}
+
+//						$linenumber++;
+//						$tmparray = $this->get_substitutionarray_lines($line, $outputlangs, $linenumber);
+//						complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
+
+						unset($tmparray['object_fields']);
+
+						// Call the ODTSubstitutionLine hook
+						$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);
+						$reshook = $hookmanager->executeHooks('ODTSubstitutionLine', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
+						foreach ($tmparray as $key => $val) {
+							try {
+								$listlines->setVars($key, $val, true, 'UTF-8');
+							} catch (OdfException $e) {
+								dol_syslog($e->getMessage(), LOG_INFO);
+							} catch (SegmentException $e) {
+								dol_syslog($e->getMessage(), LOG_INFO);
+							}
+						}
+						$listlines->merge();
+						$odfHandler->mergeSegment($listlines);
+					}
+
+					$foundtagforlines = 1;
+					try {
+						$listlines = $odfHandler->setSegment('tasks');
+					} catch (OdfException $e) {
+						// We may arrive here if tags for lines not present into template
+						$foundtagforlines = 0;
+						dol_syslog($e->getMessage(), LOG_INFO);
+					}
+					if ($foundtagforlines) {
+						$linenumber = 0;
+						for ($idw = 0; $idw < 10; $idw++) {
+							$dayinloopfromfirstdaytoshow = dol_time_plus_duree($object->date_start, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
+							$tmparray['task_ref'] = $task->ref;
+
+//							$linenumber++;
+//							$tmparray = $this->get_substitutionarray_lines($line, $outputlangs, $linenumber);
+//							complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
+
+							unset($tmparray['object_fields']);
+
 							// Call the ODTSubstitutionLine hook
 							$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);
 							$reshook = $hookmanager->executeHooks('ODTSubstitutionLine', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
-							foreach ($tmparray as $key => $val)
-							{
-								try
-								{
+							foreach ($tmparray as $key => $val) {
+								try {
 									$listlines->setVars($key, $val, true, 'UTF-8');
-								}
-								catch (OdfException $e)
-								{
+								} catch (OdfException $e) {
 									dol_syslog($e->getMessage(), LOG_INFO);
-								}
-								catch (SegmentException $e)
-								{
+								} catch (SegmentException $e) {
 									dol_syslog($e->getMessage(), LOG_INFO);
 								}
 							}
@@ -450,9 +519,7 @@ class doc_generic_myobject_odt extends ModelePDFMyObject
 						}
 						$odfHandler->mergeSegment($listlines);
 					}
-				}
-				catch (OdfException $e)
-				{
+				} catch (OdfException $e) {
 					$this->error = $e->getMessage();
 					dol_syslog($this->error, LOG_WARNING);
 					return -1;
@@ -460,13 +527,10 @@ class doc_generic_myobject_odt extends ModelePDFMyObject
 
 				// Replace labels translated
 				$tmparray = $outputlangs->get_translations_for_substitutions();
-				foreach ($tmparray as $key=>$value)
-				{
+				foreach ($tmparray as $key => $value) {
 					try {
 						$odfHandler->setVars($key, $value, true, 'UTF-8');
-					}
-					catch (OdfException $e)
-					{
+					} catch (OdfException $e) {
 						dol_syslog($e->getMessage(), LOG_INFO);
 					}
 				}
@@ -485,8 +549,7 @@ class doc_generic_myobject_odt extends ModelePDFMyObject
 						dol_syslog($e->getMessage(), LOG_INFO);
 						return -1;
 					}
-				}
-				else {
+				} else {
 					try {
 						$odfHandler->saveToDisk($file);
 					} catch (Exception $e) {
@@ -499,17 +562,16 @@ class doc_generic_myobject_odt extends ModelePDFMyObject
 				$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray);
 				$reshook = $hookmanager->executeHooks('afterODTCreation', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
 
-				if (!empty($conf->global->MAIN_UMASK))
+				if (!empty($conf->global->MAIN_UMASK)) {
 					@chmod($file, octdec($conf->global->MAIN_UMASK));
+				}
 
 				$odfHandler = null; // Destroy object
 
 				$this->result = array('fullpath'=>$file);
 
 				return 1; // Success
-			}
-			else
-			{
+			} else {
 				$this->error = $langs->transnoentities("ErrorCanNotCreateDir", $dir);
 				return -1;
 			}

@@ -21,18 +21,18 @@
  */
 
 /**
- * \file       htdocs/core/modules/doliproject/mod_myobject_advanced.php
+ * \file       htdocs/core/modules/doliproject/mod_timesheet_advanced.php
  * \ingroup    doliproject
- * \brief      File containing class for advanced numbering model of MyObject
+ * \brief      File containing class for advanced numbering model of TimeSheet
  */
 
-dol_include_once('/doliproject/core/modules/doliproject/modules_myobject.php');
+dol_include_once('/doliproject/core/modules/doliproject/modules_timesheet.php');
 
 
 /**
  *	Class to manage customer Bom numbering rules advanced
  */
-class mod_myobject_advanced extends ModeleNumRefMyObject
+class mod_timesheet_advanced extends ModeleNumRefTimeSheet
 {
 	/**
 	 * Dolibarr version of the loaded document
@@ -68,21 +68,19 @@ class mod_myobject_advanced extends ModeleNumRefMyObject
 		$texte .= '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
 		$texte .= '<input type="hidden" name="token" value="'.newToken().'">';
 		$texte .= '<input type="hidden" name="action" value="updateMask">';
-		$texte .= '<input type="hidden" name="maskconstBom" value="DOLIPROJECT_MYOBJECT_ADVANCED_MASK">';
-		$texte .= '<table class="nobordernopadding" width="100%">';
+		$texte .= '<input type="hidden" name="maskconst" value="TEST2_TIMESHEET_ADVANCED_MASK">';
+		$texte .= '<table class="nobordernopadding centpercent">';
 
-		$tooltip = $langs->trans("GenericMaskCodes", $langs->transnoentities("MyObject"), $langs->transnoentities("MyObject"));
+		$tooltip = $langs->trans("GenericMaskCodes", $langs->transnoentities("TimeSheet"), $langs->transnoentities("TimeSheet"));
 		$tooltip .= $langs->trans("GenericMaskCodes2");
 		$tooltip .= $langs->trans("GenericMaskCodes3");
-		$tooltip .= $langs->trans("GenericMaskCodes4a", $langs->transnoentities("MyObject"), $langs->transnoentities("MyObject"));
+		$tooltip .= $langs->trans("GenericMaskCodes4a", $langs->transnoentities("TimeSheet"), $langs->transnoentities("TimeSheet"));
 		$tooltip .= $langs->trans("GenericMaskCodes5");
 
 		// Parametrage du prefix
 		$texte .= '<tr><td>'.$langs->trans("Mask").':</td>';
-		$texte .= '<td class="right">'.$form->textwithpicto('<input type="text" class="flat" size="24" name="maskMyObject" value="'.$conf->global->DOLIPROJECT_MYOBJECT_ADVANCED_MASK.'">', $tooltip, 1, 1).'</td>';
-
-		$texte .= '<td class="left" rowspan="2">&nbsp; <input type="submit" class="button" value="'.$langs->trans("Modify").'" name="Button"></td>';
-
+		$texte .= '<td class="right">'.$form->textwithpicto('<input type="text" class="flat minwidth175" name="maskvalue" value="'.$conf->global->TEST2_TIMESHEET_ADVANCED_MASK.'">', $tooltip, 1, 1).'</td>';
+		$texte .= '<td class="left" rowspan="2">&nbsp; <input type="submit" class="button button-edit" value="'.$langs->trans("Modify").'" name="Button"></td>';
 		$texte .= '</tr>';
 
 		$texte .= '</table>';
@@ -100,7 +98,7 @@ class mod_myobject_advanced extends ModeleNumRefMyObject
 	{
 		global $conf, $db, $langs, $mysoc;
 
-		$object = new MyObject($db);
+		$object = new TimeSheet($db);
 		$object->initAsSpecimen();
 
 		/*$old_code_client = $mysoc->code_client;
@@ -113,8 +111,7 @@ class mod_myobject_advanced extends ModeleNumRefMyObject
 		/*$mysoc->code_client = $old_code_client;
 		$mysoc->typent_code = $old_code_type;*/
 
-		if (!$numExample)
-		{
+		if (!$numExample) {
 			$numExample = $langs->trans('NotConfigured');
 		}
 		return $numExample;
@@ -130,20 +127,19 @@ class mod_myobject_advanced extends ModeleNumRefMyObject
 	{
 		global $db, $conf;
 
-		require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
+		require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 
 		// We get cursor rule
-		$mask = $conf->global->DOLIPROJECT_MYOBJECT_ADVANCED_MASK;
+		$mask = $conf->global->TEST2_TIMESHEET_ADVANCED_MASK;
 
-		if (!$mask)
-		{
+		if (!$mask) {
 			$this->error = 'NotConfigured';
 			return 0;
 		}
 
 		$date = $object->date;
 
-		$numFinal = get_next_value($db, $mask, 'doliproject_myobject', 'ref', '', null, $date);
+		$numFinal = get_next_value($db, $mask, 'doliproject_timesheet', 'ref', '', null, $date);
 
 		return  $numFinal;
 	}
