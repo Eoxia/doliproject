@@ -816,10 +816,17 @@ function setCategoriesObject($categories, $type_categ = '', $remove_existing = t
  * @param	Extrafields	$extrafields		    Object extrafields
  * @return  array								Array with time spent for $fuser for each day of week on tasks in $lines and substasks
  */
-function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lines, &$level, &$projectsrole, &$tasksrole, $mine, $restricteditformytask, &$isavailable, $oldprojectforbreak = 0, $arrayfields = array(), $extrafields = null, $dayInMonth)
+function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lines, &$level, &$projectsrole, &$tasksrole, $mine, $restricteditformytask, &$isavailable, $oldprojectforbreak = 0, $arrayfields = array(), $extrafields = null, $dayInMonth, $noprint = 0)
 {
 	global $conf, $db, $user, $langs;
-	global $form, $formother, $projectstatic, $taskstatic, $thirdpartystatic;
+
+	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
+
+	$form             = new Form($db);
+	$formother        = new FormOther($db);
+	$projectstatic    = new Project($db);
+	$taskstatic       = new Task($db);
+	$thirdpartystatic = new Societe($db);
 
 	$numlines = count($lines);
 
@@ -862,7 +869,7 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 			if (empty($mine) || !empty($tasksrole[$lines[$i]->id])) {
 				//dol_syslog("projectLinesPerWeek Found line ".$i.", a qualified task (i have role or want to show all tasks) with id=".$lines[$i]->id." project id=".$lines[$i]->fk_project);
 
-				if ($restricteditformytask == 2 && empty($tasksrole[$lines[$i]->id])) {	// we have no role on task and we request to hide such cases
+				if ($restricteditformytask == 2 && empty($tasksrole[$lines[$i]->id])) {    // we have no role on task and we request to hide such cases
 					continue;
 				}
 
@@ -871,6 +878,7 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 					$lastprojectid = $lines[$i]->fk_project;
 					$projectstatic->id = $lines[$i]->fk_project;
 				}
+
 
 				//var_dump('--- '.$level.' '.$firstdaytoshow.' '.$fuser->id.' '.$projectstatic->id.' '.$workloadforid[$projectstatic->id]);
 				//var_dump($projectstatic->monthWorkLoadPerTask);
@@ -920,15 +928,17 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 						$taskfavorite = 1;
 					}
 
-					print '<tr class="oddeven trforbreak nobold"'.(!$taskfavorite ? 'style="display:none;"': '').'>'."\n";
-					print '<td colspan="'.(2 + $addcolspan + $dayInMonth).'">';
-					print $projectstatic->getNomUrl(1, '', 0, '<strong>'.$langs->transnoentitiesnoconv("YourRole").':</strong> '.$projectsrole[$lines[$i]->fk_project]);
-					if ($thirdpartystatic->id > 0) {
-						print ' - '.$thirdpartystatic->getNomUrl(1);
-					}
-					if ($projectstatic->title) {
-						print ' - ';
-						print '<span class="secondary" title="'.$projectstatic->title.'">'.dol_trunc($projectstatic->title, '64').'</span>';
+					if (!$noprint) {
+						print '<tr class="oddeven trforbreak nobold"' . (!$taskfavorite ? 'style="display:none;"' : '') . '>' . "\n";
+						print '<td colspan="' . (2 + $addcolspan + $dayInMonth) . '">';
+						print $projectstatic->getNomUrl(1, '', 0, '<strong>' . $langs->transnoentitiesnoconv("YourRole") . ':</strong> ' . $projectsrole[$lines[$i]->fk_project]);
+						if ($thirdpartystatic->id > 0) {
+							print ' - ' . $thirdpartystatic->getNomUrl(1);
+						}
+						if ($projectstatic->title) {
+							print ' - ';
+							print '<span class="secondary" title="' . $projectstatic->title . '">' . dol_trunc($projectstatic->title, '64') . '</span>';
+						}
 					}
 
 					/*$colspan=5+(empty($conf->global->PROJECT_TIMESHEET_DISABLEBREAK_ON_PROJECT)?0:2);
@@ -990,9 +1000,10 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 					print '</tr>';
 					print '</table>';
 					*/
-
-					print '</td>';
-					print '</tr>';
+					if (!$noprint) {
+						print '</td>';
+						print '</tr>';
+					}
 				}
 
 				if ($oldprojectforbreak != -1) {
@@ -1005,92 +1016,96 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 					$taskfavorite = 1;
 				}
 
-				print '<tr class="oddeven"'.(!$taskfavorite ? 'style="display:none;"': '').'data-taskid="'.$lines[$i]->id.'" >'."\n";
+				if (!$noprint) {
+					print '<tr class="oddeven"' . (!$taskfavorite ? 'style="display:none;"' : '') . 'data-taskid="' . $lines[$i]->id . '" >' . "\n";
+				}
 
-				// User
-				/*
-				print '<td class="nowrap">';
-				print $fuser->getNomUrl(1, 'withproject', 'time');
-				print '</td>';
-				*/
-
-				// Project
-				if (!empty($conf->global->PROJECT_TIMESHEET_DISABLEBREAK_ON_PROJECT)) {
+				if (!$noprint) {
+					// User
+					/*
 					print '<td class="nowrap">';
-					if ($oldprojectforbreak == -1) {
-						print $projectstatic->getNomUrl(1, '', 0, $langs->transnoentitiesnoconv("YourRole").': '.$projectsrole[$lines[$i]->fk_project]);
-					}
-					print "</td>";
-				}
-
-				// Thirdparty
-				if (!empty($conf->global->PROJECT_TIMESHEET_DISABLEBREAK_ON_PROJECT)) {
-					print '<td class="tdoverflowmax100">';
-					if ($thirdpartystatic->id > 0) {
-						print $thirdpartystatic->getNomUrl(1, 'project');
-					}
+					print $fuser->getNomUrl(1, 'withproject', 'time');
 					print '</td>';
-				}
+					*/
 
-				// Ref
-				print '<td class="nowrap">';
-				print '<!-- Task id = '.$lines[$i]->id.' -->';
-				for ($k = 0; $k < $level; $k++) {
-					print '<div class="marginleftonly">';
-				}
-				print $taskstatic->getNomUrl(1, 'withproject', 'time');
-				// Label task
-				print '<br>';
-				print '<span class="opacitymedium" title="'.$taskstatic->label.'">'.dol_trunc($taskstatic->label, '64').'</span>';
-				for ($k = 0; $k < $level; $k++) {
-					print "</div>";
-				}
-				print "</td>\n";
-
-				// TASK extrafields
-				$extrafieldsobjectkey = 'projet_task';
-				$extrafieldsobjectprefix = 'efpt.';
-				include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_print_fields.tpl.php';
-
-				// Planned Workload
-				if (!empty($arrayfields['t.planned_workload']['checked'])) {
-					print '<td class="leftborder plannedworkload right">';
-					if ($lines[$i]->planned_workload) {
-						print convertSecondToTime($lines[$i]->planned_workload, 'allhourmin');
-					} else {
-						print '--:--';
+					// Project
+					if (!empty($conf->global->PROJECT_TIMESHEET_DISABLEBREAK_ON_PROJECT)) {
+						print '<td class="nowrap">';
+						if ($oldprojectforbreak == -1) {
+							print $projectstatic->getNomUrl(1, '', 0, $langs->transnoentitiesnoconv("YourRole") . ': ' . $projectsrole[$lines[$i]->fk_project]);
+						}
+						print "</td>";
 					}
-					print '</td>';
-				}
 
-				if (!empty($arrayfields['t.progress']['checked'])) {
-					// Progress declared %
-					print '<td class="right">';
-					print $formother->select_percent($lines[$i]->progress, $lines[$i]->id.'progress');
-					print '</td>';
-				}
-
-				if (!empty($arrayfields['timeconsumed']['checked'])) {
-					// Time spent by user
-					print '<td class="right">';
-					$firstday = dol_print_date($firstdaytoshow, 'dayrfc');
-					$currentMonth = date( 'm', dol_now());
-					$year  = GETPOST('reyear', 'int') ?GETPOST('reyear', 'int') : (GETPOST("year", 'int') ?GETPOST("year", "int") : date("Y"));
-					$month = GETPOST('remonth', 'int') ?GETPOST('remonth', 'int') : (GETPOST("month", 'int') ?GETPOST("month", "int") : date("m"));
-					if ($currentMonth == $month) {
-						$lastday = dol_print_date(dol_now(), 'dayrfc');
-					} else {
-						$lastdaytoshow =  dol_get_last_day($year, $month);
-						$lastday = dol_print_date($lastdaytoshow, 'dayrfc');
+					// Thirdparty
+					if (!empty($conf->global->PROJECT_TIMESHEET_DISABLEBREAK_ON_PROJECT)) {
+						print '<td class="tdoverflowmax100">';
+						if ($thirdpartystatic->id > 0) {
+							print $thirdpartystatic->getNomUrl(1, 'project');
+						}
+						print '</td>';
 					}
-					$filter = ' AND t.task_datehour BETWEEN ' . "'" . $firstday . "'" . ' AND ' . "'" . $lastday . "'";
-					$tmptimespent = $taskstatic->getSummaryOfTimeSpent($fuser->id, $filter);
-					if ($tmptimespent['total_duration']) {
-						print convertSecondToTime($tmptimespent['total_duration'], 'allhourmin');
-					} else {
-						print '--:--';
+
+					// Ref
+					print '<td class="nowrap">';
+					print '<!-- Task id = ' . $lines[$i]->id . ' -->';
+					for ($k = 0; $k < $level; $k++) {
+						print '<div class="marginleftonly">';
+					}
+					print $taskstatic->getNomUrl(1, 'withproject', 'time');
+					// Label task
+					print '<br>';
+					print '<span class="opacitymedium" title="' . $taskstatic->label . '">' . dol_trunc($taskstatic->label, '64') . '</span>';
+					for ($k = 0; $k < $level; $k++) {
+						print "</div>";
 					}
 					print "</td>\n";
+
+					// TASK extrafields
+					$extrafieldsobjectkey = 'projet_task';
+					$extrafieldsobjectprefix = 'efpt.';
+					include DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_list_print_fields.tpl.php';
+
+					// Planned Workload
+					if (!empty($arrayfields['t.planned_workload']['checked'])) {
+						print '<td class="leftborder plannedworkload right">';
+						if ($lines[$i]->planned_workload) {
+							print convertSecondToTime($lines[$i]->planned_workload, 'allhourmin');
+						} else {
+							print '--:--';
+						}
+						print '</td>';
+					}
+
+					if (!empty($arrayfields['t.progress']['checked'])) {
+						// Progress declared %
+						print '<td class="right">';
+						print $formother->select_percent($lines[$i]->progress, $lines[$i]->id . 'progress');
+						print '</td>';
+					}
+
+					if (!empty($arrayfields['timeconsumed']['checked'])) {
+						// Time spent by user
+						print '<td class="right">';
+						$firstday = dol_print_date($firstdaytoshow, 'dayrfc');
+						$currentMonth = date('m', dol_now());
+						$year = GETPOST('reyear', 'int') ? GETPOST('reyear', 'int') : (GETPOST("year", 'int') ? GETPOST("year", "int") : date("Y"));
+						$month = GETPOST('remonth', 'int') ? GETPOST('remonth', 'int') : (GETPOST("month", 'int') ? GETPOST("month", "int") : date("m"));
+						if ($currentMonth == $month) {
+							$lastday = dol_print_date(dol_now(), 'dayrfc');
+						} else {
+							$lastdaytoshow = dol_get_last_day($year, $month);
+							$lastday = dol_print_date($lastdaytoshow, 'dayrfc');
+						}
+						$filter = ' AND t.task_datehour BETWEEN ' . "'" . $firstday . "'" . ' AND ' . "'" . $lastday . "'";
+						$tmptimespent = $taskstatic->getSummaryOfTimeSpent($fuser->id, $filter);
+						if ($tmptimespent['total_duration']) {
+							print convertSecondToTime($tmptimespent['total_duration'], 'allhourmin');
+						} else {
+							print '--:--';
+						}
+						print "</td>\n";
+					}
 				}
 
 				$disabledproject = 1;
@@ -1160,24 +1175,28 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 					$tableCell .= ' onkeyup="updateTotal('.$idw.',\''.$modeinput.'\')"';
 					$tableCell .= ' onblur="regexEvent(this,event,\''.$modeinput.'\'); updateTotal('.$idw.',\''.$modeinput.'\')" />';
 					$tableCell .= '</td>';
-					print $tableCell;
-				}
-
-				// Warning
-				print '<td class="right">';
-				if ((!$lines[$i]->public) && $disabledproject) {
-					print $form->textwithpicto('', $langs->trans("UserIsNotContactOfProject"));
-				} elseif ($disabledtask) {
-					$titleassigntask = $langs->trans("AssignTaskToMe");
-					if ($fuser->id != $user->id) {
-						$titleassigntask = $langs->trans("AssignTaskToUser", '...');
+					if (!$noprint) {
+						print $tableCell;
 					}
-
-					print $form->textwithpicto('', $langs->trans("TaskIsNotAssignedToUser", $titleassigntask));
 				}
-				print '</td>';
 
-				print "</tr>\n";
+				if (!$noprint) {
+					// Warning
+					print '<td class="right">';
+					if ((!$lines[$i]->public) && $disabledproject) {
+						print $form->textwithpicto('', $langs->trans("UserIsNotContactOfProject"));
+					} elseif ($disabledtask) {
+						$titleassigntask = $langs->trans("AssignTaskToMe");
+						if ($fuser->id != $user->id) {
+							$titleassigntask = $langs->trans("AssignTaskToUser", '...');
+						}
+
+						print $form->textwithpicto('', $langs->trans("TaskIsNotAssignedToUser", $titleassigntask));
+					}
+					print '</td>';
+
+					print "</tr>\n";
+				}
 			}
 
 			// Call to show task with a lower level (task under the current task)
@@ -1805,7 +1824,7 @@ function doliprojectshowdocuments($modulepart, $modulesubdir, $filedir, $urlsour
 		if ( ! empty($modellist)) {
 			asort($modellist);
 			$out      .= '<span class="hideonsmartphone">' . $langs->trans('Model') . ' </span>';
-			$modellist = array_filter($modellist, 'remove_index');
+			$modellist = array_filter($modellist, 'remove_indexdoliproject');
 			if (is_array($modellist) && count($modellist) == 1) {    // If there is only one element
 				$arraykeys                = array_keys($modellist);
 				$arrayvalues              = preg_replace('/template_/', '', array_values($modellist)[0]);
@@ -2000,7 +2019,7 @@ function doliprojectshowdocuments($modulepart, $modulesubdir, $filedir, $urlsour
  * @param   string $model
  * @return  '' or $model
  */
-function remove_index($model)
+function remove_indexdoliproject($model)
 {
 	if (preg_match('/index.php/', $model)) {
 		return '';
