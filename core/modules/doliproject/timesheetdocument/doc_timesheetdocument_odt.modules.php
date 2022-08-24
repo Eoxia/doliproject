@@ -29,6 +29,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/doc.lib.php';
 
 require_once __DIR__ . '/modules_timesheetdocument.php';
+require_once DOL_DOCUMENT_ROOT.'/custom/doliproject/class/workinghours.class.php';
 
 /**
  *	Class to build documents using ODF templates generator
@@ -397,25 +398,80 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 				$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray);
 				$reshook = $hookmanager->executeHooks('ODTSubstitution', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
 
+				require_once DOL_DOCUMENT_ROOT.'/holiday/class/holiday.class.php';
+
 				$usertmp     = new User($this->db);
 				$task        = new Task($this->db);
 				$project     = new Project($this->db);
 				$extrafields = new ExtraFields($this->db);
+				$holiday     = new Holiday($this->db);
 
 				$usertmp->fetch($object->fk_user_assign);
 				$now = dol_now();
+				$extrafields->fetch_name_optionals_label($task->table_element);
+				$arrayfields = array();
+				$arrayfields['timeconsumed'] = array('label'=>'TimeConsumed', 'checked'=>1, 'enabled'=>1, 'position'=>15);
+				if (!empty($extrafields->attributes['projet_task']['label']) && is_array($extrafields->attributes['projet_task']['label']) && count($extrafields->attributes['projet_task']['label']) > 0) {
+					foreach ($extrafields->attributes['projet_task']['label'] as $key => $val) {
+						if (!empty($extrafields->attributes['projet_task']['list'][$key])) {
+							$arrayfields["efpt.".$key] = array('label'=>$extrafields->attributes['projet_task']['label'][$key], 'checked'=>(($extrafields->attributes['projet_task']['list'][$key] < 0) ? 0 : 1), 'position'=>$extrafields->attributes['projet_task']['pos'][$key], 'enabled'=>(abs((int) $extrafields->attributes['projet_task']['list'][$key]) != 3 && $extrafields->attributes['projet_task']['perms'][$key]));
+						}
+					}
+				}
+				$arrayfields = dol_sort_array($arrayfields, 'position');
 
-				$datestart       = dol_getdate($object->date_start, false, 'Europe/Paris');
-				$firstdaytoshow  = dol_get_first_day($datestart['year'], $datestart['mon']);
-				$dayInMonth      = cal_days_in_month(CAL_GREGORIAN, $datestart['mon'], $datestart['year']);
+
+				$datestart          = dol_getdate($object->date_start, false, 'Europe/Paris');
+				$firstdaytoshow     = dol_get_first_day($datestart['year'], $datestart['mon']);
+				$firstdaytoshowgmt  = dol_get_first_day($datestart['year'], $datestart['mon'], true);
+				$dayInMonth         = cal_days_in_month(CAL_GREGORIAN, $datestart['mon'], $datestart['year']);
 
 				$tasksarray = $task->getTasksArray(0, 0, ($project->id ?: 0), 0, 0, '', '', '',  $object->fk_user_assign, 0, $extrafields);
 
+				$isavailable = array();
+
+				for ($idw = 0; $idw < $dayInMonth; $idw++) {
+					$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
+					$dayinloopfromfirstdaytoshowgmt = dol_time_plus_duree($firstdaytoshowgmt, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
+
+					$statusofholidaytocheck = Holiday::STATUS_APPROVED;
+
+					$isavailablefordayanduser = $holiday->verifDateHolidayForTimestamp($object->fk_user_assign, $dayinloopfromfirstdaytoshow, $statusofholidaytocheck);
+					$isavailable[$dayinloopfromfirstdaytoshow] = $isavailablefordayanduser; // in projectLinesPerWeek later, we are using $firstdaytoshow and dol_time_plus_duree to loop on each day
+
+					$test = num_public_holiday($dayinloopfromfirstdaytoshowgmt, $dayinloopfromfirstdaytoshowgmt + 86400, $mysoc->country_code);
+					if ($test) {
+						$isavailable[$dayinloopfromfirstdaytoshow] = array('morning'=>false, 'afternoon'=>false, 'morning_reason'=>'public_holiday', 'afternoon_reason'=>'public_holiday');
+					}
+				}
+
+
 				$j = 0;
 				$level = 0;
-				$totalforvisibletasks = projectLinesPerDayOnMonth($j, $firstdaytoshow, $object->fk_user_assign, 0, $tasksarray, $level, $projectsrole, $tasksrole, 0, $restrictviewformytask, $isavailable, 0, $arrayfields, $extrafields, $dayInMonth);
+				//echo '<pre>'; print_r( count($tasksarray) ); echo '</pre>'; exit;
+				$projectsrole = $task->getUserRolesForProjectsOrTasks($usertmp, 0, ($project->id ?: 0), 0, 1);
+				$tasksrole = $task->getUserRolesForProjectsOrTasks(0, $usertmp, ($project->id ?: 0), 0, 1);
 
-				echo '<pre>'; print_r( $totalforvisibletasks ); echo '</pre>'; exit;
+				$restrictviewformytask = ((!isset($conf->global->PROJECT_TIME_SHOW_TASK_NOT_ASSIGNED)) ? 2 : $conf->global->PROJECT_TIME_SHOW_TASK_NOT_ASSIGNED);
+
+				$mine = 0;
+
+//				echo '<pre>'; print_r( $j ); echo '</pre>';
+//				echo '<pre>'; print_r( $firstdaytoshow ); echo '</pre>';
+//				echo '<pre>'; print_r($object->fk_user_assign ); echo '</pre>';
+//				echo '<pre>'; print_r( count($tasksarray) ); echo '</pre>';
+//				echo '<pre>'; print_r( $level ); echo '</pre>';
+//				echo '<pre>'; print_r( $projectsrole ); echo '</pre>';
+//				echo '<pre>'; print_r( $tasksrole ); echo '</pre>';
+//				echo '<pre>'; print_r( $mine ); echo '</pre>';
+//				echo '<pre>'; print_r( $restrictviewformytask ); echo '</pre>';
+//				echo '<pre>'; print_r( $isavailable ); echo '</pre>';
+//				echo '<pre>'; print_r( $arrayfields ); echo '</pre>';
+//				echo '<pre>'; print_r( $dayInMonth ); echo '</pre>'; exit;
+
+				$totalforvisibletasks = projectLinesPerDayOnMonth($j, $firstdaytoshow, $usertmp, 0, $tasksarray, $level, $projectsrole, $tasksrole, 0, $restrictviewformytask, $isavailable, 0, array(), $extrafields, $dayInMonth, 1);
+
+			//echo '<pre>'; print_r( $totalforvisibletasks ); echo '</pre>'; exit;
 
 
 
@@ -457,8 +513,229 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 					if ($foundtagforlines) {
 						$linenumber = 0;
 						for ($idw = 0; $idw <= $dayInMonth; $idw++) {
-							$dayinloopfromfirstdaytoshow = dol_time_plus_duree($object->date_start, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
+							$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
+							$idw++;
 							$tmparray['day'.$idw] = dol_print_date($dayinloopfromfirstdaytoshow, '%a');
+							$idw--;
+						}
+
+//						$linenumber++;
+//						$tmparray = $this->get_substitutionarray_lines($line, $outputlangs, $linenumber);
+//						complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
+
+						unset($tmparray['object_fields']);
+
+						// Call the ODTSubstitutionLine hook
+						$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);
+						$reshook = $hookmanager->executeHooks('ODTSubstitutionLine', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
+						foreach ($tmparray as $key => $val) {
+							try {
+								$listlines->setVars($key, $val, true, 'UTF-8');
+							} catch (OdfException $e) {
+								dol_syslog($e->getMessage(), LOG_INFO);
+							} catch (SegmentException $e) {
+								dol_syslog($e->getMessage(), LOG_INFO);
+							}
+						}
+						$listlines->merge();
+						$odfHandler->mergeSegment($listlines);
+					}
+
+					$filter = ' AND p.rowid != ' . $conf->global->DOLIPROJECT_HR_PROJECT;
+					$tasksArray = $task->getTasksArray(0, 0, 0, 0, 0, '', '', $filter,  $object->fk_user_assign, 0, $extrafields);
+					if (is_array($tasksArray) && !empty($tasksArray)) {
+						foreach ($tasksArray as $tasksingle) {
+							$foundtagforlines = 1;
+							try {
+								$listlines = $odfHandler->setSegment('times');
+							} catch (OdfException $e) {
+								// We may arrive here if tags for lines not present into template
+								$foundtagforlines = 0;
+								dol_syslog($e->getMessage(), LOG_INFO);
+							}
+							if ($foundtagforlines) {
+								$linenumber = 0;
+
+								$project->fetch($tasksingle->fk_project);
+
+								loadTimeSpentMonthByDay($firstdaytoshow, $tasksingle->id, $object->fk_user_assign, $project);
+
+								for ($idw = 0; $idw <= $dayInMonth; $idw++) {
+									$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
+									$idw++;
+									$tmparray['task_ref']   = $tasksingle->ref;
+									$tmparray['task_label'] = dol_trunc($tasksingle->label, 16);
+									$tmparray['time'.$idw]  = (($project->monthWorkLoadPerTask[$dayinloopfromfirstdaytoshow][$tasksingle->id] != 0 ) ? convertSecondToTime($project->monthWorkLoadPerTask[$dayinloopfromfirstdaytoshow][$tasksingle->id], 'allhourmin') : '00:00');
+									$idw--;
+								}
+
+//						$linenumber++;
+//						$tmparray = $this->get_substitutionarray_lines($line, $outputlangs, $linenumber);
+//						complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
+
+								unset($tmparray['object_fields']);
+
+								// Call the ODTSubstitutionLine hook
+								$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);
+								$reshook = $hookmanager->executeHooks('ODTSubstitutionLine', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
+								foreach ($tmparray as $key => $val) {
+									try {
+										$listlines->setVars($key, $val, true, 'UTF-8');
+									} catch (OdfException $e) {
+										dol_syslog($e->getMessage(), LOG_INFO);
+									} catch (SegmentException $e) {
+										dol_syslog($e->getMessage(), LOG_INFO);
+									}
+								}
+								$listlines->merge();
+							}
+						}
+						$odfHandler->mergeSegment($listlines);
+					}
+
+					$project->fetch($conf->global->DOLIPROJECT_HR_PROJECT);
+
+					$tmparray['project_rh_ref'] = $project->ref;
+					$tmparray['project_rh']     = $project->title;
+
+					foreach ($tmparray as $key => $value) {
+						try {
+							if (preg_match('/logo$/', $key)) {
+								// Image
+								if (file_exists($value)) {
+									$odfHandler->setImage($key, $value);
+								} else {
+									$odfHandler->setVars($key, 'ErrorFileNotFound', true, 'UTF-8');
+								}
+							} else {
+								// Text
+								$odfHandler->setVars($key, $value, true, 'UTF-8');
+							}
+						} catch (OdfException $e) {
+							dol_syslog($e->getMessage(), LOG_INFO);
+						}
+					}
+
+					$tasksArray = $task->getTasksArray(0, 0, ($project->id ?: 0), 0, 0, '', '', '',  $object->fk_user_assign, 0, $extrafields);
+					$segment = array(
+						array(
+						'csss',
+						'cps',
+						'rtts',
+						'jfs',
+						'cms',
+						),
+						array(
+							'css',
+							'cp',
+							'rtt',
+							'jf',
+							'cm',
+						)
+					);
+					$i = 0;
+					if (is_array($tasksArray) && !empty($tasksArray)) {
+						foreach ($tasksArray as $tasksingle) {
+							$foundtagforlines = 1;
+							try {
+								$listlines = $odfHandler->setSegment($segment[0][$i]);
+							} catch (OdfException $e) {
+								// We may arrive here if tags for lines not present into template
+								$foundtagforlines = 0;
+								dol_syslog($e->getMessage(), LOG_INFO);
+							}
+							if ($foundtagforlines) {
+								$linenumber = 0;
+
+								loadTimeSpentMonthByDay($firstdaytoshow, $tasksingle->id, $object->fk_user_assign, $project);
+
+								//echo '<pre>'; print_r($project->monthWorkLoad); echo '</pre>';
+
+								for ($idw = 0; $idw <= $dayInMonth; $idw++) {
+									$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
+									$idw++;
+									$tmparray[$segment[1][$i].$idw] = (($project->monthWorkLoadPerTask[$dayinloopfromfirstdaytoshow][$tasksingle->id] != 0 ) ? convertSecondToTime($project->monthWorkLoadPerTask[$dayinloopfromfirstdaytoshow][$tasksingle->id], 'allhourmin') : '00:00');
+									$idw--;
+								}
+
+//						$linenumber++;
+//						$tmparray = $this->get_substitutionarray_lines($line, $outputlangs, $linenumber);
+//						complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
+
+								unset($tmparray['object_fields']);
+
+								// Call the ODTSubstitutionLine hook
+								$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);
+								$reshook = $hookmanager->executeHooks('ODTSubstitutionLine', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
+								foreach ($tmparray as $key => $val) {
+									try {
+										$listlines->setVars($key, $val, true, 'UTF-8');
+									} catch (OdfException $e) {
+										dol_syslog($e->getMessage(), LOG_INFO);
+									} catch (SegmentException $e) {
+										dol_syslog($e->getMessage(), LOG_INFO);
+									}
+								}
+								$listlines->merge();
+								$odfHandler->mergeSegment($listlines);
+							}
+							$i++;
+						}
+					}
+
+					$foundtagforlines = 1;
+					try {
+						$listlines = $odfHandler->setSegment('totalrhs');
+					} catch (OdfException $e) {
+						// We may arrive here if tags for lines not present into template
+						$foundtagforlines = 0;
+						dol_syslog($e->getMessage(), LOG_INFO);
+					}
+					if ($foundtagforlines) {
+						$linenumber = 0;
+						for ($idw = 0; $idw <= $dayInMonth; $idw++) {
+							$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
+							$idw++;
+							$tmparray['totalrh'.$idw] = (($project->monthWorkLoad[$dayinloopfromfirstdaytoshow] != 0 ) ? convertSecondToTime($project->monthWorkLoad[$dayinloopfromfirstdaytoshow], 'allhourmin') : '00:00');
+							$idw--;
+						}
+
+//						$linenumber++;
+//						$tmparray = $this->get_substitutionarray_lines($line, $outputlangs, $linenumber);
+//						complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
+
+						unset($tmparray['object_fields']);
+
+						// Call the ODTSubstitutionLine hook
+						$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);
+						$reshook = $hookmanager->executeHooks('ODTSubstitutionLine', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
+						foreach ($tmparray as $key => $val) {
+							try {
+								$listlines->setVars($key, $val, true, 'UTF-8');
+							} catch (OdfException $e) {
+								dol_syslog($e->getMessage(), LOG_INFO);
+							} catch (SegmentException $e) {
+								dol_syslog($e->getMessage(), LOG_INFO);
+							}
+						}
+						$listlines->merge();
+						$odfHandler->mergeSegment($listlines);
+					}
+					$foundtagforlines = 1;
+					try {
+						$listlines = $odfHandler->setSegment('totaltpss');
+					} catch (OdfException $e) {
+						// We may arrive here if tags for lines not present into template
+						$foundtagforlines = 0;
+						dol_syslog($e->getMessage(), LOG_INFO);
+					}
+					if ($foundtagforlines) {
+						$linenumber = 0;
+						for ($idw = 0; $idw <= $dayInMonth; $idw++) {
+							$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
+							$idw++;
+							$tmparray['totaltps'.$idw] = (($totalforvisibletasks[$dayinloopfromfirstdaytoshow] != 0 ) ? convertSecondToTime($totalforvisibletasks[$dayinloopfromfirstdaytoshow], 'allhourmin') : '00:00');
+							$idw--;
 						}
 
 //						$linenumber++;
@@ -485,7 +762,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 
 					$foundtagforlines = 1;
 					try {
-						$listlines = $odfHandler->setSegment('tasks');
+						$listlines = $odfHandler->setSegment('totaltimes');
 					} catch (OdfException $e) {
 						// We may arrive here if tags for lines not present into template
 						$foundtagforlines = 0;
@@ -493,32 +770,144 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 					}
 					if ($foundtagforlines) {
 						$linenumber = 0;
-						for ($idw = 0; $idw < 10; $idw++) {
-							$dayinloopfromfirstdaytoshow = dol_time_plus_duree($object->date_start, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
-							$tmparray['task_ref'] = $task->ref;
 
-//							$linenumber++;
-//							$tmparray = $this->get_substitutionarray_lines($line, $outputlangs, $linenumber);
-//							complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
+						for ($idw = 0; $idw <= $dayInMonth; $idw++) {
+							$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
 
-							unset($tmparray['object_fields']);
+							$totaltime = $totalforvisibletasks[$dayinloopfromfirstdaytoshow] - $project->monthWorkLoad[$dayinloopfromfirstdaytoshow];
 
-							// Call the ODTSubstitutionLine hook
-							$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);
-							$reshook = $hookmanager->executeHooks('ODTSubstitutionLine', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
-							foreach ($tmparray as $key => $val) {
-								try {
-									$listlines->setVars($key, $val, true, 'UTF-8');
-								} catch (OdfException $e) {
-									dol_syslog($e->getMessage(), LOG_INFO);
-								} catch (SegmentException $e) {
-									dol_syslog($e->getMessage(), LOG_INFO);
-								}
-							}
-							$listlines->merge();
+							$idw++;
+							$tmparray['totaltime'.$idw] = (($totaltime != 0 ) ? convertSecondToTime($totaltime, 'allhourmin') : '00:00');
+							$idw--;
 						}
+
+//						$linenumber++;
+//						$tmparray = $this->get_substitutionarray_lines($line, $outputlangs, $linenumber);
+//						complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
+
+						unset($tmparray['object_fields']);
+
+						// Call the ODTSubstitutionLine hook
+						$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);
+						$reshook = $hookmanager->executeHooks('ODTSubstitutionLine', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
+						foreach ($tmparray as $key => $val) {
+							try {
+								$listlines->setVars($key, $val, true, 'UTF-8');
+							} catch (OdfException $e) {
+								dol_syslog($e->getMessage(), LOG_INFO);
+							} catch (SegmentException $e) {
+								dol_syslog($e->getMessage(), LOG_INFO);
+							}
+						}
+						$listlines->merge();
 						$odfHandler->mergeSegment($listlines);
 					}
+
+					$foundtagforlines = 1;
+					try {
+						$listlines = $odfHandler->setSegment('tas');
+					} catch (OdfException $e) {
+						// We may arrive here if tags for lines not present into template
+						$foundtagforlines = 0;
+						dol_syslog($e->getMessage(), LOG_INFO);
+					}
+					if ($foundtagforlines) {
+						$linenumber = 0;
+
+						$workinghours = new Workinghours($this->db);
+						$workinghoursArray = $workinghours->fetchCurrentWorkingHours($object->fk_user_assign, 'user');
+						$workinghoursMonth = 0;
+
+						for ($idw = 0; $idw <= $dayInMonth; $idw++) {
+							$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');  // $firstdaytoshow is a date with hours = 0
+							if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+								$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+								$currentDay = 'workinghours_' . strtolower($currentDay);
+								$workinghoursMonth = $workinghoursArray->{$currentDay} * 60;
+							} else {
+								$workinghoursMonth = 0;
+							}
+							$idw++;
+							$tmparray['ta'.$idw] = (($workinghoursMonth != 0 ) ? convertSecondToTime($workinghoursMonth, 'allhourmin') : '00:00');
+							$idw--;
+						}
+
+//						$linenumber++;
+//						$tmparray = $this->get_substitutionarray_lines($line, $outputlangs, $linenumber);
+//						complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
+
+						unset($tmparray['object_fields']);
+
+						// Call the ODTSubstitutionLine hook
+						$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);
+						$reshook = $hookmanager->executeHooks('ODTSubstitutionLine', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
+						foreach ($tmparray as $key => $val) {
+							try {
+								$listlines->setVars($key, $val, true, 'UTF-8');
+							} catch (OdfException $e) {
+								dol_syslog($e->getMessage(), LOG_INFO);
+							} catch (SegmentException $e) {
+								dol_syslog($e->getMessage(), LOG_INFO);
+							}
+						}
+						$listlines->merge();
+						$odfHandler->mergeSegment($listlines);
+					}
+
+					$foundtagforlines = 1;
+					try {
+						$listlines = $odfHandler->setSegment('diffs');
+					} catch (OdfException $e) {
+						// We may arrive here if tags for lines not present into template
+						$foundtagforlines = 0;
+						dol_syslog($e->getMessage(), LOG_INFO);
+					}
+					if ($foundtagforlines) {
+						$linenumber = 0;
+
+						$workinghours = new Workinghours($this->db);
+						$workinghoursArray = $workinghours->fetchCurrentWorkingHours($object->fk_user_assign, 'user');
+						$workinghoursMonth = 0;
+
+						for ($idw = 0; $idw <= $dayInMonth; $idw++) {
+							$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');  // $firstdaytoshow is a date with hours = 0
+							if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+								$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+								$currentDay = 'workinghours_' . strtolower($currentDay);
+								$workinghoursMonth = $workinghoursArray->{$currentDay} * 60;
+							} else {
+								$workinghoursMonth = 0;
+							}
+
+							$difftotaltime = $workinghoursMonth - $totalforvisibletasks[$dayinloopfromfirstdaytoshow];
+							$idw++;
+							$tmparray['diff'.$idw] .= (($difftotaltime != 0 ) ? convertSecondToTime(abs($difftotaltime), 'allhourmin') : '00:00');
+							$idw--;
+						}
+
+//						$linenumber++;
+//						$tmparray = $this->get_substitutionarray_lines($line, $outputlangs, $linenumber);
+//						complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
+
+						unset($tmparray['object_fields']);
+
+						// Call the ODTSubstitutionLine hook
+						$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);
+						$reshook = $hookmanager->executeHooks('ODTSubstitutionLine', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
+
+						foreach ($tmparray as $key => $val) {
+							try {
+								$listlines->setVars($key, $val, true, 'UTF-8');
+							} catch (OdfException $e) {
+								dol_syslog($e->getMessage(), LOG_INFO);
+							} catch (SegmentException $e) {
+								dol_syslog($e->getMessage(), LOG_INFO);
+							}
+						}
+						$listlines->merge();
+						$odfHandler->mergeSegment($listlines);
+					}
+
 				} catch (OdfException $e) {
 					$this->error = $e->getMessage();
 					dol_syslog($this->error, LOG_WARNING);
