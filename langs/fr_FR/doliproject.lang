@@ -63,9 +63,12 @@ ErrorServiceTime = Le temps du(des) service(s) est nul
 MessageTimeSpentCreate = Temps consommé crée
 MessageNoTaskLink = Pas de tâche affectée, pas de temps passé disponible
 
-DoliprojectTimeSpent=Rapport de temps passé
+DoliprojectTimeSpent = Rapport de temps passé
 ActionAC_TEL_IN = Appel téléphonique entrant
 ActionAC_TEL_OUT = Appel téléphonique sortant
+DoliProjectConfig = Configuration
+DoliProjectArea  = Bienvenue sur DoliProject
+
 
 #
 # Temps consommé
@@ -159,3 +162,31 @@ TimeSheetDocumentDoliProjectTemplate = ODT par défaut des fiches de navette
 # Data - Donnée
 TimeSheetDocument = Fiche de Navette
 
+
+#
+# TimeSheet - Navette
+#
+
+# Right - Droit
+ReadTimeSheet = Consulter la navette
+CreateTimeSheet = Créer/Modifier la navette
+DeleteTimeSheet = Supprimer la navette
+
+# Trigger - Déclencheur
+TimeSheetDocumentGeneratedWithDolibarr = Fiche de navette générée avec Dolibarr
+
+# Mod Numbering - Modèle de numérotation
+DoliProjectTimeSheetDocumentDocumentNumberingModule = Modèle de numérotation des fiches de navette de DoliProject
+DoliProjectTimeSheetDocumentStandardModel = Renvoie le numéro sous la forme TSDn où n est un compteur séquentiel sans rupture et sans remise à 0.
+
+# ODT Template - Template ODT
+DoliProjectTemplateDocumentTimeSheetDocument = Modèle de documents des fiches de navette de DoliProject
+TimeSheetDocumentCustomDoliProjectTemplate = ODT custom des fiches de navette
+TimeSheetDocumentDoliProjectTemplate = ODT par défaut des fiches de navette
+
+# Data - Donnée
+TimeSheet = Navette
+NewTimeSheet = Nouvelle navette
+ModifyTimeSheet = modifer la navette
+TimeSheetList = Liste des navettes
+UserAssign = Utilisateur assigné
