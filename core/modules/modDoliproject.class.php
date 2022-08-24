@@ -185,26 +185,31 @@ class modDoliproject extends DolibarrModules
 		$langs->load('doliproject@doliproject');
 		// Add here entries to declare new menus
 		/* BEGIN MODULEBUILDER TOPMENU */
+		$pictopath = dol_buildpath('/custom/doliproject/img/doliproject32px.png', 1);
+		$pictoDoliProject = img_picto('', $pictopath, '', 1, 0, 0, '', 'pictoDoliProject');
+
 		$r = 0;
 		$this->menu[$r++] = array(
-			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=timespent', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'=>'left', // This is a Top menu entry
-			'titre'=>'DoliprojectTimeSpent',
-			'mainmenu'=>'project',
-			'leftmenu'=>'doliproject_timespent_list',
-			'url'=>'/doliproject/view/timespent_list.php',
-			'langs'=>'doliproject@doliproject', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>1000 + $r,
-			'enabled'=>'$conf->doliproject->enabled', // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled.
-			'perms'=>'1', // Use 'perms'=>'$user->rights->doliproject->myobject->read' if you want your menu with a permission rules
-			'target'=>'',
-			'user'=>2, // 0=Menu for internal users, 1=external users, 2=both
+			'fk_menu'  => 'fk_mainmenu=project,fk_leftmenu=timespent', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'type'     => 'left', // This is a Top menu entry
+			'titre'    => 'DoliprojectTimeSpent',
+			'prefix'   => $pictoDoliProject,
+			'mainmenu' => 'project',
+			'leftmenu' => 'doliproject_timespent_list',
+			'url'      => '/doliproject/view/timespent_list.php',
+			'langs'    => 'doliproject@doliproject', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'position' => 1000 + $r,
+			'enabled'  => '$conf->doliproject->enabled', // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled.
+			'perms'    => '1', // Use 'perms'=>'$user->rights->doliproject->myobject->read' if you want your menu with a permission rules
+			'target'   => '',
+			'user'     => 2, // 0=Menu for internal users, 1=external users, 2=both
 		);
 
 		$this->menu[$r++] = array(
 			'fk_menu'  =>'fk_mainmenu=project,fk_leftmenu=timespent', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'type'     => 'left', // This is a Top menu entry
 			'titre'    => $langs->trans('AddTimeSpent'),
+			'prefix'   => $pictoDoliProject,
 			'mainmenu' => 'project',
 			'leftmenu' => 'timespent',
 			'url'      => '/doliproject/view/timespent_day.php',
@@ -217,24 +222,26 @@ class modDoliproject extends DolibarrModules
 		);
 
 		$this->menu[$r++] = array(
-			'fk_menu'=>'fk_mainmenu=hrm,fk_leftmenu=timespent', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'=>'left', // This is a Top menu entry
-			'titre'=>'DoliprojectTimeSpent',
-			'mainmenu'=>'hrm',
-			'leftmenu'=>'doliproject_timespent_list',
-			'url'=>'/doliproject/view/timespent_list.php',
-			'langs'=>'doliproject@doliproject', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>1000 + $r,
-			'enabled'=>'$conf->doliproject->enabled', // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled.
-			'perms'=>'1', // Use 'perms'=>'$user->rights->doliproject->myobject->read' if you want your menu with a permission rules
-			'target'=>'',
-			'user'=>2, // 0=Menu for internal users, 1=external users, 2=both
+			'fk_menu'  => 'fk_mainmenu=hrm,fk_leftmenu=timespent', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'type'     => 'left', // This is a Top menu entry
+			'titre'    => 'DoliprojectTimeSpent',
+			'prefix'   => $pictoDoliProject,
+			'mainmenu' => 'hrm',
+			'leftmenu' => 'doliproject_timespent_list',
+			'url'      => '/doliproject/view/timespent_list.php',
+			'langs'    => 'doliproject@doliproject', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'position' => 1000 + $r,
+			'enabled'  => '$conf->doliproject->enabled', // Define condition to show or hide menu entry. Use '$conf->doliproject->enabled' if entry must be visible if module is enabled.
+			'perms'    => '1', // Use 'perms'=>'$user->rights->doliproject->myobject->read' if you want your menu with a permission rules
+			'target'   => '',
+			'user'     => 2, // 0=Menu for internal users, 1=external users, 2=both
 		);
 
 		$this->menu[$r++] = array(
 			'fk_menu'  =>'fk_mainmenu=hrm,fk_leftmenu=timespent', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'type'     => 'left', // This is a Top menu entry
 			'titre'    => $langs->trans('AddTimeSpent'),
+			'prefix'   => $pictoDoliProject,
 			'mainmenu' => 'hrm',
 			'leftmenu' => 'timespent',
 			'url'      => '/doliproject/view/timespent_day.php',
@@ -250,6 +257,7 @@ class modDoliproject extends DolibarrModules
 			'fk_menu'  =>'fk_mainmenu=billing,fk_leftmenu=customers_bills', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'type'     => 'left', // This is a Top menu entry
 			'titre'    => $langs->trans('RecurringInvoicesStatistics'),
+			'prefix'   => $pictoDoliProject,
 			'mainmenu' => 'billing',
 			'leftmenu' => 'customers_bills',
 			'url'      => '/doliproject/view/recurringinvoicestatistics.php',
@@ -280,6 +288,7 @@ class modDoliproject extends DolibarrModules
 			'fk_menu'  => 'fk_mainmenu=doliproject',
 			'type'     => 'top',
 			'titre'    => $langs->trans('DoliProject'),
+			'prefix'   => $pictoDoliProject,
 			'mainmenu' => 'doliproject',
 			'leftmenu' => '',
 			'url'      => '/doliproject/doliprojectindex.php',
@@ -294,8 +303,8 @@ class modDoliproject extends DolibarrModules
 		$this->menu[$r++]=array(
 			'fk_menu'  => 'fk_mainmenu=doliproject',
 			'type'     => 'left',
-			'prefix'   => '<i class="fas fa-calendar-check"></i> ',
 			'titre'    => $langs->trans('TimeSheet'),
+			'prefix'   => '<i class="fas fa-calendar-check"></i> ',
 			'mainmenu' => 'doliproject',
 			'leftmenu' => 'timesheet',
 			'url'      => '/doliproject/view/timesheet/timesheet_list.php',

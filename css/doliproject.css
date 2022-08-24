@@ -61,6 +61,12 @@
   left: 4px;
 }
 
+.pictoDoliProject {
+  vertical-align: middle;
+  width: 24px;
+  margin-right: 2px;
+}
+
 /*--------------------------------------------------------------
 	Module : Dropdown
 	Version : 1.0.0
