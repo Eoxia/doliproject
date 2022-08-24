@@ -75,13 +75,13 @@ print load_fiche_titre($langs->trans($page_name), $linkback, 'object_doliproject
 
 // Configuration header
 $head = doliprojectAdminPrepareHead();
-dol_fiche_head($head, 'about', '', 0, 'doliproject@doliproject');
+print dol_get_fiche_head($head, 'about', '', 0, 'doliproject@doliproject');
 
 dol_include_once('/doliproject/core/modules/modDoliproject.class.php');
 $tmpmodule = new modDoliproject($db);
 print $tmpmodule->getDescLong();
 
 // Page end
-dol_fiche_end();
+print dol_get_fiche_end();
 llxFooter();
 $db->close();

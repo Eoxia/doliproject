@@ -261,9 +261,9 @@ $now = dol_now();
 
 //$help_url="EN:Module_TimeSheet|FR:Module_TimeSheet_FR|ES:Módulo_TimeSheet";
 $help_url = '';
-$title = $langs->trans('ListOf', $langs->transnoentitiesnoconv("TimeSheets"));
+$title = $langs->trans('TimeSheetList');
 $morejs = array();
-$morecss = array();
+$morecss = array("/doliproject/css/doliproject.css");
 
 
 // Build and execute select
@@ -486,7 +486,7 @@ print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
 
 $newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', dol_buildpath('/doliproject/view/timesheet/timesheet_card.php', 1).'?action=create&backtopage='.urlencode($_SERVER['PHP_SELF']), '', $permissiontoadd);
 
-print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, 'object_'.$object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
+print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, 'doliproject32px@doliproject', 0, $newcardbutton, '', $limit, 0, 0, 1);
 
 // Add code for pre mass action (confirmation or email presend form)
 $topicmail = "SendTimeSheetRef";

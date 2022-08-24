@@ -35,14 +35,20 @@ if ( ! $res && file_exists("../../main.inc.php")) $res    = @include "../../main
 if ( ! $res && file_exists("../../../main.inc.php")) $res = @include "../../../main.inc.php";
 if ( ! $res) die("Include of main fails");
 
+// Libraries
 require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/usergroups.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
 
 require_once './../class/workinghours.class.php';
 
+// Global variables definitions
+global $db, $hookmanager, $langs, $user;
+
+// Load translation files required by the page
 $langs->loadLangs(array("doliproject@doliproject"));
 
+// Parameters
 $action = (GETPOST('action', 'aZ09') ? GETPOST('action', 'aZ09') : 'view');
 
 $socid                                          = GETPOST('socid', 'int') ? GETPOST('socid', 'int') : GETPOST('id', 'int');
@@ -63,7 +69,6 @@ if ($action == 'view' && $usertmp->fetch($socid) <= 0) {
 // Security check
 $permissiontoadd = $usertmp->rights->societe->creer;
 
-/*
 /*
  * Actions
  */

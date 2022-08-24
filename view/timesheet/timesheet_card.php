@@ -168,41 +168,41 @@ if (empty($reshook)) {
 	include DOL_DOCUMENT_ROOT.'/core/actions_addupdatedelete.inc.php';
 
 	// Action validate object
-//	if ($action == 'confirm_validate' && $confirm == 'yes' && $permissiontoadd) {
-//		$result = $object->validate($user);
-//		if ($result >= 0) {
-//			// Define output language
-////			if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
-////				if (method_exists($object, 'generateDocument')) {
-////					$outputlangs = $langs;
-////					$newlang = '';
-////					if ($conf->global->MAIN_MULTILANGS && empty($newlang) && GETPOST('lang_id', 'aZ09')) {
-////						$newlang = GETPOST('lang_id', 'aZ09');
-////					}
-////					if ($conf->global->MAIN_MULTILANGS && empty($newlang)) {
-////						$newlang = $object->thirdparty->default_lang;
-////					}
-////					if (!empty($newlang)) {
-////						$outputlangs = new Translate("", $conf);
-////						$outputlangs->setDefaultLang($newlang);
-////					}
-////
-////					$ret = $object->fetch($id); // Reload to get new records
-////
-////					$model = $object->model_pdf;
-////
-////					$retgen = $object->generateDocument($model, $outputlangs, $hidedetails, $hidedesc, $hideref);
-////					if ($retgen < 0) {
-////						setEventMessages($object->error, $object->errors, 'warnings');
-////					}
-////				}
-////			}
-//		} else {
-//			$error++;
-//			setEventMessages($object->error, $object->errors, 'errors');
-//		}
-//		$action = '';
-//	}
+	if ($action == 'confirm_validate2' && $confirm == 'yes' && $permissiontoadd) {
+		$result = $object->validate($user);
+		if ($result >= 0) {
+			// Define output language
+//			if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
+//				if (method_exists($object, 'generateDocument')) {
+//					$outputlangs = $langs;
+//					$newlang = '';
+//					if ($conf->global->MAIN_MULTILANGS && empty($newlang) && GETPOST('lang_id', 'aZ09')) {
+//						$newlang = GETPOST('lang_id', 'aZ09');
+//					}
+//					if ($conf->global->MAIN_MULTILANGS && empty($newlang)) {
+//						$newlang = $object->thirdparty->default_lang;
+//					}
+//					if (!empty($newlang)) {
+//						$outputlangs = new Translate("", $conf);
+//						$outputlangs->setDefaultLang($newlang);
+//					}
+//
+//					$ret = $object->fetch($id); // Reload to get new records
+//
+//					$model = $object->model_pdf;
+//
+//					$retgen = $object->generateDocument($model, $outputlangs, $hidedetails, $hidedesc, $hideref);
+//					if ($retgen < 0) {
+//						setEventMessages($object->error, $object->errors, 'warnings');
+//					}
+//				}
+//			}
+		} else {
+			$error++;
+			setEventMessages($object->error, $object->errors, 'errors');
+		}
+		$action = '';
+	}
 
 	// Actions when linking object each other
 	include DOL_DOCUMENT_ROOT.'/core/actions_dellink.inc.php';
@@ -353,7 +353,7 @@ if ($action == 'create') {
 		exit;
 	}
 
-	print load_fiche_titre($langs->trans("NewObject", $langs->transnoentitiesnoconv("TimeSheet")), '', '');
+	print load_fiche_titre($langs->trans("NewTimeSheet"), '', 'doliproject32px@doliproject');
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -371,6 +371,8 @@ if ($action == 'create') {
 	//if (! GETPOSTISSET('fieldname')) $_POST['fieldname'] = 'myvalue';
 
 	print '<table class="border centpercent tableforfieldcreate">'."\n";
+
+	$object->fields['fk_project']['default'] = $conf->global->DOLIPROJECT_HR_PROJECT;
 
 	// Common attributes
 	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_add.tpl.php';
@@ -621,7 +623,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			// Validate
 			if ($object->status == $object::STATUS_DRAFT) {
 				if (empty($object->table_element_line) || (is_array($object->lines) && count($object->lines) > 0)) {
-					print dolGetButtonAction($langs->trans('Validate'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_validate&confirm=yes&token='.newToken(), '', $permissiontoadd);
+					print dolGetButtonAction($langs->trans('Validate'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_validate2&confirm=yes&token='.newToken(), '', $permissiontoadd);
 				} else {
 					$langs->load("errors");
 					print dolGetButtonAction($langs->trans("ErrorAddAtLeastOneLineFirst"), $langs->trans("Validate"), 'default', '#', '', 0);
