@@ -60,9 +60,10 @@ if (! $user->rights->doliproject->lire) accessforbidden();
  * View
  */
 
+$morejs  = array("/doliproject/js/doliproject.js.php");
 $morecss = array("/doliproject/css/doliproject.css");
 
-llxHeader("", $langs->trans("DoliProjectArea") . ' ' . $doliproject->version, '', '', 0, 0, array(), $morecss);
+llxHeader("", $langs->trans("DoliProjectArea") . ' ' . $doliproject->version, '', '', 0, 0, $morejs, $morecss);
 
 print load_fiche_titre($langs->trans("DoliProjectArea") . ' ' . $doliproject->version, '', 'doliproject.png@doliproject');
 

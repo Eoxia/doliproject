@@ -66,7 +66,7 @@ class modDoliproject extends DolibarrModules
 			'models' 					=> 1,
 			'theme' 					=> 0,
 			'css' 						=> array(),
-			'js' => array("/doliproject/js/doliproject.js.php"),
+			'js' 						=> array(),
 			'hooks' 					=> array(
 				  'data' 				=> array(
 				      'invoicecard',
@@ -288,7 +288,7 @@ class modDoliproject extends DolibarrModules
 			'fk_menu'  => 'fk_mainmenu=doliproject',
 			'type'     => 'top',
 			'titre'    => $langs->trans('DoliProject'),
-			'prefix'   => $pictoDoliProject,
+			'prefix'   =>  '<i class="fas fa-home"></i>  ',
 			'mainmenu' => 'doliproject',
 			'leftmenu' => '',
 			'url'      => '/doliproject/doliprojectindex.php',
