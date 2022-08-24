@@ -372,7 +372,9 @@ if ($action == 'create') {
 
 	print '<table class="border centpercent tableforfieldcreate">'."\n";
 
-	$object->fields['fk_project']['default'] = $conf->global->DOLIPROJECT_HR_PROJECT;
+	$object->fields['fk_project']['default']   = $conf->global->DOLIPROJECT_HR_PROJECT;
+	$object->fields['note_public']['visible']  = 1;
+	$object->fields['note_private']['visible'] = 1;
 
 	// Common attributes
 	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_add.tpl.php';
@@ -409,6 +411,9 @@ if (($id || $ref) && $action == 'edit') {
 	print dol_get_fiche_head();
 
 	print '<table class="border centpercent tableforfieldedit">'."\n";
+
+	$object->fields['note_public']['visible']  = 1;
+	$object->fields['note_private']['visible'] = 1;
 
 	// Common attributes
 	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_edit.tpl.php';
