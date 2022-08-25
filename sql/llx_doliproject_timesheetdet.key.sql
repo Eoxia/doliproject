@@ -23,7 +23,7 @@ ALTER TABLE llx_doliproject_timesheetdet ADD CONSTRAINT llx_doliproject_timeshee
 ALTER TABLE llx_doliproject_timesheetdet ADD INDEX idx_doliproject_timesheetdet_status (status);
 -- END MODULEBUILDER INDEXES
 
---ALTER TABLE llx_doliproject_timesheetdet ADD UNIQUE INDEX uk_doliproject_timesheetdet_fieldxy(fieldx, fieldy);
-
---ALTER TABLE llx_doliproject_timesheetdet ADD CONSTRAINT llx_doliproject_timesheetdet_fk_field FOREIGN KEY (fk_field) REFERENCES llx_doliproject_myotherobject(rowid);
+# --ALTER TABLE llx_doliproject_timesheetdet ADD UNIQUE INDEX uk_doliproject_timesheetdet_fieldxy(fieldx, fieldy);
+#
+# --ALTER TABLE llx_doliproject_timesheetdet ADD CONSTRAINT llx_doliproject_timesheetdet_fk_field FOREIGN KEY (fk_field) REFERENCES llx_doliproject_myotherobject(rowid);
 

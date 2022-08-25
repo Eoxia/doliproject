@@ -37,7 +37,7 @@ function timesheetPrepareHead($object)
 	$head = array();
 
 	$head[$h][0] = dol_buildpath("/doliproject/view/timesheet/timesheet_card.php", 1).'?id='.$object->id;
-	$head[$h][1] = $langs->trans("Card");
+	$head[$h][1] = '<i class="fas fa-info-circle"></i> ' . $langs->trans("Card");
 	$head[$h][2] = 'card';
 	$h++;
 
@@ -50,7 +50,7 @@ function timesheetPrepareHead($object)
 			$nbNote++;
 		}
 		$head[$h][0] = dol_buildpath('/doliproject/view/timesheet/timesheet_note.php', 1).'?id='.$object->id;
-		$head[$h][1] = $langs->trans('Notes');
+		$head[$h][1] = '<i class="fas fa-comment"></i> ' .$langs->trans('Notes');
 		if ($nbNote > 0) {
 			$head[$h][1] .= (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '<span class="badge marginleftonlyshort">'.$nbNote.'</span>' : '');
 		}
@@ -72,7 +72,7 @@ function timesheetPrepareHead($object)
 //	$h++;
 
 	$head[$h][0] = dol_buildpath("/doliproject/view/timesheet/timesheet_agenda.php", 1).'?id='.$object->id;
-	$head[$h][1] = $langs->trans("Events");
+	$head[$h][1] = '<i class="fas fa-calendar-alt"></i> ' . $langs->trans("Events");
 	$head[$h][2] = 'agenda';
 	$h++;
 

@@ -59,6 +59,7 @@ if (!$res) {
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
+require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 
 require_once __DIR__ . '/../../class/timesheet.class.php';
 require_once __DIR__ . '/../../lib/doliproject_timesheet.lib.php';
@@ -84,6 +85,7 @@ $lineid              = GETPOST('lineid', 'int');
 // Initialize technical objects
 $object      = new TimeSheet($db);
 $extrafields = new ExtraFields($db);
+$project     = new Project($db);
 
 $diroutputmassaction = $conf->doliproject->dir_output.'/temp/massgeneration/'.$user->id;
 
@@ -435,7 +437,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	$res = $object->fetch_optionals();
 
 	$head = timesheetPrepareHead($object);
-	print dol_get_fiche_head($head, 'card', $langs->trans("TimeSheet"), -1, '');
+	print dol_get_fiche_head($head, 'card', $langs->trans("TimeSheet"), -1, 'doliproject@doliproject');
 
 	$formconfirm = '';
 
@@ -497,9 +499,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		$langs->load("projects");
 		$morehtmlref .= '<br>' . $langs->trans('Project') . ' ';
 		if (! empty($object->fk_project)) {
-			$proj = new Project($db);
-			$proj->fetch($object->fk_project);
-			$morehtmlref .= ': ' . $proj->getNomUrl(1, '', 1);
+			$project->fetch($object->fk_project);
+			$morehtmlref .= ': ' . $project->getNomUrl(1, '', 1);
 		} else {
 			$morehtmlref .= '';
 		}
@@ -533,55 +534,55 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	print dol_get_fiche_end();
 
 
-	/*
-	 * Lines
-	 */
-
-	if (!empty($object->table_element_line)) {
-		// Show object lines
-		$result = $object->getLinesArray();
-
-		print '	<form name="addproduct" id="addproduct" action="'.$_SERVER["PHP_SELF"].'?id='.$object->id.(($action != 'editline') ? '' : '#line_'.GETPOST('lineid', 'int')).'" method="POST">
-		<input type="hidden" name="token" value="' . newToken().'">
-		<input type="hidden" name="action" value="' . (($action != 'editline') ? 'addline' : 'updateline').'">
-		<input type="hidden" name="mode" value="">
-		<input type="hidden" name="page_y" value="">
-		<input type="hidden" name="id" value="' . $object->id.'">
-		';
-
-		if (!empty($conf->use_javascript_ajax) && $object->status == 0) {
-			include DOL_DOCUMENT_ROOT.'/core/tpl/ajaxrow.tpl.php';
-		}
-
-		print '<div class="div-table-responsive-no-min">';
-		if (!empty($object->lines) || ($object->status == $object::STATUS_DRAFT && $permissiontoadd && $action != 'selectlines' && $action != 'editline')) {
-			print '<table id="tablelines" class="noborder noshadow" width="100%">';
-		}
-
-		if (!empty($object->lines)) {
-			$object->printObjectLines($action, $mysoc, null, GETPOST('lineid', 'int'), 1);
-		}
-
-		// Form to add new line
-		if ($object->status == 0 && $permissiontoadd && $action != 'selectlines') {
-			if ($action != 'editline') {
-				// Add products/services form
-
-				$parameters = array();
-				$reshook = $hookmanager->executeHooks('formAddObjectLine', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
-				if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
-				if (empty($reshook))
-					$object->formAddObjectLine(1, $mysoc, $soc);
-			}
-		}
-
-		if (!empty($object->lines) || ($object->status == $object::STATUS_DRAFT && $permissiontoadd && $action != 'selectlines' && $action != 'editline')) {
-			print '</table>';
-		}
-		print '</div>';
-
-		print "</form>\n";
-	}
+//	/*
+//	 * Lines
+//	 */
+//
+//	if (!empty($object->table_element_line)) {
+//		// Show object lines
+//		$result = $object->getLinesArray();
+//
+//		print '	<form name="addproduct" id="addproduct" action="'.$_SERVER["PHP_SELF"].'?id='.$object->id.(($action != 'editline') ? '' : '#line_'.GETPOST('lineid', 'int')).'" method="POST">
+//		<input type="hidden" name="token" value="' . newToken().'">
+//		<input type="hidden" name="action" value="' . (($action != 'editline') ? 'addline' : 'updateline').'">
+//		<input type="hidden" name="mode" value="">
+//		<input type="hidden" name="page_y" value="">
+//		<input type="hidden" name="id" value="' . $object->id.'">
+//		';
+//
+//		if (!empty($conf->use_javascript_ajax) && $object->status == 0) {
+//			include DOL_DOCUMENT_ROOT.'/core/tpl/ajaxrow.tpl.php';
+//		}
+//
+//		print '<div class="div-table-responsive-no-min">';
+//		if (!empty($object->lines) || ($object->status == $object::STATUS_DRAFT && $permissiontoadd && $action != 'selectlines' && $action != 'editline')) {
+//			print '<table id="tablelines" class="noborder noshadow" width="100%">';
+//		}
+//
+//		if (!empty($object->lines)) {
+//			$object->printObjectLines($action, $mysoc, null, GETPOST('lineid', 'int'), 1);
+//		}
+//
+//		// Form to add new line
+//		if ($object->status == 0 && $permissiontoadd && $action != 'selectlines') {
+//			if ($action != 'editline') {
+//				// Add products/services form
+//
+//				$parameters = array();
+//				$reshook = $hookmanager->executeHooks('formAddObjectLine', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+//				if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+//				if (empty($reshook))
+//					$object->formAddObjectLine(1, $mysoc, $soc);
+//			}
+//		}
+//
+//		if (!empty($object->lines) || ($object->status == $object::STATUS_DRAFT && $permissiontoadd && $action != 'selectlines' && $action != 'editline')) {
+//			print '</table>';
+//		}
+//		print '</div>';
+//
+//		print "</form>\n";
+//	}
 
 
 	// Buttons for actions

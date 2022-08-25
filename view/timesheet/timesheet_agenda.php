@@ -77,6 +77,7 @@ if (!$res) {
 	die("Include of main fails");
 }
 
+require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
@@ -124,6 +125,7 @@ if (!$sortorder) {
 // Initialize technical objects
 $object = new TimeSheet($db);
 $extrafields = new ExtraFields($db);
+$project = new Project($db);
 $diroutputmassaction = $conf->doliproject->dir_output.'/temp/massgeneration/'.$user->id;
 $hookmanager->initHooks(array('timesheetagenda', 'globalcard')); // Note that conf->hooks_modules contains array
 // Fetch optionals attributes and labels
@@ -191,7 +193,10 @@ if ($object->id > 0) {
 	$title = $langs->trans("Agenda");
 	//if (! empty($conf->global->MAIN_HTML_TITLE) && preg_match('/thirdpartynameonly/',$conf->global->MAIN_HTML_TITLE) && $object->name) $title=$object->name." - ".$title;
 	$help_url = 'EN:Module_Agenda_En';
-	llxHeader('', $title, $help_url);
+	$morejs   = array("/doliproject/js/doliproject.js.php");
+	$morecss  = array("/doliproject/css/doliproject.css");
+
+	llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss);
 
 	if (!empty($conf->notification->enabled)) {
 		$langs->load("mails");
@@ -199,49 +204,29 @@ if ($object->id > 0) {
 	$head = timesheetPrepareHead($object);
 
 
-	print dol_get_fiche_head($head, 'agenda', $langs->trans("TimeSheet"), -1, $object->picto);
+	print dol_get_fiche_head($head, 'agenda', $langs->trans("TimeSheet"), -1, 'doliproject@doliproject');
 
 	// Object card
 	// ------------------------------------------------------------
-	$linkback = '<a href="'.dol_buildpath('/doliproject/timesheet_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
+	$linkback = '<a href="'.dol_buildpath('/doliproject/view/timesheet/timesheet_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
 
 	$morehtmlref = '<div class="refidno">';
-	/*
-	// Ref customer
-	$morehtmlref.=$form->editfieldkey("RefCustomer", 'ref_client', $object->ref_client, $object, 0, 'string', '', 0, 1);
-	$morehtmlref.=$form->editfieldval("RefCustomer", 'ref_client', $object->ref_client, $object, 0, 'string', '', null, null, '', 1);
 	// Thirdparty
-	$morehtmlref.='<br>'.$langs->trans('ThirdParty') . ' : ' . (is_object($object->thirdparty) ? $object->thirdparty->getNomUrl(1) : '');
+	if (! empty($conf->societe->enabled)) {
+		$object->fetch_thirdparty();
+		$morehtmlref .= $langs->trans('ThirdParty') . ' : ' . (is_object($object->thirdparty) ? $object->thirdparty->getNomUrl(1) : '');
+	}
 	// Project
 	if (! empty($conf->projet->enabled)) {
 		$langs->load("projects");
-		$morehtmlref.='<br>'.$langs->trans('Project') . ' ';
-		if ($permissiontoadd) {
-			if ($action != 'classify') {
-				//$morehtmlref.='<a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=classify&token='.newToken().'&id=' . $object->id . '">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a> : ';
-			}
-			$morehtmlref.=' : ';
-			if ($action == 'classify') {
-				//$morehtmlref.=$form->form_project($_SERVER['PHP_SELF'] . '?id=' . $object->id, $object->socid, $object->fk_project, 'projectid', 0, 0, 1, 1);
-				$morehtmlref.='<form method="post" action="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'">';
-				$morehtmlref.='<input type="hidden" name="action" value="classin">';
-				$morehtmlref.='<input type="hidden" name="token" value="'.newToken().'">';
-				$morehtmlref.=$formproject->select_projects($object->socid, $object->fk_project, 'projectid', $maxlength, 0, 1, 0, 1, 0, 0, '', 1);
-				$morehtmlref.='<input type="submit" class="button valignmiddle" value="'.$langs->trans("Modify").'">';
-				$morehtmlref.='</form>';
-			} else {
-				$morehtmlref.=$form->form_project($_SERVER['PHP_SELF'] . '?id=' . $object->id, $object->socid, $object->fk_project, 'none', 0, 0, 0, 1);
-			}
+		$morehtmlref .= '<br>' . $langs->trans('Project') . ' ';
+		if (! empty($object->fk_project)) {
+			$project->fetch($object->fk_project);
+			$morehtmlref .= ': ' . $project->getNomUrl(1, '', 1);
 		} else {
-			if (! empty($object->fk_project)) {
-				$proj = new Project($db);
-				$proj->fetch($object->fk_project);
-				$morehtmlref .= ': '.$proj->getNomUrl();
-			} else {
-				$morehtmlref .= '';
-			}
+			$morehtmlref .= '';
 		}
-	}*/
+	}
 	$morehtmlref .= '</div>';
 
 

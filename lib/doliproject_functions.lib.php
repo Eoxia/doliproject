@@ -1823,13 +1823,14 @@ function doliprojectshowdocuments($modulepart, $modulesubdir, $filedir, $urlsour
 		// Model
 		if ( ! empty($modellist)) {
 			asort($modellist);
-			$out      .= '<span class="hideonsmartphone">' . $langs->trans('Model') . ' </span>';
+			$out      .= '<span class="hideonsmartphone"> <i class="fas fa-file-word"></i> </span>';
 			$modellist = array_filter($modellist, 'remove_indexdoliproject');
-			if (is_array($modellist) && count($modellist) == 1) {    // If there is only one element
-				$arraykeys                = array_keys($modellist);
-				$arrayvalues              = preg_replace('/template_/', '', array_values($modellist)[0]);
-				$modellist[$arraykeys[0]] = $arrayvalues;
-				$modelselected            = $arraykeys[0];
+			if (is_array($modellist)) {    // If there is only one element
+				foreach ($modellist as $key => $modellistsingle) {
+					$arrayvalues              = preg_replace('/template_/', '', $modellistsingle);
+					$modellist[$key] = $langs->trans($arrayvalues);
+					$modelselected            = $key;
+				}
 			}
 			$morecss                                        = 'maxwidth200';
 			if ($conf->browser->layout == 'phone') $morecss = 'maxwidth100';
