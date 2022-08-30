@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2020 SuperAdmin
+/* Copyright (C) 2022 EOXIA <dev@eoxia.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  */
 
 /**
- * \file    doliproject/lib/doliproject.lib.php
+ * \file    lib/doliproject.lib.php
  * \ingroup doliproject
  * \brief   Library files with common functions for Doliproject
  */
@@ -35,26 +35,14 @@ function doliprojectAdminPrepareHead()
 	$h = 0;
 	$head = array();
 
-	$head[$h][0] = dol_buildpath("/doliproject/admin/setup.php", 1);
-	$head[$h][1] = $langs->trans("Settings");
-	$head[$h][2] = 'settings';
-	$h++;
-
-	/*
-	$head[$h][0] = dol_buildpath("/doliproject/admin/myobject_extrafields.php", 1);
-	$head[$h][1] = $langs->trans("ExtraFields");
-	$head[$h][2] = 'myobject_extrafields';
-	$h++;
-	*/
-
-	$head[$h][0] = dol_buildpath("/doliproject/admin/about.php", 1);
-	$head[$h][1] = $langs->trans("About");
-	$head[$h][2] = 'about';
-	$h++;
-
 	$head[$h][0] = dol_buildpath("/doliproject/admin/project.php", 1);
-	$head[$h][1] = $langs->trans("ProjectsAndTasks");
+	$head[$h][1] = '<i class="fas fa-project-diagram"></i>  ' . $langs->trans("ProjectsAndTasks");
 	$head[$h][2] = 'projecttasks';
+	$h++;
+
+	$head[$h][0] = dol_buildpath("/doliproject/admin/timesheet.php", 1);
+	$head[$h][1] = '<i class="fas fa-calendar-check"></i>  ' . $langs->trans("TimeSheet");
+	$head[$h][2] = 'timesheet';
 	$h++;
 
 	$head[$h][0] = dol_buildpath("/doliproject/admin/timesheetdocument.php", 1);
@@ -62,14 +50,16 @@ function doliprojectAdminPrepareHead()
 	$head[$h][2] = 'timesheetdocument';
 	$h++;
 
-	// Show more tabs from modules
-	// Entries must be declared in modules descriptor with line
-	//$this->tabs = array(
-	//	'entity:+tabname:Title:@doliproject:/doliproject/mypage.php?id=__ID__'
-	//); // to add new tab
-	//$this->tabs = array(
-	//	'entity:-tabname:Title:@doliproject:/doliproject/mypage.php?id=__ID__'
-	//); // to remove a tab
+	$head[$h][0] = dol_buildpath("/doliproject/admin/setup.php", 1);
+	$head[$h][1] = '<i class="fas fa-cog"></i>  ' . $langs->trans("Settings");
+	$head[$h][2] = 'settings';
+	$h++;
+
+	$head[$h][0] = dol_buildpath("/doliproject/admin/about.php", 1);
+	$head[$h][1] = '<i class="fas fa-readme"></i>  ' . $langs->trans("About");
+	$head[$h][2] = 'about';
+	$h++;
+
 	complete_head_from_modules($conf, $langs, null, $head, $h, 'doliproject');
 
 	return $head;

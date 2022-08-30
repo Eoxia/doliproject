@@ -191,4 +191,7 @@ NewTimeSheet = Nouvelle navette
 ModifyTimeSheet = modifer la navette
 TimeSheetList = Liste des navettes
 UserAssign = Utilisateur assigné
+TimeSheetData = Données configurables de la navette
+PrefillDate = Préremplir la date de début et de fin de la navette
+PrefillDateDescription = Préremplissage de la date de début avec le premier jour du mois en cours et la date de fin avec le dernier jour du mois en cours
 

@@ -81,6 +81,8 @@ $contextpage         = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ
 $backtopage          = GETPOST('backtopage', 'alpha');
 $backtopageforcancel = GETPOST('backtopageforcancel', 'alpha');
 $lineid              = GETPOST('lineid', 'int');
+$year                = (GETPOST("year", 'int') ? GETPOST("year", "int") : date("Y"));
+$month               = (GETPOST("month", 'int') ?GETPOST("month", "int") : date("m"));
 
 // Initialize technical objects
 $object      = new TimeSheet($db);
@@ -375,6 +377,22 @@ if ($action == 'create') {
 	print '<table class="border centpercent tableforfieldcreate">'."\n";
 
 	$object->fields['fk_project']['default']   = $conf->global->DOLIPROJECT_HR_PROJECT;
+	$object->fields['fk_user_assign']['default'] = $user->id;
+	if ($conf->global->DOLIPROJECT_TIMESHEET_PREFILL_DATE) {
+		$firstday = dol_get_first_day($year, $month);
+		$firstday = dol_getdate($firstday);
+
+		$_POST['date_startday'] = $firstday['mday'];
+		$_POST['date_startmonth'] = $firstday['mon'];
+		$_POST['date_startyear'] = $firstday['year'];
+
+		$lastday = dol_get_last_day($year, $month);
+		$lastday = dol_getdate($lastday);
+
+		$_POST['date_endday'] = $lastday['mday'];
+		$_POST['date_endmonth'] = $lastday['mon'];
+		$_POST['date_endyear'] = $lastday['year'];
+	}
 	$object->fields['note_public']['visible']  = 1;
 	$object->fields['note_private']['visible'] = 1;
 
