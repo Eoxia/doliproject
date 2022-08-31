@@ -723,7 +723,7 @@ for ($idw = 0; $idw < 7; $idw++) {
 	$day = $splitted_date[0];
 	$month = $splitted_date[1];
 	$year = $splitted_date[2];
-	print ' <a href="timespent_day.php?year='. $year .'&month='. $month .'&day='. $day .'&search_usertoprocessid=1"><i class="fas fa-external-link-alt"></i></a>';
+	print ' <a href="timespent_day.php?year='. $year .'&month='. $month .'&day='. $day .'&search_usertoprocessid=' . $usertoprocess->id .'"><i class="fas fa-external-link-alt"></i></a>';
 	print '<br>'.dol_print_date($dayinloopfromfirstdaytoshow, 'dayreduceformat').'</th>';
 }
 //print '<td></td>';
