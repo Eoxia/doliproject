@@ -112,7 +112,7 @@ class TimeSheet extends CommonObject
 		'label'          => array('type'=>'varchar(255)', 'label'=>'Label', 'enabled'=>'1', 'position'=>80, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'maxwidth500', 'cssview'=>'wordbreak', 'help'=>"Help text", 'showoncombobox'=>'2',),
 		'date_start'     => array('type'=>'date', 'label'=>'DateStart', 'enabled'=>'1', 'position'=>90, 'notnull'=>1, 'visible'=>1,),
 		'date_end'       => array('type'=>'date', 'label'=>'DateEnd', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>1,),
-		'description'    => array('type'=>'text', 'label'=>'Description', 'enabled'=>'1', 'position'=>110, 'notnull'=>0, 'visible'=>3,),
+		'description'    => array('type'=>'html', 'label'=>'Description', 'enabled'=>'1', 'position'=>110, 'notnull'=>0, 'visible'=>3,),
 		'note_public'    => array('type'=>'html', 'label'=>'NotePublic', 'enabled'=>'1', 'position'=>120, 'notnull'=>0, 'visible'=>0,),
 		'note_private'   => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>130, 'notnull'=>0, 'visible'=>0,),
 		'last_main_doc'  => array('type'=>'varchar(255)', 'label'=>'LastMainDoc', 'enabled'=>'1', 'position'=>140, 'notnull'=>0, 'visible'=>0,),
