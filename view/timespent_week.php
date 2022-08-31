@@ -49,6 +49,10 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/holiday/class/holiday.class.php';
+if (!empty($conf->categorie->enabled)) {
+	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcategory.class.php';
+	require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+}
 
 require_once DOL_DOCUMENT_ROOT.'/custom/doliproject/lib/doliproject_functions.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/custom/doliproject/class/workinghours.class.php';
@@ -90,13 +94,17 @@ $week = GETPOST("week", "int") ?GETPOST("week", "int") : date("W");
 
 $day = (int) $day;
 
-//$search_categ = GETPOST("search_categ", 'alpha');
 $search_usertoprocessid = GETPOST('search_usertoprocessid', 'int');
 $search_task_ref = GETPOST('search_task_ref', 'alpha');
 $search_task_label = GETPOST('search_task_label', 'alpha');
 $search_project_ref = GETPOST('search_project_ref', 'alpha');
 $search_thirdparty = GETPOST('search_thirdparty', 'alpha');
 $search_declared_progress = GETPOST('search_declared_progress', 'alpha');
+
+if (!empty($conf->categorie->enabled)) {
+	$search_category_array = GETPOST("search_category_".Categorie::TYPE_PROJECT."_list", "array");
+}
+
 
 $sortfield = GETPOST('sortfield', 'aZ09comma');
 $sortorder = GETPOST('sortorder', 'aZ09comma');
@@ -187,7 +195,6 @@ if ($reshook < 0) {
 // Purge criteria
 if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')) { // All tests are required to be compatible with all browsers
 	$action = '';
-	//$search_categ = '';
 	$search_usertoprocessid = $user->id;
 	$search_task_ref = '';
 	$search_task_label = '';
@@ -197,6 +204,7 @@ if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x'
 
 	$search_array_options_project = array();
 	$search_array_options_task = array();
+	$search_category_array = array();
 
 	// We redefine $usertoprocess
 	$usertoprocess = $user;
@@ -422,6 +430,9 @@ if ($search_thirdparty) {
 if ($search_declared_progress) {
 	$morewherefilter .= natural_search("t.progress", $search_declared_progress, 1);
 }
+if (!empty($conf->categorie->enabled)) {
+	$morewherefilter .= Categorie::getFilterSelectQuery(Categorie::TYPE_PROJECT, "p.rowid", $search_category_array);
+}
 
 $sql = &$morewherefilter;
 
@@ -574,17 +585,6 @@ for ($idw = 0; $idw < 7; $idw++) {
 
 $moreforfilter = '';
 
-// Filter on categories
-/*
- if (! empty($conf->categorie->enabled))
- {
- require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
- $moreforfilter.='<div class="divsearchfield">';
- $moreforfilter.=$langs->trans('ProjectCategories'). ': ';
- $moreforfilter.=$formother->select_categories('project', $search_categ, 'search_categ', 1, 1, 'maxwidth300');
- $moreforfilter.='</div>';
- }*/
-
 // If the user can view user other than himself
 $moreforfilter .= '<div class="divsearchfield">';
 $moreforfilter .= '<div class="inline-block hideonsmartphone"></div>';
@@ -605,6 +605,12 @@ if (empty($conf->global->PROJECT_TIMESHEET_DISABLEBREAK_ON_PROJECT)) {
 	$moreforfilter .= '<div class="inline-block"></div>';
 	$moreforfilter .= img_picto($langs->trans('Filter').' '.$langs->trans('ThirdParty'), 'company', 'class="paddingright pictofixedwidth"').'<input type="text" name="search_thirdparty" class="maxwidth100" value="'.dol_escape_htmltag($search_thirdparty).'">';
 	$moreforfilter .= '</div>';
+}
+
+// Filter on categories
+if (!empty($conf->categorie->enabled) && $user->rights->categorie->lire) {
+	$formcategory = new FormCategory($db);
+	$moreforfilter .= $formcategory->getFilterBox(Categorie::TYPE_PROJECT, $search_category_array);
 }
 
 if (!empty($moreforfilter)) {

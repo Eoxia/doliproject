@@ -48,6 +48,10 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/holiday/class/holiday.class.php';
+if (!empty($conf->categorie->enabled)) {
+	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcategory.class.php';
+	require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+}
 
 require_once DOL_DOCUMENT_ROOT.'/custom/doliproject/lib/doliproject_functions.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/custom/doliproject/class/workinghours.class.php';
@@ -95,6 +99,10 @@ $search_task_label = GETPOST('search_task_label', 'alpha');
 $search_project_ref = GETPOST('search_project_ref', 'alpha');
 $search_thirdparty = GETPOST('search_thirdparty', 'alpha');
 $search_declared_progress = GETPOST('search_declared_progress', 'alpha');
+if (!empty($conf->categorie->enabled)) {
+	$search_category_array = GETPOST("search_category_".Categorie::TYPE_PROJECT."_list", "array");
+}
+
 
 $sortfield = GETPOST('sortfield', 'aZ09comma');
 $sortorder = GETPOST('sortorder', 'aZ09comma');
@@ -192,6 +200,7 @@ if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x'
 
 	$search_array_options_project = array();
 	$search_array_options_task = array();
+	$search_category_array = array();
 
 	// We redefine $usertoprocess
 	$usertoprocess = $user;
@@ -469,6 +478,9 @@ if ($search_thirdparty) {
 if ($search_declared_progress) {
 	$morewherefilter .= natural_search("t.progress", $search_declared_progress, 1);
 }
+if (!empty($conf->categorie->enabled)) {
+	$morewherefilter .= Categorie::getFilterSelectQuery(Categorie::TYPE_PROJECT, "p.rowid", $search_category_array);
+}
 
 $sql = &$morewherefilter;
 
@@ -587,16 +599,6 @@ print '<input type="checkbox"  class="show-only-favorite-tasks"'. ($conf->global
 
 $moreforfilter = '';
 
-// Filter on categories
-/*if (! empty($conf->categorie->enabled))
-{
-	require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-	$moreforfilter.='<div class="divsearchfield">';
-	$moreforfilter.=$langs->trans('ProjectCategories'). ': ';
-	$moreforfilter.=$formother->select_categories('project', $search_categ, 'search_categ', 1, 1, 'maxwidth300');
-	$moreforfilter.='</div>';
-}*/
-
 // If the user can view user other than himself
 $moreforfilter .= '<div class="divsearchfield">';
 $moreforfilter .= '<div class="inline-block hideonsmartphone"></div>';
@@ -619,14 +621,20 @@ if (empty($conf->global->PROJECT_TIMESHEET_DISABLEBREAK_ON_PROJECT)) {
 	$moreforfilter .= '</div>';
 }
 
-//if (!empty($moreforfilter)) {
-//	print '<div class="liste_titre liste_titre_bydiv centpercent">';
-//	print $moreforfilter;
-//	$parameters = array();
-//	$reshook = $hookmanager->executeHooks('printFieldPreListTitle', $parameters); // Note that $action and $object may have been modified by hook
-//	print $hookmanager->resPrint;
-//	print '</div>';
-//}
+// Filter on categories
+if (!empty($conf->categorie->enabled) && $user->rights->categorie->lire) {
+	$formcategory = new FormCategory($db);
+	$moreforfilter .= $formcategory->getFilterBox(Categorie::TYPE_PROJECT, $search_category_array);
+}
+
+if (!empty($moreforfilter)) {
+	print '<div class="liste_titre liste_titre_bydiv centpercent">';
+	print $moreforfilter;
+	$parameters = array();
+	$reshook = $hookmanager->executeHooks('printFieldPreListTitle', $parameters); // Note that $action and $object may have been modified by hook
+	print $hookmanager->resPrint;
+	print '</div>';
+}
 
 $varpage = empty($contextpage) ? $_SERVER["PHP_SELF"] : $contextpage;
 $selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage); // This also change content of $arrayfields
