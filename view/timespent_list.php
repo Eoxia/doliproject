@@ -488,7 +488,7 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 			//if (in_array($key, array('fk_soc', 'fk_user', 'fk_warehouse'))) $cssforfield = 'tdoverflowmax100';
 			if (!empty($arrayfields[$key]['checked'])) {
 				print '<td' . ($cssforfield ? ' class="' . $cssforfield . '"' : '') . '>';
-				if (in_array($val['fieldalias'], array('socid', 'projectref', 'fk_user', 'taskid'))) {
+				if (in_array($val['fieldalias'], array('socid', 'projectref', 'fk_user', 'taskid', 'invoice_id'))) {
 					$InfoFieldList = explode(':', $val['type']);
 					$classname = $InfoFieldList[0];
 					$classpath = $InfoFieldList[1];
@@ -501,7 +501,9 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 								print $object->getNomUrl(1, '', 1);
 							} else {
 								$object->fetch($obj->{$val['fieldalias']});
-								print $object->getNomUrl(1);
+								if (!empty($obj->{$val['fieldalias']})) {
+									print $object->getNomUrl(1);
+								}
 							}
 						}
 					}
