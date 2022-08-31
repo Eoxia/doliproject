@@ -87,6 +87,10 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
 require_once DOL_DOCUMENT_ROOT . '/projet/class/task.class.php';
+if (!empty($conf->categorie->enabled)) {
+	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcategory.class.php';
+	require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+}
 
 // Load translation files required by the page
 $langs->loadLangs(array("projects", "other"));
@@ -101,6 +105,11 @@ $toselect = GETPOST('toselect', 'array'); // Array of ids of elements selected i
 $contextpage = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : 'booklist'; // To manage different context of search
 $backtopage = GETPOST('backtopage', 'alpha'); // Go back to a dedicated page
 $optioncss = GETPOST('optioncss', 'aZ'); // Option for the css output (always '' except when 'print')
+
+if (!empty($conf->categorie->enabled)) {
+	$search_category_array = GETPOST("search_category_".Categorie::TYPE_PROJECT."_list", "array");
+}
+
 
 $id = GETPOST('id', 'int');
 
@@ -140,6 +149,8 @@ $arrayfields = array(
 							 'type'       => 'duration', 'visible' => 1,'isameasure'=>1),
 	'note'          => array('tablealias' => 'ptt.', 'label' => "Note", 'checked' => 1, 'position' => 16,
 							 'type'       => 'text', 'visible' => 1),
+	'ptt.invoice_id'     => array('fieldalias' => 'invoice_id', 'label' => "Facture", 'checked' => 1, 'position' => 17,
+		'type'       => 'Facture:compta/facture/class/facture.class.php:1', 'visible' => 1),
 );
 
 
@@ -204,6 +215,7 @@ if (empty($reshook)) {
 		}
 		$toselect = array();
 		$search_array_options = array();
+		$search_category_array = array();
 	}
 	if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')
 		|| GETPOST('button_search_x', 'alpha') || GETPOST('button_search.x', 'alpha') || GETPOST('button_search', 'alpha')) {
@@ -236,7 +248,6 @@ foreach ($arrayfields as $field => $data) {
 	$sqlfields[] = $data['tablealias'] . $field . ((array_key_exists('fieldalias', $data) ? ' as ' . $data['fieldalias'] : ''));
 }
 $sql .= implode(',', $sqlfields);
-
 
 // Add fields from hooks
 $parameters = array();
@@ -280,6 +291,10 @@ foreach ($search as $key => $val) {
 	if ($key == 'taskid' && !empty($val)) $sql .= ' AND pt.rowid=' . (int)$val;
 	if ($key == 'fk_user' && !empty($val)) $sql .= ' AND ptt.fk_user=' . (int)$val;
 
+}
+
+if (!empty($conf->categorie->enabled)) {
+	$sql .= Categorie::getFilterSelectQuery(Categorie::TYPE_PROJECT, "p.rowid", $search_category_array);
 }
 
 // Add where from hooks
@@ -382,6 +397,12 @@ if (empty($reshook)) {
 	$moreforfilter .= $hookmanager->resPrint;
 } else {
 	$moreforfilter = $hookmanager->resPrint;
+}
+
+// Filter on categories
+if (!empty($conf->categorie->enabled) && $user->rights->categorie->lire) {
+	$formcategory = new FormCategory($db);
+	$moreforfilter .= $formcategory->getFilterBox(Categorie::TYPE_PROJECT, $search_category_array);
 }
 
 if (!empty($moreforfilter)) {
