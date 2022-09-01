@@ -121,6 +121,7 @@ DiffSpentAndConsumedWorkedHoursMonth = Différence d'heures de travail passées/
 WarningShowOnlyFavoriteTasks = Attention quand l'option 'Afficher uniquement les tâches favorites' est activée, les valeurs totales récupèrent l'ensembles des tâches.
 ExpectedWorkedHoursWeek = Heures de travail prévues du %s au %s
 ThemeDashboardTimeSpent = Thème du Rapport de pointage de temps
+TimeSpentList = Liste des temps consommés
 
 #
 # Setup Page
