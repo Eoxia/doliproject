@@ -289,7 +289,7 @@ class modDoliproject extends DolibarrModules
 			'fk_menu'  => 'fk_mainmenu=doliproject',
 			'type'     => 'top',
 			'titre'    => $langs->trans('DoliProject'),
-			'prefix'   =>  '<i class="fas fa-home"></i>  ',
+			'prefix'   =>  '<i class="fas fa-home pictofixedwidth"></i>  ',
 			'mainmenu' => 'doliproject',
 			'leftmenu' => '',
 			'url'      => '/doliproject/doliprojectindex.php',
@@ -305,7 +305,7 @@ class modDoliproject extends DolibarrModules
 			'fk_menu'  => 'fk_mainmenu=doliproject',
 			'type'     => 'left',
 			'titre'    => $langs->trans('TimeSheet'),
-			'prefix'   => '<i class="fas fa-calendar-check"></i> ',
+			'prefix'   => '<i class="fas fa-calendar-check pictofixedwidth"></i> ',
 			'mainmenu' => 'doliproject',
 			'leftmenu' => 'timesheet',
 			'url'      => '/doliproject/view/timesheet/timesheet_list.php',
@@ -321,7 +321,7 @@ class modDoliproject extends DolibarrModules
 			'fk_menu'  => 'fk_mainmenu=doliproject',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'type'     => 'left',			                // This is a Left menu entry
 			'titre'    => $langs->trans('DoliProjectConfig'),
-			'prefix'   => '<i class="fas fa-cog"></i>  ',
+			'prefix'   => '<i class="fas fa-cog pictofixedwidth"></i>  ',
 			'mainmenu' => 'doliproject',
 			'leftmenu' => 'doliprojectconfig',
 			'url'      => '/doliproject/admin/setup.php',
@@ -337,7 +337,7 @@ class modDoliproject extends DolibarrModules
 			'fk_menu'  => 'fk_mainmenu=doliproject',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'type'     => 'left',			                // This is a Left menu entry
 			'titre'    => $langs->transnoentities('MinimizeMenu'),
-			'prefix'   => '<i class="fas fa-chevron-circle-left"></i> ',
+			'prefix'   => '<i class="fas fa-chevron-circle-left pictofixedwidth"></i> ',
 			'mainmenu' => 'doliproject',
 			'leftmenu' => '',
 			'url'      => '',
