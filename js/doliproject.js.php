@@ -1,4 +1,5 @@
-/* Copyright (C) 2021 EOXIA <dev@eoxia.com>
+<?php
+/* Copyright (C) 2022 EOXIA <dev@eoxia.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,20 +17,67 @@
  * Library javascript to enable Browser notifications
  */
 
+if ( ! defined('NOREQUIRESOC')) {
+	define('NOREQUIRESOC', '1');
+}
+if ( ! defined('NOCSRFCHECK')) {
+	define('NOCSRFCHECK', 1);
+}
+if ( ! defined('NOTOKENRENEWAL')) {
+	define('NOTOKENRENEWAL', 1);
+}
+if ( ! defined('NOLOGIN')) {
+	define('NOLOGIN', 1);
+}
+if ( ! defined('NOREQUIREMENU')) {
+	define('NOREQUIREMENU', 1);
+}
+if ( ! defined('NOREQUIREHTML')) {
+	define('NOREQUIREHTML', 1);
+}
+if ( ! defined('NOREQUIREAJAX')) {
+	define('NOREQUIREAJAX', '1');
+}
+
+session_cache_limiter('public');
+
+$res = 0;
+// Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
+if ( ! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res = @include $_SERVER["CONTEXT_DOCUMENT_ROOT"] . "/main.inc.php";
+// Try main.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
+$tmp = empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME']; $tmp2 = realpath(__FILE__); $i = strlen($tmp) - 1; $j = strlen($tmp2) - 1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] == $tmp2[$j]) { $i--; $j--; }
+if ( ! $res && $i > 0 && file_exists(substr($tmp, 0, ($i + 1)) . "/main.inc.php")) $res    = @include substr($tmp, 0, ($i + 1)) . "/main.inc.php";
+if ( ! $res && $i > 0 && file_exists(substr($tmp, 0, ($i + 1)) . "/../main.inc.php")) $res = @include substr($tmp, 0, ($i + 1)) . "/../main.inc.php";
+// Try main.inc.php using relative path
+if ( ! $res && file_exists("../../main.inc.php")) $res    = @include "../../main.inc.php";
+if ( ! $res && file_exists("../../../main.inc.php")) $res = @include "../../../main.inc.php";
+if ( ! $res) die("Include of main fails");
+
+// Define javascript type
+top_httphead('text/javascript; charset=UTF-8');
+// Important: Following code is to avoid page request by browser and PHP CPU at each Dolibarr page access.
+if (empty($dolibarr_nocache)) {
+	header('Cache-Control: max-age=10800, public, must-revalidate');
+} else {
+	header('Cache-Control: no-cache');
+}
+?>
+
 /**
- * \file    js/digiriskdolibarr.js.php
- * \ingroup digiriskdolibarr
- * \brief   JavaScript file for module DigiriskDolibarr.
+ * \file    js/doliproject.js.php
+ * \ingroup doliproject
+ * \brief   JavaScript file for module DoliProject.
  */
 
-/* Javascript library of module DigiriskDolibarr */
+/* Javascript library of module DoliProject */
 
 'use strict';
 /**
  * @namespace EO_Framework_Init
  *
  * @author Eoxia <dev@eoxia.com>
- * @copyright 2015-2021 Eoxia
+ * @copyright 2015-20222 Eoxia
  */
 
 if ( ! window.eoxiaJS ) {
@@ -119,6 +167,250 @@ if ( ! window.eoxiaJS.scriptsLoaded ) {
 
 	$( document ).ready( window.eoxiaJS.init );
 }
+
+/**
+ * Initialise l'objet "modal" ainsi que la méthode "init" obligatoire pour la bibliothèque EoxiaJS.
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ */
+window.eoxiaJS.modal = {};
+
+/**
+ * La méthode appelée automatiquement par la bibliothèque EoxiaJS.
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ *
+ * @return {void}
+ */
+window.eoxiaJS.modal.init = function() {
+	window.eoxiaJS.modal.event();
+};
+
+/**
+ * La méthode contenant tous les événements pour la modal.
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ *
+ * @return {void}
+ */
+window.eoxiaJS.modal.event = function() {
+	$( document ).on( 'click', '.modal-close', window.eoxiaJS.modal.closeModal );
+	$( document ).on( 'click', '.modal-open', window.eoxiaJS.modal.openModal );
+	$( document ).on( 'click', '.modal-refresh', window.eoxiaJS.modal.refreshModal );
+};
+
+/**
+ * Open Modal.
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ *
+ * @param  {MouseEvent} event Les attributs lors du clic.
+ * @return {void}
+ */
+window.eoxiaJS.modal.openModal = function ( event ) {
+	let idSelected = $(this).attr('value');
+	if (document.URL.match(/#/)) {
+		var urlWithoutTag = document.URL.split(/#/)[0]
+	} else {
+		var urlWithoutTag = document.URL
+	}
+	history.pushState({ path:  document.URL}, '', urlWithoutTag);
+
+	// Open modal signature.
+	if ($(this).hasClass('modal-signature-open')) {
+		$('#modal-signature' + idSelected).addClass('modal-active');
+		window.eoxiaJS.signature.modalSignatureOpened( $(this) );
+	}
+
+	$('.notice').addClass('hidden');
+};
+
+/**
+ * Close Modal.
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ *
+ * @param  {MouseEvent} event Les attributs lors du clic.
+ * @return {void}
+ */
+window.eoxiaJS.modal.closeModal = function ( event ) {
+	$(this).closest('.modal-active').removeClass('modal-active')
+	$('.clicked-photo').attr('style', '');
+	$('.clicked-photo').removeClass('clicked-photo');
+	$('.notice').addClass('hidden');
+};
+
+/**
+ * Refresh Modal.
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ *
+ * @param  {MouseEvent} event Les attributs lors du clic.
+ * @return {void}
+ */
+window.eoxiaJS.modal.refreshModal = function ( event ) {
+	window.location.reload();
+};
+
+/**
+ * [dropdown description]
+ *
+ * @memberof EO_Framework_Dropdown
+ *
+ * @type {Object}
+ */
+window.eoxiaJS.dropdown = {};
+
+/**
+ * [description]
+ *
+ * @memberof EO_Framework_Dropdown
+ *
+ * @returns {void} [description]
+ */
+window.eoxiaJS.dropdown.init = function() {
+	window.eoxiaJS.dropdown.event();
+};
+
+/**
+ * [description]
+ *
+ * @memberof EO_Framework_Dropdown
+ *
+ * @returns {void} [description]
+ */
+window.eoxiaJS.dropdown.event = function() {
+	$( document ).on( 'keyup', window.eoxiaJS.dropdown.keyup );
+	$( document ).on( 'click', '.wpeo-dropdown:not(.dropdown-active) .dropdown-toggle:not(.disabled)', window.eoxiaJS.dropdown.open );
+	$( document ).on( 'click', '.wpeo-dropdown.dropdown-active .dropdown-content', function(e) { e.stopPropagation() } );
+	$( document ).on( 'click', '.wpeo-dropdown.dropdown-active:not(.dropdown-force-display) .dropdown-content .dropdown-item', window.eoxiaJS.dropdown.close  );
+	$( document ).on( 'click', '.wpeo-dropdown.dropdown-active', function ( e ) { window.eoxiaJS.dropdown.close( e ); e.stopPropagation(); } );
+	$( document ).on( 'click', 'body', window.eoxiaJS.dropdown.close );
+};
+
+/**
+ * [description]
+ *
+ * @memberof EO_Framework_Dropdown
+ *
+ * @param  {void} event [description]
+ * @returns {void}       [description]
+ */
+window.eoxiaJS.dropdown.keyup = function( event ) {
+	if ( 27 === event.keyCode ) {
+		window.eoxiaJS.dropdown.close();
+	}
+}
+
+/**
+ * [description]
+ *
+ * @memberof EO_Framework_Dropdown
+ *
+ * @param  {void} event [description]
+ * @returns {void}       [description]
+ */
+window.eoxiaJS.dropdown.open = function( event ) {
+	var triggeredElement = $( this );
+	var angleElement = triggeredElement.find('[data-fa-i2svg]');
+	var callbackData = {};
+	var key = undefined;
+
+	window.eoxiaJS.dropdown.close( event, $( this ) );
+
+	if ( triggeredElement.attr( 'data-action' ) ) {
+		window.eoxiaJS.loader.display( triggeredElement );
+
+		triggeredElement.get_data( function( data ) {
+			for ( key in callbackData ) {
+				if ( ! data[key] ) {
+					data[key] = callbackData[key];
+				}
+			}
+
+			window.eoxiaJS.request.send( triggeredElement, data, function( element, response ) {
+				triggeredElement.closest( '.wpeo-dropdown' ).find( '.dropdown-content' ).html( response.data.view );
+
+				triggeredElement.closest( '.wpeo-dropdown' ).addClass( 'dropdown-active' );
+
+				/* Toggle Button Icon */
+				if ( angleElement ) {
+					window.eoxiaJS.dropdown.toggleAngleClass( angleElement );
+				}
+			} );
+		} );
+	} else {
+		triggeredElement.closest( '.wpeo-dropdown' ).addClass( 'dropdown-active' );
+
+		/* Toggle Button Icon */
+		if ( angleElement ) {
+			window.eoxiaJS.dropdown.toggleAngleClass( angleElement );
+		}
+	}
+
+	event.stopPropagation();
+};
+
+/**
+ * [description]
+ *
+ * @memberof EO_Framework_Dropdown
+ *
+ * @param  {void} event [description]
+ * @returns {void}       [description]
+ */
+window.eoxiaJS.dropdown.close = function( event ) {
+	var _element = $( this );
+	$( '.wpeo-dropdown.dropdown-active:not(.no-close)' ).each( function() {
+		var toggle = $( this );
+		var triggerObj = {
+			close: true
+		};
+
+		_element.trigger( 'dropdown-before-close', [ toggle, _element, triggerObj ] );
+
+		if ( triggerObj.close ) {
+			toggle.removeClass( 'dropdown-active' );
+
+			/* Toggle Button Icon */
+			var angleElement = $( this ).find('.dropdown-toggle').find('[data-fa-i2svg]');
+			if ( angleElement ) {
+				window.eoxiaJS.dropdown.toggleAngleClass( angleElement );
+			}
+		} else {
+			return;
+		}
+	});
+};
+
+/**
+ * [description]
+ *
+ * @memberof EO_Framework_Dropdown
+ *
+ * @param  {jQuery} button [description]
+ * @returns {void}        [description]
+ */
+window.eoxiaJS.dropdown.toggleAngleClass = function( button ) {
+	if ( button.hasClass('fa-caret-down') || button.hasClass('fa-caret-up') ) {
+		button.toggleClass('fa-caret-down').toggleClass('fa-caret-up');
+	}
+	else if ( button.hasClass('fa-caret-circle-down') || button.hasClass('fa-caret-circle-up') ) {
+		button.toggleClass('fa-caret-circle-down').toggleClass('fa-caret-circle-up');
+	}
+	else if ( button.hasClass('fa-angle-down') || button.hasClass('fa-angle-up') ) {
+		button.toggleClass('fa-angle-down').toggleClass('fa-angle-up');
+	}
+	else if ( button.hasClass('fa-chevron-circle-down') || button.hasClass('fa-chevron-circle-up') ) {
+		button.toggleClass('fa-chevron-circle-down').toggleClass('fa-chevron-circle-up');
+	}
+};
 
 /**
  * @namespace EO_Framework_Tooltip
@@ -486,4 +778,215 @@ window.eoxiaJS.menu.setMenu = function() {
 		localStorage.setItem('keypressNumber', 0)
 	}
 };
+
+/**
+ * Initialise l'objet "signature" ainsi que la méthode "init" obligatoire pour la bibliothèque EoxiaJS.
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ */
+window.eoxiaJS.signature = {};
+
+/**
+ * Initialise le canvas signature
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ */
+window.eoxiaJS.signature.canvas;
+
+/**
+ * Initialise le boutton signature
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ */
+window.eoxiaJS.signature.buttonSignature;
+
+/**
+ * La méthode appelée automatiquement par la bibliothèque EoxiaJS.
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ *
+ * @return {void}
+ */
+window.eoxiaJS.signature.init = function() {
+	window.eoxiaJS.signature.event();
+};
+
+/**
+ * La méthode contenant tous les événements pour la signature.
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ *
+ * @return {void}
+ */
+window.eoxiaJS.signature.event = function() {
+	$( document ).on( 'click', '.signature-erase', window.eoxiaJS.signature.clearCanvas );
+	$( document ).on( 'click', '.signature-validate', window.eoxiaJS.signature.createSignature );
+	$( document ).on( 'click', '.auto-download', window.eoxiaJS.signature.autoDownloadSpecimen );
+};
+
+/**
+ * Open modal signature
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ *
+ * @return {void}
+ */
+window.eoxiaJS.signature.modalSignatureOpened = function( triggeredElement ) {
+	window.eoxiaJS.signature.buttonSignature = triggeredElement;
+
+	var ratio =  Math.max( window.devicePixelRatio || 1, 1 );
+
+	window.eoxiaJS.signature.canvas = document.querySelector('#modal-signature' + triggeredElement.attr('value') + ' canvas' );
+
+	window.eoxiaJS.signature.canvas.signaturePad = new SignaturePad( window.eoxiaJS.signature.canvas, {
+		penColor: "rgb(0, 0, 0)"
+	} );
+
+	window.eoxiaJS.signature.canvas.width = window.eoxiaJS.signature.canvas.offsetWidth * ratio;
+	window.eoxiaJS.signature.canvas.height = window.eoxiaJS.signature.canvas.offsetHeight * ratio;
+	window.eoxiaJS.signature.canvas.getContext( "2d" ).scale( ratio, ratio );
+	window.eoxiaJS.signature.canvas.signaturePad.clear();
+
+	var signature_data = $( '#signature_data' + triggeredElement.attr('value') ).val();
+	window.eoxiaJS.signature.canvas.signaturePad.fromDataURL(signature_data);
+};
+
+/**
+ * Action Clear sign
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ *
+ * @return {void}
+ */
+window.eoxiaJS.signature.clearCanvas = function( event ) {
+	var canvas = $( this ).closest( '.modal-signature' ).find( 'canvas' );
+	canvas[0].signaturePad.clear();
+};
+
+/**
+ * Action create signature
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ *
+ * @return {void}
+ */
+window.eoxiaJS.signature.createSignature = function() {
+	let elementSignatory = $(this).attr('value');
+	let elementRedirect  = '';
+	let elementCode = '';
+	let elementZone  = $(this).find('#zone' + elementSignatory).attr('value');
+	let elementConfCAPTCHA  = $('#confCAPTCHA').val();
+	let actionContainerSuccess = $('.noticeSignatureSuccess');
+	var signatoryIDPost = '';
+	if (elementSignatory !== 0) {
+		signatoryIDPost = '&signatoryID=' + elementSignatory;
+	}
+
+	if ( ! $(this).closest( '.wpeo-modal' ).find( 'canvas' )[0].signaturePad.isEmpty() ) {
+		var signature = $(this).closest( '.wpeo-modal' ).find( 'canvas' )[0].toDataURL();
+	}
+
+	let token = $('.modal-signature').find('input[name="token"]').val();
+
+	var url = '';
+	var type = '';
+	if (elementZone == "private") {
+		url = document.URL + '&action=addSignature' + signatoryIDPost + '&token=' + token;
+		type = "POST"
+	} else {
+		url = document.URL + '&action=addSignature' + signatoryIDPost + '&token=' + token;
+		type = "POST";
+	}
+
+	if (elementConfCAPTCHA == 1) {
+		elementCode = $('#securitycode').val();
+		let elementSessionCode = $('#sessionCode').val();
+		if (elementSessionCode != elementCode) {
+			elementRedirect = $('#redirectSignatureError').val();
+		}
+	} else {
+		elementRedirect = $(this).find('#redirect' + elementSignatory).attr('value');
+	}
+
+	$.ajax({
+		url: url,
+		type: type,
+		processData: false,
+		contentType: 'application/octet-stream',
+		data: JSON.stringify({
+			signature: signature,
+			code: elementCode
+		}),
+		success: function( resp ) {
+			if (elementZone == "private") {
+				actionContainerSuccess.html($(resp).find('.noticeSignatureSuccess .all-notice-content'));
+				actionContainerSuccess.removeClass('hidden');
+				$('.signatures-container').html($(resp).find('.signatures-container'));
+			} else {
+				window.location.replace(elementRedirect);
+			}
+		},
+		error: function ( ) {
+			alert('Error')
+		}
+	});
+};
+
+/**
+ * Download signature
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ *
+ * @return {void}
+ */
+window.eoxiaJS.signature.download = function(fileUrl, filename) {
+	var a = document.createElement("a");
+	a.href = fileUrl;
+	a.setAttribute("download", filename);
+	a.click();
+}
+
+/**
+ * Auto Download signature specimen
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ *
+ * @return {void}
+ */
+window.eoxiaJS.signature.autoDownloadSpecimen = function( event ) {
+	let element = $(this).closest('.file-generation')
+	let token = $('.digirisk-signature-container').find('input[name="token"]').val();
+	let url = document.URL + '&action=builddoc&token=' + token
+	$.ajax({
+		url: url,
+		type: "POST",
+		success: function ( ) {
+			let filename = element.find('.specimen-name').attr('value')
+			let path = element.find('.specimen-path').attr('value')
+
+			window.eoxiaJS.signature.download(path + filename, filename);
+			$.ajax({
+				url: document.URL + '&action=remove_file&token=' + token,
+				type: "POST",
+				success: function ( ) {
+				},
+				error: function ( ) {
+				}
+			});
+		},
+		error: function ( ) {
+		}
+	});
+};
+
 

@@ -364,8 +364,19 @@ class modDoliproject extends DolibarrModules
 		global $conf, $langs, $db, $user;
 		$langs->load('doliproject@doliproject');
 
+		$sql = array();
+		// Load sql sub folders
+		$sqlFolder = scandir(__DIR__ . '/../../sql');
+		foreach ($sqlFolder as $subFolder) {
+			if ( ! preg_match('/\./', $subFolder)) {
+				$this->_load_tables('/doliproject/sql/' . $subFolder . '/');
+			}
+		}
+
 		$result = $this->_load_tables('/doliproject/sql/');
-		if ($result < 0) return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
+		if ($result < 0) {
+			return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
+		}
 
 		if ($conf->global->DOLIPROJECT_HR_PROJECT < 1) {
 

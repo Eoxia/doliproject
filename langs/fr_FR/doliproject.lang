@@ -195,4 +195,70 @@ UserAssign = Utilisateur assigné
 TimeSheetData = Données configurables de la navette
 PrefillDate = Préremplir la date de début et de fin de la navette
 PrefillDateDescription = Préremplissage de la date de début avec le premier jour du mois en cours et la date de fin avec le dernier jour du mois en cours
+Lock = Verrouiller
+ReOpenDoli = Rouvrir
+ValidatePendingSignature = Validé (en attente de signature)
+TimeSheetMustBeValidatedToSign = La navette doit être validée pour que les participants puissent signer
+TimeSheetMustBeLocked = La navette doit être verrouillée afin de permettre la génération
+GoToLock = Verrouiller la navette
+GoToValidate = Valider la navette
+TIMESHEET_SOCIETY_ATTENDANT = Participant interne
+TIMESHEET_SOCIETY_RESPONSIBLE = Responsable
 
+
+
+#
+# DoliProjectSignature - Signature
+#
+
+# Trigger - Déclencheur
+DoliProjectSignatureSignedTrigger = Signature du participant effectuée
+DoliProjectSignaturePendingSignatureTrigger = Email envoyé, en attente de la signature du participant
+DoliProjectSignatureAbsentTrigger = Participant absent
+DoliProjectSignatureDeletedTrigger = Participant supprimé
+
+# SetEventMessage - Notice info
+DisclaimerSignatureTitle = Attention
+AddSignatureSuccess = Signature du document réussie
+AddSignatureSuccessText = La signature a bien été enregistrée pour le document
+AddAttendantMessage = Ajout du participant :
+DeleteAttendantMessage = Suppression du participant :
+SignatureEvent = Le participant a signé : %s
+Attendant = Le participant
+SetAbsentAttendant = est absent
+
+# Status - Statut
+Registered = Inscrit
+SignatureRequest = Demande de signature
+PendingSignature = En attente de signature
+Denied = Refusé
+Signed = Signé
+Unsigned = Non signé
+Absent = Absent
+JustifiedAbsent = Absence justifiée
+
+# Header table - Entête de tableau
+Role = Rôle
+SignatureLink = Lien signature
+SendMailDate = Date d'envoi d'email
+SignatureDate = Date de signature
+ActionsSignature = Actions
+
+# Data - Donnée
+Attendants = Participants
+SendEmail = Envoyer un email
+DeleteAttendant = Supprimer le participant
+Sign = Signer
+Erase = Effacer
+SocietyAttendant = Participant interne
+SocietyResponsible = Responsable
+NoSocietyAttendants = Pas de particapants liés à cet objet. Pour ajouter des particapants, le statut doit être "Brouillon".
+FileGenerated
+
+#
+# Other
+#
+
+# Data - Donnée
+SendEmailAt = Envoi de l'email à
+ErrorSetupEmail = Erreur de configuration des mails, vous n'avez pas configuré votre serveur d'envoi de mail
