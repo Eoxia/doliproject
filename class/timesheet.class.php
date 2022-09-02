@@ -1,6 +1,5 @@
 <?php
-/* Copyright (C) 2017  Laurent Destailleur <eldy@users.sourceforge.net>
- * Copyright (C) ---Put here your own copyright and developer email---
+/* Copyright (C) 2022 EOXIA <dev@eoxia.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +21,9 @@
  * \brief       This file is a CRUD class file for TimeSheet (Create/Read/Update/Delete)
  */
 
-// Put here all includes required by your class file
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
-//require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
-//require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+
+require_once __DIR__ . '/doliprojectsignature.class.php';
 
 /**
  * Class for TimeSheet
@@ -63,11 +61,9 @@ class TimeSheet extends CommonObject
 	 */
 	public $picto = 'timesheet@doliproject';
 
-
 	const STATUS_DRAFT = 0;
 	const STATUS_VALIDATED = 1;
-	const STATUS_CANCELED = 9;
-
+	const STATUS_LOCKED = 2;
 
 	/**
 	 *  'type' field format ('integer', 'integer:ObjectClass:PathToClass[:AddCreateButtonOrNot[:Filter[:Sortfield]]]', 'sellist:TableName:LabelFieldName[:KeyFieldName[:KeyFieldParent[:Filter[:Sortfield]]]]', 'varchar(x)', 'double(24,8)', 'real', 'price', 'text', 'text:none', 'html', 'date', 'datetime', 'timestamp', 'duration', 'mail', 'phone', 'url', 'password')
@@ -124,66 +120,63 @@ class TimeSheet extends CommonObject
 		'fk_soc'         => array('type'=>'integer:Societe:societe/class/societe.class.php:1', 'label'=>'ThirdParty', 'enabled'=>'1', 'position'=>101, 'notnull'=>-1, 'visible'=>1, 'index'=>1, 'css'=>'maxwidth500 widthcentpercentminusxx',),
 		'fk_user_assign' => array('type'=>'integer:User:user/class/user.class.php:1:t.fk_soc IS NULL', 'label'=>'UserAssign', 'enabled'=>'1', 'position'=>85, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'css'=>'maxwidth500 widthcentpercentminusxx',),
 	);
-	// BEGIN MODULEBUILDER PROPERTIES
+
 	public $rowid;
 	public $ref;
 	public $ref_ext;
 	public $entity;
+	public $date_creation;
+	public $tms;
+	public $import_key;
+	public $status;
 	public $label;
+	public $date_start;
+	public $date_end;
 	public $description;
 	public $note_public;
 	public $note_private;
-	public $date_creation;
-	public $date_start;
-	public $date_end;
-	public $tms;
 	public $last_main_doc;
-	public $import_key;
 	public $model_pdf;
 	public $model_odt;
-	public $status;
-	public $fk_user_assign;
-	public $fk_soc;
-	public $fk_project;
 	public $fk_user_creat;
 	public $fk_user_modif;
-	// END MODULEBUILDER PROPERTIES
-
+	public $fk_project;
+	public $fk_soc;
+	public $fk_user_assign;
 
 	// If this object has a subtable with lines
 
-	// /**
-	//  * @var string    Name of subtable line
-	//  */
-	// public $table_element_line = 'doliproject_timesheetline';
+	 /**
+	  * @var string    Name of subtable line
+	  */
+	 public $table_element_line = 'doliproject_timesheetdet';
 
-	// /**
-	//  * @var string    Field with ID of parent key if this object has a parent
-	//  */
-	// public $fk_element = 'fk_timesheet';
+	 /**
+	  * @var string    Field with ID of parent key if this object has a parent
+	  */
+	 public $fk_element = 'fk_timesheet';
 
-	// /**
-	//  * @var string    Name of subtable class that manage subtable lines
-	//  */
-	// public $class_element_line = 'TimeSheetline';
+	 /**
+	  * @var string    Name of subtable class that manage subtable lines
+	  */
+	 public $class_element_line = 'TimeSheetline';
 
-	// /**
-	//  * @var array	List of child tables. To test if we can delete object.
-	//  */
-	// protected $childtables = array();
+	 /**
+	  * @var array	List of child tables. To test if we can delete object.
+	  */
+	 protected $childtables = array();
 
-	// /**
-	//  * @var array    List of child tables. To know object to delete on cascade.
-	//  *               If name matches '@ClassNAme:FilePathClass;ParentFkFieldName' it will
-	//  *               call method deleteByParentField(parentId, ParentFkFieldName) to fetch and delete child object
-	//  */
-	// protected $childtablesoncascade = array('doliproject_timesheetdet');
+	 /**
+	  * @var array    List of child tables. To know object to delete on cascade.
+	  *               If name matches '@ClassNAme:FilePathClass;ParentFkFieldName' it will
+	  *               call method deleteByParentField(parentId, ParentFkFieldName) to fetch and delete child object
+	  */
+	 protected $childtablesoncascade = array('doliproject_timesheetdet');
 
-	// /**
-	//  * @var TimeSheetLine[]     Array of subtable lines
-	//  */
-	// public $lines = array();
-
+	 /**
+	  * @var TimeSheetLine[]     Array of subtable lines
+	  */
+	 public $lines = array();
 
 
 	/**
@@ -203,12 +196,6 @@ class TimeSheet extends CommonObject
 		if (empty($conf->multicompany->enabled) && isset($this->fields['entity'])) {
 			$this->fields['entity']['enabled'] = 0;
 		}
-
-		// Example to show how to set values of fields definition dynamically
-		/*if ($user->rights->doliproject->timesheet->read) {
-			$this->fields['myfield']['visible'] = 1;
-			$this->fields['myfield']['noteditable'] = 0;
-		}*/
 
 		// Unset fields that are disabled
 		foreach ($this->fields as $key => $val) {
@@ -239,9 +226,6 @@ class TimeSheet extends CommonObject
 	public function create(User $user, $notrigger = false)
 	{
 		$resultcreate = $this->createCommon($user, $notrigger);
-
-		//$resultvalidate = $this->validate($user, $notrigger);
-
 		return $resultcreate;
 	}
 
@@ -368,11 +352,9 @@ class TimeSheet extends CommonObject
 	public function fetchLines()
 	{
 		$this->lines = array();
-
 		$result = $this->fetchLinesCommon();
 		return $result;
 	}
-
 
 	/**
 	 * Load list of objects in memory from the database.
@@ -476,7 +458,6 @@ class TimeSheet extends CommonObject
 	public function delete(User $user, $notrigger = false)
 	{
 		return $this->deleteCommon($user, $notrigger);
-		//return $this->deleteCommon($user, $notrigger, 1);
 	}
 
 	/**
@@ -496,7 +477,6 @@ class TimeSheet extends CommonObject
 
 		return $this->deleteLineCommon($user, $idline, $notrigger);
 	}
-
 
 	/**
 	 *	Validate object
@@ -622,7 +602,6 @@ class TimeSheet extends CommonObject
 		}
 	}
 
-
 	/**
 	 *	Set draft status
 	 *
@@ -637,38 +616,7 @@ class TimeSheet extends CommonObject
 			return 0;
 		}
 
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->doliproject->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->doliproject->doliproject_advance->validate))))
-		 {
-		 $this->error='Permission denied';
-		 return -1;
-		 }*/
-
 		return $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, 'TIMESHEET_UNVALIDATE');
-	}
-
-	/**
-	 *	Set cancel status
-	 *
-	 *	@param	User	$user			Object user that modify
-	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
-	 *	@return	int						<0 if KO, 0=Nothing done, >0 if OK
-	 */
-	public function cancel($user, $notrigger = 0)
-	{
-		// Protection
-		if ($this->status != self::STATUS_VALIDATED) {
-			return 0;
-		}
-
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->doliproject->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->doliproject->doliproject_advance->validate))))
-		 {
-		 $this->error='Permission denied';
-		 return -1;
-		 }*/
-
-		return $this->setStatusCommon($user, self::STATUS_CANCELED, $notrigger, 'TIMESHEET_CANCEL');
 	}
 
 	/**
@@ -678,21 +626,9 @@ class TimeSheet extends CommonObject
 	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
 	 *	@return	int						<0 if KO, 0=Nothing done, >0 if OK
 	 */
-	public function reopen($user, $notrigger = 0)
+	public function setLocked($user, $notrigger = 0)
 	{
-		// Protection
-		if ($this->status != self::STATUS_CANCELED) {
-			return 0;
-		}
-
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->doliproject->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->doliproject->doliproject_advance->validate))))
-		 {
-		 $this->error='Permission denied';
-		 return -1;
-		 }*/
-
-		return $this->setStatusCommon($user, self::STATUS_VALIDATED, $notrigger, 'TIMESHEET_REOPEN');
+		return $this->setStatusCommon($user, self::STATUS_VALIDATED, $notrigger, 'TIMESHEET_LOCKED');
 	}
 
 	/**
@@ -817,17 +753,6 @@ class TimeSheet extends CommonObject
 	 *  @param  int		$mode          0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto, 6=Long label + Picto
 	 *  @return	string 			       Label of status
 	 */
-	public function getLabelStatus($mode = 0)
-	{
-		return $this->LibStatut($this->status, $mode);
-	}
-
-	/**
-	 *  Return the label of the status
-	 *
-	 *  @param  int		$mode          0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto, 6=Long label + Picto
-	 *  @return	string 			       Label of status
-	 */
 	public function getLibStatut($mode = 0)
 	{
 		return $this->LibStatut($this->status, $mode);
@@ -846,20 +771,18 @@ class TimeSheet extends CommonObject
 		// phpcs:enable
 		if (empty($this->labelStatus) || empty($this->labelStatusShort)) {
 			global $langs;
-			//$langs->load("doliproject@doliproject");
-			$this->labelStatus[self::STATUS_DRAFT] = $langs->transnoentitiesnoconv('Draft');
-			$this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
-			$this->labelStatus[self::STATUS_CANCELED] = $langs->transnoentitiesnoconv('Disabled');
-			$this->labelStatusShort[self::STATUS_DRAFT] = $langs->transnoentitiesnoconv('Draft');
-			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
-			$this->labelStatusShort[self::STATUS_CANCELED] = $langs->transnoentitiesnoconv('Disabled');
+			$langs->load("doliproject@doliproject");
+			$this->labelStatus[self::STATUS_DRAFT]          = $langs->transnoentitiesnoconv('Draft');
+			$this->labelStatus[self::STATUS_VALIDATED]      = $langs->transnoentitiesnoconv('ValidatePendingSignature');
+			$this->labelStatus[self::STATUS_LOCKED]         = $langs->transnoentitiesnoconv('Locked');
+			$this->labelStatusShort[self::STATUS_DRAFT]     = $langs->transnoentitiesnoconv('Draft');
+			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('ValidatePendingSignature');
+			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Locked');
 		}
 
-		$statusType = 'status'.$status;
-		//if ($status == self::STATUS_VALIDATED) $statusType = 'status1';
-		if ($status == self::STATUS_CANCELED) {
-			$statusType = 'status6';
-		}
+		$statusType                                        = 'status' . $status;
+		if ($status == self::STATUS_VALIDATED) $statusType = 'status3';
+		if ($status == self::STATUS_LOCKED) $statusType    = 'status8';
 
 		return dolGetStatus($this->labelStatus[$status], $this->labelStatusShort[$status], '', $statusType, $mode);
 	}
@@ -1041,36 +964,6 @@ class TimeSheet extends CommonObject
 
 		return $result;
 	}
-
-	/**
-	 * Action executed by scheduler
-	 * CAN BE A CRON TASK. In such a case, parameters come from the schedule job setup field 'Parameters'
-	 * Use public function doScheduledJob($param1, $param2, ...) to get parameters
-	 *
-	 * @return	int			0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
-	 */
-	public function doScheduledJob()
-	{
-		global $conf, $langs;
-
-		//$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_mydedicatedlofile.log';
-
-		$error = 0;
-		$this->output = '';
-		$this->error = '';
-
-		dol_syslog(__METHOD__, LOG_DEBUG);
-
-		$now = dol_now();
-
-		$this->db->begin();
-
-		// ...
-
-		$this->db->commit();
-
-		return $error;
-	}
 }
 
 
@@ -1106,7 +999,7 @@ class TimeSheetLine extends CommonObjectLine
 		'fk_user_assign' => array('type'=>'integer:user:user/class/user.class.php:1:status=1 AND entity IN (__SHARED_ENTITIES__)', 'label'=>'UserAssign', 'enabled'=>'1', 'position'=>1045, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'css'=>'maxwidth500 widthcentpercentminusxx', 'validate'=>'1',),
 		'fk_soc ' => array('type'=>'integer:Societe:societe/class/societe.class.php:1:status=1 AND entity IN (__SHARED_ENTITIES__)', 'label'=>'ThirdParty', 'enabled'=>'1', 'position'=>1050, 'notnull'=>-1, 'visible'=>1, 'index'=>1, 'css'=>'maxwidth500 widthcentpercentminusxx', 'help'=>"LinkToThirparty", 'validate'=>'1',),
 		'fk_project' => array('type'=>'integer:Project:projet/class/project.class.php:1', 'label'=>'Project', 'enabled'=>'1', 'position'=>1052, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'css'=>'maxwidth500 widthcentpercentminusxx', 'validate'=>'1',),
-		);
+	);
 
 	public $rowid;
 	public $ref;
@@ -1134,3 +1027,119 @@ class TimeSheetLine extends CommonObjectLine
 		$this->db = $db;
 	}
 }
+
+/**
+ * Class TimeSheetSignature
+ */
+
+class TimeSheetSignature extends DoliProjectSignature
+{
+	/**
+	 * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management.
+	 */
+
+	public $object_type = 'timesheet';
+
+	/**
+	 * @var array Context element object
+	 */
+	public $context = array();
+
+	/**
+	 * @var string String with name of icon for document. Must be the part after the 'object_' into object_document.png
+	 */
+	public $picto = 'timesheet@doliproject';
+
+	/**
+	 * Constructor
+	 *
+	 * @param DoliDb $db Database handler
+	 */
+	public function __construct(DoliDB $db)
+	{
+		global $conf, $langs;
+
+		$this->db = $db;
+
+		if (empty($conf->global->MAIN_SHOW_TECHNICAL_ID) && isset($this->fields['rowid'])) $this->fields['rowid']['visible'] = 0;
+		if (empty($conf->multicompany->enabled) && isset($this->fields['entity'])) $this->fields['entity']['enabled']        = 0;
+
+		// Unset fields that are disabled
+		foreach ($this->fields as $key => $val) {
+			if (isset($val['enabled']) && empty($val['enabled'])) {
+				unset($this->fields[$key]);
+			}
+		}
+
+		// Translate some data of arrayofkeyval
+		if (is_object($langs)) {
+			foreach ($this->fields as $key => $val) {
+				if (is_array($val['arrayofkeyval'])) {
+					foreach ($val['arrayofkeyval'] as $key2 => $val2) {
+						$this->fields[$key]['arrayofkeyval'][$key2] = $langs->trans($val2);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Clone an object into another one
+	 *
+	 * @param User $user User that creates
+	 * @param int $fromid Id of object to clone
+	 * @param $timesheetid
+	 * @return    mixed                New object created, <0 if KO
+	 * @throws Exception
+	 */
+	public function createFromClone(User $user, $fromid, $timesheetid)
+	{
+		$error = 0;
+
+		dol_syslog(__METHOD__, LOG_DEBUG);
+
+		$object = new self($this->db);
+
+		$this->db->begin();
+
+		// Load source object
+		$object->fetchCommon($fromid);
+
+		// Reset some properties
+		unset($object->id);
+		unset($object->fk_user_creat);
+		unset($object->import_key);
+		unset($object->signature);
+		unset($object->signature_date);
+		unset($object->last_email_sent_date);
+
+		// Clear fields
+		if (property_exists($object, 'date_creation')) {
+			$object->date_creation = dol_now();
+		}
+		if (property_exists($object, 'fk_object')) {
+			$object->fk_object = $timesheetid;
+		}
+		if (property_exists($object, 'status')) {
+			$object->status = 1;
+		}
+		if (property_exists($object, 'signature_url')) {
+			$object->signature_url = generate_random_id(16);
+		}
+
+		// Create clone
+		$object->context['createfromclone'] = 'createfromclone';
+		$result                             = $object->createCommon($user);
+		unset($object->context['createfromclone']);
+
+		// End
+		if ( ! $error) {
+			$this->db->commit();
+			return $result;
+		} else {
+			$this->db->rollback();
+			return -1;
+		}
+	}
+}
+

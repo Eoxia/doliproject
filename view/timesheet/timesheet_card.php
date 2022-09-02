@@ -63,7 +63,7 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 
 require_once __DIR__ . '/../../class/timesheet.class.php';
 require_once __DIR__ . '/../../lib/doliproject_timesheet.lib.php';
-require_once __DIR__ . '/../../lib/doliproject_functions.lib.php';
+require_once __DIR__ . '/../../lib/doliproject_function.lib.php';
 
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;
@@ -89,8 +89,6 @@ $object      = new TimeSheet($db);
 $extrafields = new ExtraFields($db);
 $project     = new Project($db);
 
-$diroutputmassaction = $conf->doliproject->dir_output.'/temp/massgeneration/'.$user->id;
-
 $hookmanager->initHooks(array('timesheetcard', 'globalcard')); // Note that conf->hooks_modules contains array
 
 // Fetch optionals attributes and labels
@@ -114,30 +112,14 @@ if (empty($action) && empty($id) && empty($ref)) {
 // Load object
 include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be include, not include_once.
 
-// There is several ways to check permission.
-// Set $enablepermissioncheck to 1 to enable a minimum low level of checks
-$enablepermissioncheck = 0;
-if ($enablepermissioncheck) {
-	$permissiontoread   = $user->rights->doliproject->timesheet->read;
-	$permissiontoadd    = $user->rights->doliproject->timesheet->write; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-	$permissiontodelete = $user->rights->doliproject->timesheet->delete || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
-	$permissionnote     = $user->rights->doliproject->timesheet->write; // Used by the include of actions_setnotes.inc.php
-	$permissiondellink  = $user->rights->doliproject->timesheet->write; // Used by the include of actions_dellink.inc.php
-} else {
-	$permissiontoread   = 1;
-	$permissiontoadd    = 1; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-	$permissiontodelete = 1;
-	$permissionnote     = 1;
-	$permissiondellink  = 1;
-}
+$permissiontoread   = $user->rights->doliproject->timesheet->read;
+$permissiontoadd    = $user->rights->doliproject->timesheet->write; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
+$permissiontodelete = $user->rights->doliproject->timesheet->delete || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
+$permissionnote     = $user->rights->doliproject->timesheet->write; // Used by the include of actions_setnotes.inc.php
 
 $upload_dir = $conf->doliproject->multidir_output[isset($object->entity) ? $object->entity : 1];
 
 // Security check (enable the most restrictive one)
-//if ($user->socid > 0) accessforbidden();
-//if ($user->socid > 0) $socid = $user->socid;
-//$isdraft = (isset($object->status) && ($object->status == $object::STATUS_DRAFT) ? 1 : 0);
-//restrictedArea($user, $object->element, $object->id, $object->table_element, '', 'fk_soc', 'rowid', $isdraft);
 if (empty($conf->doliproject->enabled)) accessforbidden();
 if (!$permissiontoread) accessforbidden();
 
@@ -166,7 +148,7 @@ if (empty($reshook)) {
 		}
 	}
 
-	$triggermodname = 'DOLIPROJECT_TIMESHEET_MODIFY'; // Name of trigger action code to execute when we modify record
+	$triggermodname = 'TIMESHEET_MODIFY'; // Name of trigger action code to execute when we modify record
 
 	// Actions cancel, add, update, update_extras, confirm_validate, confirm_delete, confirm_deleteline, confirm_clone, confirm_close, confirm_setdraft, confirm_reopen
 	include DOL_DOCUMENT_ROOT.'/core/actions_addupdatedelete.inc.php';
@@ -208,14 +190,11 @@ if (empty($reshook)) {
 		$action = '';
 	}
 
-	// Actions when linking object each other
-	include DOL_DOCUMENT_ROOT.'/core/actions_dellink.inc.php';
-
 	// Actions when printing a doc from card
 	include DOL_DOCUMENT_ROOT.'/core/actions_printing.inc.php';
 
 	// Action to move up and down lines of object
-	//include DOL_DOCUMENT_ROOT.'/core/actions_lineupdown.inc.php';
+	include DOL_DOCUMENT_ROOT.'/core/actions_lineupdown.inc.php';
 
 	// Action to build doc
 	if ($action == 'builddoc' && $permissiontoadd) {
@@ -303,6 +282,7 @@ if (empty($reshook)) {
 	if ($action == 'set_thirdparty' && $permissiontoadd) {
 		$object->setValueFrom('fk_soc', GETPOST('fk_soc', 'int'), '', '', 'date', '', $user, $triggermodname);
 	}
+
 	if ($action == 'classin' && $permissiontoadd) {
 		$object->setProject(GETPOST('projectid', 'int'));
 	}
@@ -314,17 +294,12 @@ if (empty($reshook)) {
 	include DOL_DOCUMENT_ROOT.'/core/actions_sendmails.inc.php';
 }
 
-
-
-
 /*
  * View
- *
- * Put here all code to build page
  */
 
-$form = new Form($db);
-$formfile = new FormFile($db);
+$form        = new Form($db);
+$formfile    = new FormFile($db);
 $formproject = new FormProjets($db);
 
 $title    = $langs->trans("TimeSheet");
@@ -333,22 +308,6 @@ $morejs   = array("/doliproject/js/doliproject.js.php");
 $morecss  = array("/doliproject/css/doliproject.css");
 
 llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss);
-
-// Example : Adding jquery code
-// print '<script type="text/javascript">
-// jQuery(document).ready(function() {
-// 	function init_myfunc()
-// 	{
-// 		jQuery("#myid").removeAttr(\'disabled\');
-// 		jQuery("#myid").attr(\'disabled\',\'disabled\');
-// 	}
-// 	init_myfunc();
-// 	jQuery("#mybutton").click(function() {
-// 		init_myfunc();
-// 	});
-// });
-// </script>';
-
 
 // Part to create
 if ($action == 'create') {
@@ -474,22 +433,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('ToClone'), $langs->trans('ConfirmCloneAsk', $object->ref), 'confirm_clone', $formquestion, 'yes', 1);
 	}
 
-	// Confirmation of action xxxx
-	if ($action == 'xxx') {
-		$formquestion = array();
-		/*
-		$forcecombo=0;
-		if ($conf->browser->name == 'ie') $forcecombo = 1;	// There is a bug in IE10 that make combo inside popup crazy
-		$formquestion = array(
-			// 'text' => $langs->trans("ConfirmClone"),
-			// array('type' => 'checkbox', 'name' => 'clone_content', 'label' => $langs->trans("CloneMainAttributes"), 'value' => 1),
-			// array('type' => 'checkbox', 'name' => 'update_prices', 'label' => $langs->trans("PuttingPricesUpToDate"), 'value' => 1),
-			// array('type' => 'other',    'name' => 'idwarehouse',   'label' => $langs->trans("SelectWarehouseForStockDecrease"), 'value' => $formproduct->selectWarehouses(GETPOST('idwarehouse')?GETPOST('idwarehouse'):'ifone', 'idwarehouse', '', 1, 0, 0, '', 0, $forcecombo))
-		);
-		*/
-		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('XXX'), $text, 'confirm_xxx', $formquestion, 0, 1, 220);
-	}
-
 	// Call Hook formConfirm
 	$parameters = array('formConfirm' => $formconfirm, 'lineid' => $lineid);
 	$reshook = $hookmanager->executeHooks('formConfirm', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
@@ -552,59 +495,57 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	print dol_get_fiche_end();
 
 
-//	/*
-//	 * Lines
-//	 */
-//
-//	if (!empty($object->table_element_line)) {
-//		// Show object lines
-//		$result = $object->getLinesArray();
-//
-//		print '	<form name="addproduct" id="addproduct" action="'.$_SERVER["PHP_SELF"].'?id='.$object->id.(($action != 'editline') ? '' : '#line_'.GETPOST('lineid', 'int')).'" method="POST">
-//		<input type="hidden" name="token" value="' . newToken().'">
-//		<input type="hidden" name="action" value="' . (($action != 'editline') ? 'addline' : 'updateline').'">
-//		<input type="hidden" name="mode" value="">
-//		<input type="hidden" name="page_y" value="">
-//		<input type="hidden" name="id" value="' . $object->id.'">
-//		';
-//
-//		if (!empty($conf->use_javascript_ajax) && $object->status == 0) {
-//			include DOL_DOCUMENT_ROOT.'/core/tpl/ajaxrow.tpl.php';
-//		}
-//
-//		print '<div class="div-table-responsive-no-min">';
-//		if (!empty($object->lines) || ($object->status == $object::STATUS_DRAFT && $permissiontoadd && $action != 'selectlines' && $action != 'editline')) {
-//			print '<table id="tablelines" class="noborder noshadow" width="100%">';
-//		}
-//
-//		if (!empty($object->lines)) {
-//			$object->printObjectLines($action, $mysoc, null, GETPOST('lineid', 'int'), 1);
-//		}
-//
-//		// Form to add new line
-//		if ($object->status == 0 && $permissiontoadd && $action != 'selectlines') {
-//			if ($action != 'editline') {
-//				// Add products/services form
-//
-//				$parameters = array();
-//				$reshook = $hookmanager->executeHooks('formAddObjectLine', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
-//				if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
-//				if (empty($reshook))
-//					$object->formAddObjectLine(1, $mysoc, $soc);
-//			}
-//		}
-//
-//		if (!empty($object->lines) || ($object->status == $object::STATUS_DRAFT && $permissiontoadd && $action != 'selectlines' && $action != 'editline')) {
-//			print '</table>';
-//		}
-//		print '</div>';
-//
-//		print "</form>\n";
-//	}
+	/*
+	 * Lines
+	 */
+
+	if (!empty($object->table_element_line)) {
+		// Show object lines
+		$result = $object->getLinesArray();
+
+		print '	<form name="addproduct" id="addproduct" action="'.$_SERVER["PHP_SELF"].'?id='.$object->id.(($action != 'editline') ? '' : '#line_'.GETPOST('lineid', 'int')).'" method="POST">
+		<input type="hidden" name="token" value="' . newToken().'">
+		<input type="hidden" name="action" value="' . (($action != 'editline') ? 'addline' : 'updateline').'">
+		<input type="hidden" name="mode" value="">
+		<input type="hidden" name="page_y" value="">
+		<input type="hidden" name="id" value="' . $object->id.'">
+		';
+
+		if (!empty($conf->use_javascript_ajax) && $object->status == 0) {
+			include DOL_DOCUMENT_ROOT.'/core/tpl/ajaxrow.tpl.php';
+		}
+
+		print '<div class="div-table-responsive-no-min">';
+		if (!empty($object->lines) || ($object->status == $object::STATUS_DRAFT && $permissiontoadd && $action != 'selectlines' && $action != 'editline')) {
+			print '<table id="tablelines" class="noborder noshadow" width="100%">';
+		}
+
+		if (!empty($object->lines)) {
+			$object->printObjectLines($action, $mysoc, null, GETPOST('lineid', 'int'), 1);
+		}
+
+		// Form to add new line
+		if ($object->status == 0 && $permissiontoadd && $action != 'selectlines') {
+			if ($action != 'editline') {
+				// Add products/services form
+				$parameters = array();
+				$reshook = $hookmanager->executeHooks('formAddObjectLine', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+				if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+				if (empty($reshook))
+					$object->formAddObjectLine(1, $mysoc, $soc);
+			}
+		}
+
+		if (!empty($object->lines) || ($object->status == $object::STATUS_DRAFT && $permissiontoadd && $action != 'selectlines' && $action != 'editline')) {
+			print '</table>';
+		}
+		print '</div>';
+
+		print "</form>\n";
+	}
 
 
 	// Buttons for actions
-
 	if ($action != 'presend' && $action != 'editline') {
 		print '<div class="tabsAction">'."\n";
 		$parameters = array();
@@ -614,54 +555,43 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		}
 
 		if (empty($reshook)) {
-			// Send
-			if (empty($user->socid)) {
-				print dolGetButtonAction($langs->trans('SendMail'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=presend&mode=init&token='.newToken().'#formmailbeforetitle');
-			}
+			$params = array(
+				'attr' => array(
+					'classOverride' => 'butActionRefused classfortooltip'
+				)
+			);
 
-			// Back to draft
-			if ($object->status == $object::STATUS_VALIDATED) {
-				print dolGetButtonAction($langs->trans('SetToDraft'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=confirm_setdraft&confirm=yes&token='.newToken(), '', $permissiontoadd);
-			}
-
-			print dolGetButtonAction($langs->trans('Modify'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=edit&token='.newToken(), '', $permissiontoadd);
+			// Modify
+			print dolGetButtonAction($langs->trans('Modify'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=edit&token='.newToken(), '', $permissiontoadd, ($object->status == $object::STATUS_DRAFT) ? '' : $params);
 
 			// Validate
-			if ($object->status == $object::STATUS_DRAFT) {
-				if (empty($object->table_element_line) || (is_array($object->lines) && count($object->lines) > 0)) {
-					print dolGetButtonAction($langs->trans('Validate'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_validate2&confirm=yes&token='.newToken(), '', $permissiontoadd);
-				} else {
-					$langs->load("errors");
-					print dolGetButtonAction($langs->trans("ErrorAddAtLeastOneLineFirst"), $langs->trans("Validate"), 'default', '#', '', 0);
-				}
+			if (empty($object->table_element_line) || (is_array($object->lines) && count($object->lines) > 0)) {
+				print dolGetButtonAction($langs->trans('Validate'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_validate2&confirm=yes&token='.newToken(), '', $permissiontoadd, ($object->status == $object::STATUS_DRAFT) ? '' : $params);
+			} else {
+				$langs->load("errors");
+				print dolGetButtonAction($langs->trans("ErrorAddAtLeastOneLineFirst"), $langs->trans("Validate"), 'default', '#', '', 0, $params);
 			}
+
+			// ReOpen
+			print dolGetButtonAction($langs->trans('ReOpenDoli'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=confirm_setdraft&confirm=yes&token=' . newToken(), '', $permissiontoadd, ($object->status == $object::STATUS_VALIDATED) ? '' : $params);
+
+			// Sign
+			print dolGetButtonAction($langs->trans('Sign'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id, '', $permissiontoadd, ($object->status == $object::STATUS_VALIDATED) ? '' : $params);
+
+			// Lock
+			print dolGetButtonAction($langs->trans('Lock'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=close&token=' . newToken(), '', $permissiontoadd, ($object->status == $object::STATUS_LOCKED) ? '' : $params);
+
+			// Send
+			print dolGetButtonAction($langs->trans('SendMail'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=presend&mode=init&token='.newToken().'#formmailbeforetitle', '', $permissiontoadd, ($object->status == $object::STATUS_LOCKED) ? '' : $params);
 
 			// Clone
 			print dolGetButtonAction($langs->trans('ToClone'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.(!empty($object->socid)?'&socid='.$object->socid:'').'&action=clone&token='.newToken(), '', $permissiontoadd);
-
-			/*
-			if ($permissiontoadd) {
-				if ($object->status == $object::STATUS_ENABLED) {
-					print dolGetButtonAction($langs->trans('Disable'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=disable&token='.newToken(), '', $permissiontoadd);
-				} else {
-					print dolGetButtonAction($langs->trans('Enable'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=enable&token='.newToken(), '', $permissiontoadd);
-				}
-			}
-			if ($permissiontoadd) {
-				if ($object->status == $object::STATUS_VALIDATED) {
-					print dolGetButtonAction($langs->trans('Cancel'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=close&token='.newToken(), '', $permissiontoadd);
-				} else {
-					print dolGetButtonAction($langs->trans('Re-Open'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=reopen&token='.newToken(), '', $permissiontoadd);
-				}
-			}
-			*/
 
 			// Delete (need delete permission, or if draft, just need create/modify permission)
 			print dolGetButtonAction($langs->trans('Delete'), '', 'delete', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=delete&token='.newToken(), '', $permissiontodelete || ($object->status == $object::STATUS_DRAFT && $permissiontoadd));
 		}
 		print '</div>'."\n";
 	}
-
 
 	// Select mail models is same action as presend
 	if (GETPOST('modelselected')) {
@@ -680,16 +610,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			$dir_files = $object->element . 'document/' . $objref;
 			$filedir = $upload_dir . '/' . $dir_files;
 			$urlsource = $_SERVER["PHP_SELF"]."?id=".$object->id;
-			$genallowed = 1; // If you can read, you can build the PDF to read content
-			$delallowed = 1; // If you can create/edit, you can remove a file on card
+			$genallowed = $permissiontoadd; // If you can read, you can build the PDF to read content
+			$delallowed = $permissiontodelete; // If you can create/edit, you can remove a file on card
 
-			print doliprojectshowdocuments('doliproject:TimeSheetDocument', $dir_files, $filedir, $urlsource, $genallowed, $delallowed, $conf->global->DOLIPROJECT_TIMESHEETDOCUMENT_DEFAULT_MODEL, 1, 0, 0, 0, 0, '', '', '', $langs->defaultlang, $object, 0, 'remove_file', (($object->status >= 0) ? 1 : 0));
+			print doliprojectshowdocuments('doliproject:TimeSheetDocument', $dir_files, $filedir, $urlsource, $genallowed, $delallowed, $conf->global->DOLIPROJECT_TIMESHEETDOCUMENT_DEFAULT_MODEL, 1, 0, 0, 0, 0, '', '', '', $langs->defaultlang, $object, 0, 'remove_file', (($object->status == 2) ? 1 : 0), $langs->trans('TimeSheetMustBeLocked'));
 		}
-
-		// Show links to link elements
-		$linktoelem = $form->showLinkToObjectBlock($object, null, array('timesheet'));
-		$somethingshown = $form->showLinkedObjectBlock($object, $linktoelem);
-
 
 		print '</div><div class="fichehalfright">';
 

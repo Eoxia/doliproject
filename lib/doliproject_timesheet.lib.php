@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) ---Put here your own copyright and developer email---
+/* Copyright (C) 2022 EOXIA <dev@eoxia.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
  */
 function timesheetPrepareHead($object)
 {
-	global $db, $langs, $conf;
+	global $conf, $langs;
 
 	$langs->load("doliproject@doliproject");
 
@@ -76,14 +76,11 @@ function timesheetPrepareHead($object)
 	$head[$h][2] = 'agenda';
 	$h++;
 
-	// Show more tabs from modules
-	// Entries must be declared in modules descriptor with line
-	//$this->tabs = array(
-	//	'entity:+tabname:Title:@doliproject:/doliproject/mypage.php?id=__ID__'
-	//); // to add new tab
-	//$this->tabs = array(
-	//	'entity:-tabname:Title:@doliproject:/doliproject/mypage.php?id=__ID__'
-	//); // to remove a tab
+	$head[$h][0] = dol_buildpath("/doliproject/view/timesheet/timesheet_attendants.php", 1) . '?id=' . $object->id;
+	$head[$h][1] = '<i class="fas fa-file-signature"></i> ' . $langs->trans("Attendants");
+	$head[$h][2] = 'attendants';
+	$h++;
+
 	complete_head_from_modules($conf, $langs, $object, $head, $h, 'timesheet@doliproject');
 
 	complete_head_from_modules($conf, $langs, $object, $head, $h, 'timesheet@doliproject', 'remove');
