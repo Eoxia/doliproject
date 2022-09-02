@@ -79,7 +79,8 @@ class modDoliproject extends DolibarrModules
 					  'invoicereccard',
 					  'cron',
 					  'cronjoblist',
-					  'projecttasktime'
+					  'projecttasktime',
+					  'timesheetcard'
 				  ),
 			),
 			'moduleforexternal' => 0,

@@ -86,8 +86,11 @@ $month               = (GETPOST("month", 'int') ?GETPOST("month", "int") : date(
 
 // Initialize technical objects
 $object      = new TimeSheet($db);
+$objectline  = new TimeSheetLine($db);
+$signatory   = new TimeSheetSignature($db);
 $extrafields = new ExtraFields($db);
 $project     = new Project($db);
+$product     = new Product($db);
 
 $hookmanager->initHooks(array('timesheetcard', 'globalcard')); // Note that conf->hooks_modules contains array
 
@@ -287,6 +290,80 @@ if (empty($reshook)) {
 		$object->setProject(GETPOST('projectid', 'int'));
 	}
 
+	// Action to add line
+	if ($action == 'addline' && $permissiontoadd) {
+		// Get parameters
+		$qty             = GETPOST('qty');
+		$prod_entry_mode = GETPOST('prod_entry_mode');
+
+		$now = dol_now();
+
+		if ($prod_entry_mode == 'free') {
+			$product_type = GETPOST('type');
+			$description  = GETPOST('dp_desc', 'restricthtml');
+			$objectline->description  = $description;
+			$objectline->product_type = $product_type;
+		} elseif ($prod_entry_mode == 'predef') {
+			$product_id   = GETPOST('idprod');
+			$product->fetch($product_id);
+			$objectline->fk_product   = $product_id;
+			$objectline->product_type = 0;
+		} else {
+			setEventMessages('test', array(), 'errors');
+			$error++;
+		}
+
+		// Initialize object timesheet line
+		$objectline->date_creation   = $object->db->idate($now);
+		$objectline->qty             = $qty;
+		$objectline->rang            = 0;
+		$objectline->fk_timesheet    = $id;
+		$objectline->fk_parent_line  = 0;
+
+		if ( ! $error) {
+			$result = $objectline->insert($user, false);
+			if ($result > 0) {
+				// Creation timesheet line OK
+				$urltogo = str_replace('__ID__', $result, $backtopage);
+				$urltogo = preg_replace('/--IDFORBACKTOPAGE--/', $id, $urltogo); // New method to autoselect project after a New on another form object creation
+				header("Location: " . $urltogo);
+				exit;
+			} else {
+				// Creation timesheet line KO
+				if ( ! empty($objectline->errors)) setEventMessages(null, $objectline->errors, 'errors');
+				else setEventMessages($objectline->error, null, 'errors');
+			}
+		}
+	}
+
+	// Action to edit line
+	if ($action == 'updateline' && $permissiontoadd) {
+		// Get parameters
+		$qty          = GETPOST('qty');
+		$description  = GETPOST('product_desc', 'restricthtml');
+
+		$objectline->fetch($lineid);
+
+		// Initialize object timesheet line
+		$objectline->qty         = $qty;
+		$objectline->description = $description;
+
+		if ( ! $error) {
+			$result = $objectline->update($user, false);
+			if ($result > 0) {
+				// Update timesheet line OK
+				$urltogo = str_replace('__ID__', $result, $backtopage);
+				$urltogo = preg_replace('/--IDFORBACKTOPAGE--/', $parent_id, $urltogo); // New method to autoselect project after a New on another form object creation
+				header("Location: " . $urltogo);
+				exit;
+			} else {
+				// Update timesheet line KO
+				if ( ! empty($objectline->errors)) setEventMessages(null, $objectline->errors, 'errors');
+				else setEventMessages($objectline->error, null, 'errors');
+			}
+		}
+	}
+
 	// Actions to send emails
 	$triggersendname = 'DOLIPROJECT_TIMESHEET_SENTBYMAIL';
 	$autocopy = 'MAIN_MAIL_AUTOCOPY_TIMESHEET_TO';
@@ -374,7 +451,7 @@ if ($action == 'create') {
 
 // Part to edit record
 if (($id || $ref) && $action == 'edit') {
-	print load_fiche_titre($langs->trans("TimeSheet"), '', '');
+	print load_fiche_titre($langs->trans("ModifyTimeSheet"), '', 'doliproject@doliproject');
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -423,8 +500,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('DeleteTimeSheet'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 1);
 	}
 	// Confirmation to delete line
-	if ($action == 'deleteline') {
-		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id.'&lineid='.$lineid, $langs->trans('DeleteLine'), $langs->trans('ConfirmDeleteLine'), 'confirm_deleteline', '', 0, 1);
+	if ($action == 'ask_deleteline') {
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id.'&lineid='.$lineid, $langs->trans('DeleteProductLine'), $langs->trans('ConfirmDeleteProductLine'), 'confirm_deleteline', '', 0, 1);
 	}
 	// Clone confirmation
 	if ($action == 'clone') {
@@ -494,7 +571,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	print dol_get_fiche_end();
 
-
 	/*
 	 * Lines
 	 */
@@ -521,19 +597,40 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		}
 
 		if (!empty($object->lines)) {
-			$object->printObjectLines($action, $mysoc, null, GETPOST('lineid', 'int'), 1);
-		}
+			if ($permissiontoadd) {
+				$user->rights->timesheet = new stdClass();
+				$user->rights->timesheet->creer = 1;
+				$object->statut = $object::STATUS_DRAFT;
+			}
+			$object->printObjectLines($action, $mysoc, null, GETPOST('lineid', 'int'), 1); ?>
+			<script>
+				jQuery('.linecolvat').remove();
+				jQuery('.linecoluht').remove();
+				jQuery('.linecoldiscount').remove();
+				jQuery('.linecolht').remove();
+				jQuery('.tredited .right #tva_tx').remove();
+				jQuery('.tredited .right #price_ht').remove();
+				jQuery('.tredited .right #remise_percent').remove();
+				jQuery('.tredited .nowrap').remove();
+			</script>
+		<?php }
 
 		// Form to add new line
 		if ($object->status == 0 && $permissiontoadd && $action != 'selectlines') {
 			if ($action != 'editline') {
 				// Add products/services form
+				$object->socid = 0;
 				$parameters = array();
 				$reshook = $hookmanager->executeHooks('formAddObjectLine', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
 				if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
-				if (empty($reshook))
-					$object->formAddObjectLine(1, $mysoc, $soc);
-			}
+				if (empty($reshook)) $object->formAddObjectLine(1, $mysoc, $soc); ?>
+				<script>
+					jQuery('.linecolvat').remove();
+					jQuery('.linecoluht').remove();
+					jQuery('.linecoldiscount').remove();
+					jQuery('#trlinefordates').remove();
+				</script>
+			<?php }
 		}
 
 		if (!empty($object->lines) || ($object->status == $object::STATUS_DRAFT && $permissiontoadd && $action != 'selectlines' && $action != 'editline')) {
@@ -544,7 +641,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		print "</form>\n";
 	}
 
-
 	// Buttons for actions
 	if ($action != 'presend' && $action != 'editline') {
 		print '<div class="tabsAction">'."\n";
@@ -554,38 +650,32 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 		}
 
-		if (empty($reshook)) {
-			$params = array(
-				'attr' => array(
-					'classOverride' => 'butActionRefused classfortooltip'
-				)
-			);
-
+		if (empty($reshook) && $permissiontoadd) {
 			// Modify
-			print dolGetButtonAction($langs->trans('Modify'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=edit&token='.newToken(), '', $permissiontoadd, ($object->status == $object::STATUS_DRAFT) ? '' : $params);
+			print '<a class="' . ($object->status == $object::STATUS_DRAFT ? 'butAction' : 'butActionRefused classfortooltip') . '" id="actionButtonEdit" title="' . ($object->status == $object::STATUS_DRAFT ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeInDraft"))) . '" href="' . ($object->status == $object::STATUS_DRAFT ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=edit') : '#') . '">' . $langs->trans("Modify") . '</a>';
 
 			// Validate
-			if (empty($object->table_element_line) || (is_array($object->lines) && count($object->lines) > 0)) {
-				print dolGetButtonAction($langs->trans('Validate'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_validate2&confirm=yes&token='.newToken(), '', $permissiontoadd, ($object->status == $object::STATUS_DRAFT) ? '' : $params);
-			} else {
-				$langs->load("errors");
-				print dolGetButtonAction($langs->trans("ErrorAddAtLeastOneLineFirst"), $langs->trans("Validate"), 'default', '#', '', 0, $params);
-			}
+			print '<span class="' . ($object->status == $object::STATUS_DRAFT ? 'butAction' : 'butActionRefused classfortooltip') . '" id="' . ($object->status == $object::STATUS_DRAFT ? 'actionButtonPendingSignature' : '') . '" title="' . ($object->status == $object::STATUS_DRAFT ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeInProgressToValidate"))) . '" href="' . ($object->status == $object::STATUS_DRAFT ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=confirm_validate2') : '#') . '">' . $langs->trans("Validate") . '</span>';
+
 
 			// ReOpen
-			print dolGetButtonAction($langs->trans('ReOpenDoli'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=confirm_setdraft&confirm=yes&token=' . newToken(), '', $permissiontoadd, ($object->status == $object::STATUS_VALIDATED) ? '' : $params);
+			print '<span class="' . ($object->status == $object::STATUS_VALIDATED ? 'butAction' : 'butActionRefused classfortooltip') . '" id="' . ($object->status == $object::STATUS_VALIDATED ? 'actionButtonInProgress' : '') . '" title="' . ($object->status == $object::STATUS_VALIDATED ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeValidated"))) . '" href="' . ($object->status == $object::STATUS_VALIDATED ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=setInProgress') : '#') . '">' . $langs->trans("ReOpenDigi") . '</span>';
 
 			// Sign
-			print dolGetButtonAction($langs->trans('Sign'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id, '', $permissiontoadd, ($object->status == $object::STATUS_VALIDATED) ? '' : $params);
+			print '<a class="' . (($object->status == $object::STATUS_VALIDATED && ! $signatory->checkSignatoriesSignatures($object->id, 'timesheet')) ? 'butAction' : 'butActionRefused classfortooltip') . '" id="actionButtonSign" title="' . (($object->status == $object::STATUS_VALIDATED && ! $signatory->checkSignatoriesSignatures($object->id, 'timesheet')) ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeValidatedToSign"))) . '" href="' . (($object->status == $object::STATUS_VALIDATED && ! $signatory->checkSignatoriesSignatures($object->id, 'timesheet')) ? $url : '#') . '">' . $langs->trans("Sign") . '</a>';
 
 			// Lock
-			print dolGetButtonAction($langs->trans('Lock'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=close&token=' . newToken(), '', $permissiontoadd, ($object->status == $object::STATUS_LOCKED) ? '' : $params);
+			print '<span class="' . (($object->status == $object::STATUS_VALIDATED && $signatory->checkSignatoriesSignatures($object->id, 'timesheet')) ? 'butAction' : 'butActionRefused classfortooltip') . '" id="' . (($object->status == $object::STATUS_VALIDATED && $signatory->checkSignatoriesSignatures($object->id, 'timesheet')) ? 'actionButtonLock' : '') . '" title="' . (($object->status == $object::STATUS_VALIDATED && $signatory->checkSignatoriesSignatures($object->id, 'timesheet')) ? '' : dol_escape_htmltag($langs->trans("AllSignatoriesMustHaveSigned"))) . '">' . $langs->trans("Lock") . '</span>';
 
 			// Send
-			print dolGetButtonAction($langs->trans('SendMail'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=presend&mode=init&token='.newToken().'#formmailbeforetitle', '', $permissiontoadd, ($object->status == $object::STATUS_LOCKED) ? '' : $params);
+			//@TODO changer le send to
+			print '<a class="' . ($object->status == $object::STATUS_LOCKED ? 'butAction' : 'butActionRefused classfortooltip') . '" id="actionButtonSign" title="' . dol_escape_htmltag($langs->trans("TimeSheetMustBeLockedToSendEmail")) . '" href="' . ($object->status == $object::STATUS_LOCKED ? ($_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=presend&mode=init#formmailbeforetitle&sendto=' . $allLinks['LabourInspectorSociety']->id[0]) : '#') . '">' . $langs->trans('SendMail') . '</a>';
+
+			// Close
+			print '<a class="' . ($object->status == $object::STATUS_LOCKED ? 'butAction' : 'butActionRefused classfortooltip') . '" id="actionButtonClose" title="' . ($object->status == $object::STATUS_LOCKED ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeLocked"))) . '" href="' . ($object->status == $object::STATUS_LOCKED ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=setArchived') : '#') . '">' . $langs->trans("Close") . '</a>';
 
 			// Clone
-			print dolGetButtonAction($langs->trans('ToClone'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.(!empty($object->socid)?'&socid='.$object->socid:'').'&action=clone&token='.newToken(), '', $permissiontoadd);
+			print dolGetButtonAction($langs->trans('ToClone'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=clone&token='.newToken(), 'actionButtonClone', $permissiontoadd);
 
 			// Delete (need delete permission, or if draft, just need create/modify permission)
 			print dolGetButtonAction($langs->trans('Delete'), '', 'delete', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=delete&token='.newToken(), '', $permissiontodelete || ($object->status == $object::STATUS_DRAFT && $permissiontoadd));

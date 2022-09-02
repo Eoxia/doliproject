@@ -817,4 +817,18 @@ class ActionsDoliproject
 			setCategoriesObject($categoryArray, 'invoice', false, $object);
 		}
 	}
+
+	public function printObjectLine($parameters, &$object, $action) {
+		if (in_array($parameters['currentcontext'], array('timesheetcard'))) {
+			if ($parameters['line']->fk_product > 0) {
+				require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+				$product = new Product($this->db);
+
+				$product->fetch($parameters['line']->fk_product);
+				$parameters['line']->ref         = $product->ref;
+				$parameters['line']->label       = $product->label;
+				$parameters['line']->description = $product->description;
+			}
+		}
+	}
 }
