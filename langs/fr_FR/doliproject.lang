@@ -189,7 +189,7 @@ TimeSheetDocumentDoliProjectTemplate = ODT par défaut des fiches de navette
 # Data - Donnée
 TimeSheet = Navette
 NewTimeSheet = Nouvelle navette
-ModifyTimeSheet = modifer la navette
+ModifyTimeSheet = Modifer la navette
 TimeSheetList = Liste des navettes
 UserAssign = Utilisateur assigné
 TimeSheetData = Données configurables de la navette

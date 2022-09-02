@@ -1,4 +1,4 @@
--- Copyright (C) ---Put here your own copyright and developer email---
+-- Copyright (C) 2022 EOXIA <dev@eoxia.com>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -13,26 +13,14 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
-
 CREATE TABLE llx_doliproject_timesheetdet(
-	-- BEGIN MODULEBUILDER FIELDS
-	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
-	ref varchar(128) DEFAULT '(PROV)' NOT NULL, 
-	label varchar(255), 
-	amount double DEFAULT NULL, 
-	qty real, 
-	fk_soc integer, 
-	fk_project integer, 
-	description text, 
-	note_public text, 
-	note_private text, 
-	date_creation datetime NOT NULL, 
-	tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
-	fk_user_creat integer NOT NULL, 
-	fk_user_modif integer, 
-	last_main_doc varchar(255), 
-	import_key varchar(14), 
-	model_pdf varchar(255), 
-	status integer NOT NULL
-	-- END MODULEBUILDER FIELDS
+	rowid          integer AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    date_creation  datetime NOT NULL,
+	qty            real,
+	rang           integer DEFAULT 0,
+	description    text,
+    product_type   integer DEFAULT 0,
+    fk_timesheet   integer NOT NULL,
+    fk_product     integer NULL,
+    fk_parent_line integer NULL
 ) ENGINE=innodb;
