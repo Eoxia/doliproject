@@ -45,7 +45,7 @@ abstract class ModeleODTTimeSheetDocument extends CommonDocGenerator
 		$type = 'timesheetdocument';
 		$list = array();
 
-		require_once __DIR__ . '/../../../../lib/doliproject_functions.lib.php';
+		require_once __DIR__ . '/../../../../lib/doliproject_function.lib.php';
 		$list = getListOfModelsDoliProject($db, $type, $maxfilenamelength);
 
 		return $list;

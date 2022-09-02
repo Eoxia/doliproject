@@ -54,7 +54,7 @@ if (!empty($conf->categorie->enabled)) {
 	require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 }
 
-require_once DOL_DOCUMENT_ROOT.'/custom/doliproject/lib/doliproject_functions.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/custom/doliproject/lib/doliproject_function.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/custom/doliproject/class/workinghours.class.php';
 
 // Global variables definitions

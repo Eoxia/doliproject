@@ -563,7 +563,7 @@ class ActionsDoliproject
 			}
 		}
 		if (in_array($parameters['currentcontext'], array('projecttaskcard', 'projecttasktime'))) {
-			require_once __DIR__ . '/../lib/doliproject_functions.lib.php';
+			require_once __DIR__ . '/../lib/doliproject_function.lib.php';
 
 			if (GETPOST('action') == 'toggleTaskFavorite') {
 				toggleTaskFavorite(GETPOST('id'), $user->id);
@@ -603,7 +603,7 @@ class ActionsDoliproject
 		}
 		if (in_array($parameters['currentcontext'], array('projecttaskscard'))) {
 			global $db;
-			require_once __DIR__ . '/../lib/doliproject_functions.lib.php';
+			require_once __DIR__ . '/../lib/doliproject_function.lib.php';
 
 			$task = new Task($db);
 			$tasksarray = $task->getTasksArray(0, 0, GETPOST('id'));
@@ -625,7 +625,7 @@ class ActionsDoliproject
 		}
 		if (in_array($parameters['currentcontext'], array('tasklist'))) {
 			global $db;
-			require_once __DIR__ . '/../lib/doliproject_functions.lib.php';
+			require_once __DIR__ . '/../lib/doliproject_function.lib.php';
 
 			$task = new Task($db);
 			$tasksarray = $task->getTasksArray(0, 0, GETPOST('id'));
@@ -806,7 +806,7 @@ class ActionsDoliproject
 	public function afterCreationOfRecurringInvoice($parameters, &$object) {
 		if (in_array($parameters['currentcontext'], array('cron', 'cronjoblist'))) {
 			require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-			require_once __DIR__ . '/../lib/doliproject_functions.lib.php';
+			require_once __DIR__ . '/../lib/doliproject_function.lib.php';
 			$cat = new Categorie($this->db);
 			$categories = $cat->containing($parameters['facturerec']->id, 'invoicerec');
 			if (is_array($categories) && !empty($categories)) {

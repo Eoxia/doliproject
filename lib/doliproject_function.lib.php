@@ -1,7 +1,7 @@
 <?php
 
 /**
-* \file    doliproject/lib/doliproject_functions.lib.php
+* \file    doliproject/lib/doliproject_function.lib.php
 * \ingroup doliproject
 * \brief   Library files with common functions for DoliCar
 												   */
@@ -37,7 +37,7 @@ function toggleTaskFavorite($task_id, $user_id)
 }
 
 /**
- * \file    doliproject/lib/doliproject_functions.lib.php
+ * \file    doliproject/lib/doliproject_function.lib.php
  * \ingroup doliproject
  * \brief   Library files with common functions for DoliCar
  */

@@ -144,7 +144,7 @@ class InterfaceDoliprojectTriggers extends DolibarrTriggers
 
 			case 'BILL_CREATE':
 				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
-				require_once __DIR__ . '/../../lib/doliproject_functions.lib.php';
+				require_once __DIR__ . '/../../lib/doliproject_function.lib.php';
 				$categories = GETPOST('categories', 'array:int');
 				setCategoriesObject($categories, 'invoice', false, $object);
 				break;
@@ -152,7 +152,7 @@ class InterfaceDoliprojectTriggers extends DolibarrTriggers
 			case 'BILLREC_CREATE':
 				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
 				require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-				require_once __DIR__ . '/../../lib/doliproject_functions.lib.php';
+				require_once __DIR__ . '/../../lib/doliproject_function.lib.php';
 				$cat = new Categorie($this->db);
 				$categories = $cat->containing(GETPOST('facid'),'invoice');
 				if (is_array($categories) && !empty($categories)) {
