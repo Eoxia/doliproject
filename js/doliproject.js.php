@@ -729,7 +729,7 @@ window.eoxiaJS.menu.toggleMenu = function() {
 		elementParent.find('.blockvmenusearch').show();
 		$('div.menu_titre').attr('style', 'width: 188px !important; cursor : pointer' )
 		$('span.vmenu').attr('title', ' Réduire le menu')
-		$('span.vmenu').html('<i class="fas fa-chevron-circle-left"></i> Réduire le menu');
+		$('span.vmenu').html('<i class="fas fa-chevron-circle-left pictofixedwidth"></i> Réduire le menu');
 
 		localStorage.setItem('maximized', 'true')
 

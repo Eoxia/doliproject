@@ -65,8 +65,10 @@ $backtopage = GETPOST('backtopage', 'alpha');
 
 $form = new Form($db);
 
+$morejs = array("/doliproject/js/doliproject.js.php");
+
 $page_name = "DoliprojectAbout";
-llxHeader('', $langs->trans($page_name));
+llxHeader('', $langs->trans($page_name), '', '', 0, 0, $morejs);
 
 // Subheader
 $linkback = '<a href="'.($backtopage ? $backtopage : DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
