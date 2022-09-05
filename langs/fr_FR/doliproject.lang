@@ -176,6 +176,18 @@ DeleteTimeSheet = Supprimer la navette
 
 # Trigger - Déclencheur
 TimeSheetDocumentGeneratedWithDolibarr = Fiche de navette générée avec Dolibarr
+TimeSheetCreateTrigger = Création de la navette
+TimeSheetModifyTrigger = Modification de la navette
+TimeSheetDeleteTrigger = Suppression de la navette
+TimeSheetInprogressTrigger = Plan de prévention rouvert
+TimeSheetPendingSignatureTrigger = Plan de prévention en attente de signature des participants
+TimeSheetLockTrigger = Plan de prévention verrouillé - Prêt pour la génération du documuent
+TimeSheetArchivedTrigger = Plan de prévention archivé
+TimeSheetAddAttendantTrigger = Ajout d'un participant au plan de prévention
+TimeSheetSentByMailTrigger = Email plan de prévention envoyé
+TimeSheetLineCreateTrigger = Ligne de navette créée
+TimeSheetLineModifyTrigger = Ligne de navette modifiée
+TimeSheetLineDeleteTrigger = Ligne de navette supprimée
 
 # Mod Numbering - Modèle de numérotation
 DoliProjectTimeSheetDocumentDocumentNumberingModule = Modèle de numérotation des fiches de navette de DoliProject
@@ -186,6 +198,21 @@ DoliProjectTemplateDocumentTimeSheetDocument = Modèle de documents des fiches d
 TimeSheetDocumentCustomDoliProjectTemplate = ODT custom des fiches de navette
 TimeSheetDocumentDoliProjectTemplate = ODT par défaut des fiches de navette
 
+# SetEventMessage - Notice info
+TimeSheetMustBeDraft = La navette doit être en brouillon pour accéder à cette fonctionnalité
+TimeSheetMustBeDraftToValidate = La navette est déjà validée
+TimeSheetMustBeValidated = La navette doit être validée pour la rouvrir
+TimeSheetMustBeValidatedToSign = La navette doit être validée pour que les signataires puissent signer
+AllSignatoriesMustHaveSigned = Tous les signataires doivent avoir signé pour verrouiller l'objet
+TimeSheetMustBeLockedToSendEmail = La navette doit être verrouillée pour envoyer un email
+TimeSheetMustBeLocked = La navette doit être verrouillée afin de permettre la génération
+ValidateTimeSheet = Valider la navette
+ConfirmValidateTimeSheet = Êtes-vous sûr de vouloir valider la navette ? <br> La validation permet aux signataires de signer le document mais <b> empêche l'ajout de nouveaux signataires ou la modification de la navettte </b>.
+ReOpenTimeSheet = Ouvrir à nouveau la navette
+ConfirmReOpenTimeSheet = Êtes-vous sûr de vouloir rouvrir la navette ? La réouverture permet la modification de la navettte et l'ajout de nouveaux signataires mais <b>toutes les signatures du document seront perdues</b>.
+LockTimeSheet = Verrouiller la navette
+ConfirmLockTimeSheet = Êtes-vous sûr de vouloir verrouiller la navette ?<br>Ce verrouillage permet de figer les données et la génération du document.
+
 # Data - Donnée
 TimeSheet = Navette
 NewTimeSheet = Nouvelle navette
@@ -195,15 +222,17 @@ UserAssign = Utilisateur assigné
 TimeSheetData = Données configurables de la navette
 PrefillDate = Préremplir la date de début et de fin de la navette
 PrefillDateDescription = Préremplissage de la date de début avec le premier jour du mois en cours et la date de fin avec le dernier jour du mois en cours
+TimeSheetAttendants = Navette - Signataires
+StatusDraft = Brouillon ( à valider)
 Lock = Verrouiller
 ReOpenDoli = Rouvrir
 ValidatePendingSignature = Validé (en attente de signature)
-TimeSheetMustBeValidatedToSign = La navette doit être validée pour que les participants puissent signer
-TimeSheetMustBeLocked = La navette doit être verrouillée afin de permettre la génération
 GoToLock = Verrouiller la navette
 GoToValidate = Valider la navette
-TIMESHEET_SOCIETY_ATTENDANT = Participant interne
+TIMESHEET_SOCIETY_ATTENDANT = Signataire interne
 TIMESHEET_SOCIETY_RESPONSIBLE = Responsable
+NbAttendants = Nombre de signataire
+NbAttendantsDescription = Le nombre de signataire par défaut est de 2
 
 
 
@@ -212,19 +241,19 @@ TIMESHEET_SOCIETY_RESPONSIBLE = Responsable
 #
 
 # Trigger - Déclencheur
-DoliProjectSignatureSignedTrigger = Signature du participant effectuée
-DoliProjectSignaturePendingSignatureTrigger = Email envoyé, en attente de la signature du participant
-DoliProjectSignatureAbsentTrigger = Participant absent
-DoliProjectSignatureDeletedTrigger = Participant supprimé
+DoliProjectSignatureSignedTrigger = Signature du signataire effectuée
+DoliProjectSignaturePendingSignatureTrigger = Email envoyé, en attente de la signature du signataire
+DoliProjectSignatureAbsentTrigger = Signataire absent
+DoliProjectSignatureDeletedTrigger = Signataire supprimé
 
 # SetEventMessage - Notice info
 DisclaimerSignatureTitle = Attention
 AddSignatureSuccess = Signature du document réussie
 AddSignatureSuccessText = La signature a bien été enregistrée pour le document
-AddAttendantMessage = Ajout du participant :
-DeleteAttendantMessage = Suppression du participant :
-SignatureEvent = Le participant a signé : %s
-Attendant = Le participant
+AddAttendantMessage = Ajout du signataire :
+DeleteAttendantMessage = Suppression du signataire :
+SignatureEvent = Le signataire a signé : %s
+Attendant = Le signataire
 SetAbsentAttendant = est absent
 
 # Status - Statut
@@ -245,14 +274,14 @@ SignatureDate = Date de signature
 ActionsSignature = Actions
 
 # Data - Donnée
-Attendants = Participants
+Attendants = Signataires
 SendEmail = Envoyer un email
-DeleteAttendant = Supprimer le participant
+DeleteAttendant = Supprimer le signataire
 Sign = Signer
 Erase = Effacer
-SocietyAttendant = Participant interne
+SocietyAttendant = Signataire interne
 SocietyResponsible = Responsable
-NoSocietyAttendants = Pas de particapants liés à cet objet. Pour ajouter des particapants, le statut doit être "Brouillon".
+NoSocietyAttendants = Pas de signataires liés à cet objet. Pour ajouter des signataires, le statut doit être "Brouillon".
 FileGenerated
 
 #
