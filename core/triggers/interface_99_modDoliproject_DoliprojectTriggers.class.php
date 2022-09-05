@@ -163,6 +163,70 @@ class InterfaceDoliprojectTriggers extends DolibarrTriggers
 				setCategoriesObject($categoryArray, 'invoicerec', false, $object);
 				break;
 
+			// Timesheet
+			case 'TIMESHEET_CREATE' :
+				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+				require_once __DIR__ . '/../../class/timesheet.class.php';
+				$signatory = new TimeSheetSignature($this->db);
+				$usertmp   = new User($this->db);
+
+				$usertmp->fetch($object->fk_user_assign);
+
+				$signatory->setSignatory($object->id, 'timesheet', 'user', array($object->fk_user_assign), 'TIMESHEET_SOCIETY_ATTENDANT');
+				$signatory->setSignatory($object->id, 'timesheet', 'user', array($usertmp->fk_user), 'TIMESHEET_SOCIETY_RESPONSIBLE');
+				break;
+
+			case 'TIMESHEET_MODIFY' :
+				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+				require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
+				$now = dol_now();
+				$actioncomm = new ActionComm($this->db);
+
+				$actioncomm->elementtype = 'timesheet@doliproject';
+				$actioncomm->code        = 'AC_TIMESHEET_MODIFY';
+				$actioncomm->type_code   = 'AC_OTH_AUTO';
+				$actioncomm->label       = $langs->trans('TimeSheetModifyTrigger');
+				$actioncomm->datep       = $now;
+				$actioncomm->fk_element  = $object->id;
+				$actioncomm->userownerid = $user->id;
+				$actioncomm->percentage  = -1;
+
+				$actioncomm->create($user);
+				break;
+
+			case 'TIMESHEET_DELETE' :
+				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+				require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
+				$now = dol_now();
+				$actioncomm = new ActionComm($this->db);
+
+				$actioncomm->elementtype = 'timesheet@doliproject';
+				$actioncomm->code        = 'AC_TIMESHEET_DELETE';
+				$actioncomm->type_code   = 'AC_OTH_AUTO';
+				$actioncomm->label       = $langs->trans('TimeSheetDeleteTrigger');
+				$actioncomm->datep       = $now;
+				$actioncomm->fk_element  = $object->id;
+				$actioncomm->userownerid = $user->id;
+				$actioncomm->percentage  = -1;
+
+				$actioncomm->create($user);
+				break;
+
+			case 'ECMFILES_CREATE' :
+				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+				require_once __DIR__ . '/../../class/timesheet.class.php';
+				$signatory = new TimeSheetSignature($this->db);
+
+				$signatories = $signatory->fetchSignatories($object->src_object_id, 'timesheet');
+
+				if ( ! empty($signatories) && $signatories > 0) {
+					foreach ($signatories as $signatory) {
+						$signatory->signature = $langs->transnoentities("FileGenerated");
+						$signatory->update($user, false);
+					}
+				}
+				break;
+
 			default:
 				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
 				break;
