@@ -672,6 +672,9 @@ class ActionsDoliproject
 				<?php }
 			}
 		}
+		if (preg_match('/categoryindex/', $parameters['context'])) {	    // do something only for the context 'somecontext1' or 'somecontext2'
+			print '<script src="../custom/doliproject/js/doliproject.js.php"></script>';
+		}
 		if (GETPOST('action') == 'toggleTaskFavorite') {
 			toggleTaskFavorite(GETPOST('taskId'), $user->id);
 		}
@@ -719,7 +722,7 @@ class ActionsDoliproject
 	{
 		$error = 0; // Error counter
 
-		if (in_array($parameters['currentcontext'], array('category', 'invoicecard', 'invoicereccard'))) { // do something only for the context 'somecontext1' or 'somecontext2'
+		if (in_array($parameters['currentcontext'], array('category', 'invoicecard', 'invoicereccard', 'timesheetcard'))) { // do something only for the context 'somecontext1' or 'somecontext2'
 			$tags = array(
 				'invoice' => array(
 					'id' => 436370001,
@@ -732,6 +735,12 @@ class ActionsDoliproject
 					'code' => 'invoicerec',
 					'obj_class' => 'Facture',
 					'obj_table' => 'facture',
+				),
+				'timesheet' => array(
+					'id' => 436370003,
+					'code' => 'timesheet',
+					'obj_class' => 'TimeSheet',
+					'obj_table' => 'doliproject_timesheet',
 				)
 			);
 		}
