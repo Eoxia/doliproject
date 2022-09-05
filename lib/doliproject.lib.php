@@ -28,7 +28,7 @@
  */
 function doliprojectAdminPrepareHead()
 {
-	global $langs, $conf;
+	global $conf, $langs;
 
 	$langs->load("doliproject@doliproject");
 
@@ -56,7 +56,7 @@ function doliprojectAdminPrepareHead()
 	$h++;
 
 	$head[$h][0] = dol_buildpath("/doliproject/admin/about.php", 1);
-	$head[$h][1] = '<i class="fas fa-readme"></i>  ' . $langs->trans("About");
+	$head[$h][1] = '<i class="fab fa-readme"></i>  ' . $langs->trans("About");
 	$head[$h][2] = 'about';
 	$h++;
 

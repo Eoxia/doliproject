@@ -81,6 +81,10 @@ if (!$res) {
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
+if (!empty($conf->categorie->enabled)) {
+	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcategory.class.php';
+	require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+}
 
 // load doliproject libraries
 require_once __DIR__ . '/../../class/timesheet.class.php';
@@ -115,6 +119,10 @@ if (empty($page) || $page < 0 || GETPOST('button_search', 'alpha') || GETPOST('b
 $offset = $limit * $page;
 $pageprev = $page - 1;
 $pagenext = $page + 1;
+
+if (!empty($conf->categorie->enabled)) {
+	$search_category_array = GETPOST("search_category_timesheet_list", "array");
+}
 
 // Initialize technical objects
 $object = new TimeSheet($db);
@@ -236,6 +244,7 @@ if (empty($reshook)) {
 		}
 		$toselect = array();
 		$search_array_options = array();
+		$search_category_array = array();
 	}
 	if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')
 		|| GETPOST('button_search_x', 'alpha') || GETPOST('button_search.x', 'alpha') || GETPOST('button_search', 'alpha')) {
@@ -326,6 +335,11 @@ foreach ($search as $key => $val) {
 if ($search_all) {
 	$sql .= natural_search(array_keys($fieldstosearchall), $search_all);
 }
+
+if (!empty($conf->categorie->enabled)) {
+	$sql .= Categorie::getFilterSelectQuery('timesheet', "t.rowid", $search_category_array);
+}
+
 //$sql.= dolSqlDateFilter("t.field", $search_xxxday, $search_xxxmonth, $search_xxxyear);
 // Add where from extra fields
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_sql.tpl.php';
@@ -509,6 +523,12 @@ $moreforfilter = '';
 /*$moreforfilter.='<div class="divsearchfield">';
 $moreforfilter.= $langs->trans('MyFilter') . ': <input type="text" name="search_myfield" value="'.dol_escape_htmltag($search_myfield).'">';
 $moreforfilter.= '</div>';*/
+
+// Filter on categories
+if (!empty($conf->categorie->enabled) && $user->rights->categorie->lire) {
+	$formcategory = new FormCategory($db);
+	$moreforfilter .= $formcategory->getFilterBox('timesheet', $search_category_array);
+}
 
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldPreListTitle', $parameters, $object); // Note that $action and $object may have been modified by hook
