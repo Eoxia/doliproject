@@ -1,4 +1,4 @@
-<?php if (empty($element->signature)) : ?>
+<?php if (empty($element->signature) && ($object->status == $object::STATUS_VALIDATED || $element->signature == $langs->transnoentities("FileGenerated"))) : ?>
 	<div class="wpeo-button button-blue wpeo-modal-event modal-signature-open modal-open" value="<?php echo $element->id ?>">
 		<span><i class="fas fa-signature"></i> <?php echo $langs->trans('Sign'); ?></span>
 	</div>
@@ -29,8 +29,8 @@
 					<span><?php echo $langs->trans('Cancel'); ?></span>
 				</div>
 				<div class="signature-validate wpeo-button button-primary" value="<?php echo $element->id ?>">
-					<input type="hidden" id="redirect<?php echo $element->id ?>" value="<?php echo $url ?>">
-					<input type="hidden" id="zone<?php echo $element->id ?>" value="<?php echo $zone ?>">
+					<input type="hidden" id="redirect<?php echo $element->id ?>" value="<?php echo $_SERVER['REQUEST_URI']; ?>">
+					<input type="hidden" id="zone<?php echo $element->id ?>" value="private">
 					<span><?php echo $langs->trans('Validate'); ?></span>
 				</div>
 			</div>

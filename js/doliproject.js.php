@@ -989,4 +989,50 @@ window.eoxiaJS.signature.autoDownloadSpecimen = function( event ) {
 	});
 };
 
+/**
+ * Initialise l'objet "keyEvent" ainsi que la méthode "init" obligatoire pour la bibliothèque EoxiaJS.
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ */
+window.eoxiaJS.keyEvent = {};
+
+/**
+ * La méthode appelée automatiquement par la bibliothèque EoxiaJS.
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ *
+ * @return {void}
+ */
+window.eoxiaJS.keyEvent.init = function() {
+	window.eoxiaJS.keyEvent.event();
+};
+
+/**
+ * La méthode contenant tous les événements pour le migration.
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ *
+ * @return {void}
+ */
+window.eoxiaJS.keyEvent.event = function() {
+	$( document ).on( 'keydown', window.eoxiaJS.keyEvent.keyup );
+}
+
+/**
+ * Action modal close & validation with key events
+ *
+ * @since   1.4.0
+ * @version 1.4.0
+ *
+ * @return {void}
+ */
+window.eoxiaJS.keyEvent.keyup = function( event ) {
+	if ( 'Escape' === event.key  ) {
+		$(this).find('.modal-active .modal-close .fas.fa-times').first().click();
+	}
+};
+
 

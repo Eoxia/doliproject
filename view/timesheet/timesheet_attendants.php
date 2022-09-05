@@ -156,7 +156,7 @@ if ($action == 'addSignature') {
 		if ($result > 0) {
 			// Creation signature OK
 			$signatory->setSigned($user, 0);
-			setEventMessages($langs->trans('SignatureEvent') . ' ' . $contact->firstname . ' ' . $contact->lastname, array());
+			setEventMessages($langs->trans('SignatureEvent') . ' ' . $signatory->firstname . ' ' . $signatory->lastname, array());
 			$urltogo = str_replace('__ID__', $result, $backtopage);
 			$urltogo = preg_replace('/--IDFORBACKTOPAGE--/', $id, $urltogo); // New method to autoselect project after a New on another form object creation
 			header("Location: " . $urltogo);
@@ -361,14 +361,15 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 					<div class="notice-title"><?php echo $langs->trans('AddSignatureSuccess') ?></div>
 					<div class="notice-subtitle"><?php echo $langs->trans("AddSignatureSuccessText") . GETPOST('signature_id')?></div>
 				</div>
-				<?php
-			if ($signatory->checkSignatoriesSignatures($object->id, $object->element)) {
-				print '<a class="butAction" style="width = 100%;margin-right:0" href="' . DOL_URL_ROOT . '/custom/doliproject/view/'. $object->element .'/'. $object->element .'_card.php?id=' . $id . '">' . $langs->trans("GoToLock") . '</a>';
-			}
-			?>
 			</div>
 		</div>
 	<?php
+
+	print '<div class="signatures-container">';
+
+	if ($signatory->checkSignatoriesSignatures($object->id, $object->element) && $object->status < $object::STATUS_LOCKED) {
+		print '<a class="butAction" style="width = 100%;margin-right:0" href="' . DOL_URL_ROOT . '/custom/doliproject/view/' . $object->element . '/' . $object->element . '_card.php?id=' . $id . '">' . $langs->trans("GoToLock") . '</a>';
+	}
 
 	//Society attendants -- Participants de la société
 	$society_intervenants = $signatory->fetchSignatory(strtoupper($object->element).'_SOCIETY_ATTENDANT', $object->id, $object->element);
@@ -417,15 +418,15 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			print $element->getLibStatut(5);
 			print '</td>';
 			print '<td class="center">';
-			if ($permissiontoadd) {
+			if ($permissiontoadd && $object->status < $object::STATUS_LOCKED) {
 				require __DIR__ . "/../../core/tpl/signature/doliproject_signature_action_view.tpl.php";
 			}
 			print '</td>';
+			print '<td class="center">';
 			if ($element->signature != $langs->transnoentities("FileGenerated") && $permissiontoadd) {
-				print '<td class="center">';
 				require __DIR__ . "/../../core/tpl/signature/doliproject_signature_view.tpl.php";
-				print '</td>';
 			}
+			print '</td>';
 			print '</tr>';
 			$already_added_users[$element->element_id] = $element->element_id;
 			$j++;
@@ -436,7 +437,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		print '</td></tr>';
 	}
 
-	if ($permissiontoadd) {
+	if ($object->status == $object::STATUS_DRAFT && $conf->global->DOLIPROJECT_TIMESHEET_NB_ATTENDANTS != count($already_added_users) && $permissiontoadd) {
 		print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '">';
 		print '<input type="hidden" name="token" value="' . newToken() . '">';
 		print '<input type="hidden" name="action" value="addSocietyAttendant">';
@@ -445,7 +446,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 		//Participants interne
 		print '<tr class="oddeven"><td class="maxwidth200">';
-		print $form->select_dolusers('', 'user_attendant', 1, $already_added_users);
+		print $form->select_dolusers('', 'user_attendant', 1, $already_added_users, 0, '', '', $conf->entity);
 		print '</td>';
 		print '<td>';
 		print '<select class="minwidth200" id="attendantRole" name="attendantRole">';
