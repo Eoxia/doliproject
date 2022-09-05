@@ -89,7 +89,7 @@ class modDoliproject extends DolibarrModules
 		$this->dirs 					= array("/doliproject/temp");
 		$this->config_page_url 			= array("setup.php@doliproject");
 		$this->hidden 					= false;
-		$this->depends 					= array('modProjet', 'modBookmark', 'modHoliday', 'modFckeditor');
+		$this->depends 					= array('modProjet', 'modBookmark', 'modHoliday', 'modFckeditor', 'modSalaries');
 		$this->requiredby 				= array(); // List of module class names as string to disable if this one is disabled. Example: array('modModuleToDisable1', ...)
 		$this->conflictwith 			= array(); // List of module class names as string this module is in conflict with. Example: array('modModuleToDisable1', ...)
 		$this->langfiles 				= array("doliproject@doliproject");
@@ -114,6 +114,7 @@ class modDoliproject extends DolibarrModules
 			11 => array('MAIN_AGENDA_ACTIONAUTO_TIMESHEET_EDIT', 'integer', 1, '', 0, 'current'),
 			12 => array('DOLIPROJECT_TIMESHEET_ADDON', 'chaine', 'mod_timesheet_standard', '', 0, 'current'),
 			13 => array('DOLIPROJECT_TIMESHEET_PREFILL_DATE', 'integer', 1, '', 0, 'current'),
+			14 => array('DOLIPROJECT_TIMESHEET_NB_ATTENDANTS', 'integer', 2, '', 0, 'current'),
 
 			// CONST TIMESHEET DOCUMENT
 			20 => array('MAIN_AGENDA_ACTIONAUTO_TIMESHEETDOCUMENT_CREATE', 'integer', 1, '', 0, 'current'),
@@ -313,9 +314,25 @@ class modDoliproject extends DolibarrModules
 			'langs'    => 'doliproject@doliproject',
 			'position' => 1100 + $r,
 			'enabled'  => '$conf->doliproject->enabled',
-			'perms'    => '$user->rights->doliproject->lire',
+			'perms'    => '$user->rights->doliproject->timesheet->read',
 			'target'   => '',
 			'user'     => 2,
+		);
+
+		$this->menu[$r++] = array(
+			'fk_menu'  => 'fk_mainmenu=doliproject',
+			'type'     => 'left',
+			'titre'    => $langs->trans('Categories'),
+			'prefix'   => '<i class="fas fa-tags pictofixedwidth"></i>  ',
+			'mainmenu' => 'doliproject',
+			'leftmenu' => 'timesheettags',
+			'url'      => '/categories/index.php?type=timesheet',
+			'langs'    => 'doliproject@doliproject',
+			'position' => 1100 + $r,
+			'enabled'  => '$conf->doliproject->enabled && $conf->categorie->enabled',
+			'perms'    => '$user->rights->doliproject->timesheet->read',
+			'target'   => '',
+			'user'     => 0,
 		);
 
 		$this->menu[$r++] = array(

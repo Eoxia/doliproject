@@ -65,6 +65,7 @@ class TimeSheet extends CommonObject
 	const STATUS_DRAFT = 0;
 	const STATUS_VALIDATED = 1;
 	const STATUS_LOCKED = 2;
+	const STATUS_ARCHIVED = 3;
 
 	/**
 	 *  'type' field format ('integer', 'integer:ObjectClass:PathToClass[:AddCreateButtonOrNot[:Filter[:Sortfield]]]', 'sellist:TableName:LabelFieldName[:KeyFieldName[:KeyFieldParent[:Filter[:Sortfield]]]]', 'varchar(x)', 'double(24,8)', 'real', 'price', 'text', 'text:none', 'html', 'date', 'datetime', 'timestamp', 'duration', 'mail', 'phone', 'url', 'password')
@@ -105,8 +106,8 @@ class TimeSheet extends CommonObject
 		'date_creation'  => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>40, 'notnull'=>1, 'visible'=>0,),
 		'tms'            => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>50, 'notnull'=>0, 'visible'=>0,),
 		'import_key'     => array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>'1', 'position'=>60, 'notnull'=>-1, 'visible'=>0,),
-		'status'         => array('type'=>'integer', 'label'=>'Status', 'enabled'=>'1', 'position'=>70, 'notnull'=>1, 'visible'=>0, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', '1'=>'Validé;', '9'=>'Annulée;'),),
-		'label'          => array('type'=>'varchar(255)', 'label'=>'Label', 'enabled'=>'1', 'position'=>80, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'maxwidth500', 'cssview'=>'wordbreak', 'help'=>"Help text", 'showoncombobox'=>'2',),
+		'status'         => array('type'=>'integer', 'label'=>'Status', 'enabled'=>'1', 'position'=>70, 'notnull'=>1, 'visible'=>2, 'arrayofkeyval'=>array('0'=>'Draft', '1'=>'Validate', '2'=>'Locked', '3'=>'Archived'),),
+		'label'          => array('type'=>'varchar(255)', 'label'=>'Label', 'enabled'=>'1', 'position'=>80, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'maxwidth500 widthcentpercentminusxx', 'cssview'=>'wordbreak', 'help'=>"Help text", 'showoncombobox'=>'2',),
 		'date_start'     => array('type'=>'date', 'label'=>'DateStart', 'enabled'=>'1', 'position'=>90, 'notnull'=>1, 'visible'=>1,),
 		'date_end'       => array('type'=>'date', 'label'=>'DateEnd', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>1,),
 		'description'    => array('type'=>'html', 'label'=>'Description', 'enabled'=>'1', 'position'=>110, 'notnull'=>0, 'visible'=>3,),
@@ -118,7 +119,7 @@ class TimeSheet extends CommonObject
 		'fk_user_creat'  => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>170, 'notnull'=>1, 'visible'=>0, 'foreignkey'=>'user.rowid',),
 		'fk_user_modif'  => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModif', 'enabled'=>'1', 'position'=>180, 'notnull'=>-1, 'visible'=>0,),
 		'fk_project'     => array('type'=>'integer:Project:projet/class/project.class.php:1', 'label'=>'Project', 'enabled'=>'1', 'position'=>82, 'notnull'=>-1, 'visible'=>3, 'index'=>1, 'css'=>'maxwidth500 widthcentpercentminusxx',),
-		'fk_soc'         => array('type'=>'integer:Societe:societe/class/societe.class.php:1', 'label'=>'ThirdParty', 'enabled'=>'1', 'position'=>101, 'notnull'=>-1, 'visible'=>1, 'index'=>1, 'css'=>'maxwidth500 widthcentpercentminusxx',),
+		'fk_soc'         => array('type'=>'integer:Societe:societe/class/societe.class.php:1', 'label'=>'ThirdParty', 'enabled'=>'1', 'position'=>101, 'notnull'=>-1, 'visible'=>3, 'index'=>1, 'css'=>'maxwidth500 widthcentpercentminusxx',),
 		'fk_user_assign' => array('type'=>'integer:User:user/class/user.class.php:1:t.fk_soc IS NULL', 'label'=>'UserAssign', 'enabled'=>'1', 'position'=>85, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'css'=>'maxwidth500 widthcentpercentminusxx',),
 	);
 
@@ -617,11 +618,13 @@ class TimeSheet extends CommonObject
 			return 0;
 		}
 
+		$signatory = new TimeSheetSignature($this->db);
+		$signatory->deleteSignatoriesSignatures($this->id, 'timesheet');
 		return $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, 'TIMESHEET_UNVALIDATE');
 	}
 
 	/**
-	 *	Set back to validated status
+	 *	Set lock status
 	 *
 	 *	@param	User	$user			Object user that modify
 	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
@@ -629,7 +632,19 @@ class TimeSheet extends CommonObject
 	 */
 	public function setLocked($user, $notrigger = 0)
 	{
-		return $this->setStatusCommon($user, self::STATUS_VALIDATED, $notrigger, 'TIMESHEET_LOCKED');
+		return $this->setStatusCommon($user, self::STATUS_LOCKED, $notrigger, 'TIMESHEET_LOCKED');
+	}
+
+	/**
+	 *	Set close status
+	 *
+	 *	@param	User	$user			Object user that modify
+	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
+	 *	@return	int						<0 if KO, >0 if OK
+	 */
+	public function setArchived($user, $notrigger = 0)
+	{
+		return $this->setStatusCommon($user, self::STATUS_ARCHIVED, $notrigger, 'TIMESHEET_ARCHIVED');
 	}
 
 	/**
@@ -773,17 +788,21 @@ class TimeSheet extends CommonObject
 		if (empty($this->labelStatus) || empty($this->labelStatusShort)) {
 			global $langs;
 			$langs->load("doliproject@doliproject");
-			$this->labelStatus[self::STATUS_DRAFT]          = $langs->transnoentitiesnoconv('Draft');
+			$this->labelStatus[self::STATUS_DRAFT]          = $langs->transnoentitiesnoconv('StatusDraft');
 			$this->labelStatus[self::STATUS_VALIDATED]      = $langs->transnoentitiesnoconv('ValidatePendingSignature');
 			$this->labelStatus[self::STATUS_LOCKED]         = $langs->transnoentitiesnoconv('Locked');
-			$this->labelStatusShort[self::STATUS_DRAFT]     = $langs->transnoentitiesnoconv('Draft');
+			$this->labelStatus[self::STATUS_ARCHIVED]       = $langs->transnoentitiesnoconv('Archived');
+
+			$this->labelStatusShort[self::STATUS_DRAFT]     = $langs->transnoentitiesnoconv('StatusDraft');
 			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('ValidatePendingSignature');
-			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Locked');
+			$this->labelStatusShort[self::STATUS_LOCKED]    = $langs->transnoentitiesnoconv('Locked');
+			$this->labelStatusShort[self::STATUS_ARCHIVED]  = $langs->transnoentitiesnoconv('Archived');
 		}
 
 		$statusType                                        = 'status' . $status;
 		if ($status == self::STATUS_VALIDATED) $statusType = 'status3';
 		if ($status == self::STATUS_LOCKED) $statusType    = 'status8';
+		if ($status == self::STATUS_ARCHIVED) $statusType  = 'status8';
 
 		return dolGetStatus($this->labelStatus[$status], $this->labelStatusShort[$status], '', $statusType, $mode);
 	}
@@ -928,6 +947,21 @@ class TimeSheet extends CommonObject
 	}
 
 	/**
+	 * Sets object to supplied categories.
+	 *
+	 * Deletes object from existing categories not supplied.
+	 * Adds it to non existing supplied categories.
+	 * Existing categories are left untouch.
+	 *
+	 * @param  int[]|int $categories Category or categories IDs
+	 * @return void
+	 */
+	public function setCategories($categories)
+	{
+		return parent::setCategoriesCommon($categories, 'timesheet');
+	}
+
+	/**
 	 *  Create a document onto disk according to template module.
 	 *
 	 *  @param	    string		$modele			Force template to use ('' to not force)
@@ -998,7 +1032,7 @@ class TimeSheetLine extends CommonObjectLine
 	/**
 	 * @var string Name of table without prefix where object is stored
 	 */
-	public $table_element = 'doliproject_ fk_timesheetdet';
+	public $table_element = 'doliproject_timesheetdet';
 
 
 	/**
