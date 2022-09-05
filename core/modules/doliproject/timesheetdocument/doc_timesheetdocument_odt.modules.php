@@ -26,6 +26,7 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/doc.lib.php';
 
 require_once __DIR__ . '/modules_timesheetdocument.php';
@@ -383,6 +384,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 				$array_objet = $this->get_substitutionarray_object($object, $outputlangs);
 				$array_user = $this->get_substitutionarray_user($user, $outputlangs);
 				$array_soc = $this->get_substitutionarray_mysoc($mysoc, $outputlangs);
+				$array_soc['mycompany_logo']  = preg_replace('/_small/', '_mini', $array_soc['mycompany_logo']);
 				$array_thirdparty = $this->get_substitutionarray_thirdparty($socobject, $outputlangs);
 				$array_other = $this->get_substitutionarray_other($outputlangs);
 				// retrieve contact information for use in object as contact_xxx tags
@@ -483,18 +485,58 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 
 				$tmparray['month_year']        = dol_print_date($object->date_start, "%B %Y", 'tzuser');
 
+				$project->fetch($conf->global->DOLIPROJECT_HR_PROJECT);
+
+				$tmparray['project_rh_ref'] = $project->ref;
+				$tmparray['project_rh']     = $project->title;
+
+				$signatory = new TimeSheetSignature($this->db);
+
+				$society_responsible = $signatory->fetchSignatory('TIMESHEET_SOCIETY_RESPONSIBLE', $object->id, 'timesheet');
+				$society_responsible = is_array($society_responsible) ? array_shift($society_responsible) : $society_responsible;
+				$societey_attendant  = $signatory->fetchSignatory('TIMESHEET_SOCIETY_ATTENDANT', $object->id, 'timesheet');
+				$societey_attendant  = is_array($societey_attendant) ? array_shift($societey_attendant) : $societey_attendant;
+
+				$tempdir = $conf->doliproject->multidir_output[isset($object->entity) ? $object->entity : 1] . '/temp/';
+
+				//Signatures
+				if ( ! empty($society_responsible) && $society_responsible > 0) {
+					$tmparray['society_responsible_fullname']       = $society_responsible->lastname . ' ' . $society_responsible->firstname;
+					$tmparray['society_responsible_signature_date'] = dol_print_date($society_responsible->signature_date, 'dayhoursec');
+
+					$encoded_image = explode(",",  $society_responsible->signature)[1];
+					$decoded_image = base64_decode($encoded_image);
+					file_put_contents($tempdir . "signature.png", $decoded_image);
+					$tmparray['society_responsible_signature'] = $tempdir . "signature.png";
+				}
+				if ( ! empty($societey_attendant) && $societey_attendant > 0) {
+					$tmparray['society_attendant_fullname']       = $societey_attendant->lastname . ' ' . $societey_attendant->firstname;
+					$tmparray['society_attendant_signature_date'] = dol_print_date($societey_attendant->signature_date, 'dayhoursec');
+
+					$encoded_image = explode(",",  $societey_attendant->signature)[1];
+					$decoded_image = base64_decode($encoded_image);
+					file_put_contents($tempdir . "signature1.png", $decoded_image);
+					$tmparray['society_attendant_signature'] = $tempdir . "signature1.png";
+				}
+
 				foreach ($tmparray as $key => $value) {
 					try {
-						if (preg_match('/logo$/', $key)) {
-							// Image
-							if (file_exists($value)) {
-								$odfHandler->setImage($key, $value);
-							} else {
-								$odfHandler->setVars($key, 'ErrorFileNotFound', true, 'UTF-8');
+						if ($key == 'society_responsible_signature' || $key == 'society_attendant_signature') { // Image
+							$list     = getimagesize($value);
+							$newWidth = 350;
+							if ($list[0]) {
+								$ratio     = $newWidth / $list[0];
+								$newHeight = $ratio * $list[1];
+								dol_imageResizeOrCrop($value, 0, $newWidth, $newHeight);
 							}
+							$odfHandler->setImage($key, $value);
+						} elseif (preg_match('/logo$/', $key)) {
+							if (file_exists($value)) $odfHandler->setImage($key, $value);
+							else $odfHandler->setVars($key, $langs->transnoentities('ErrorFileNotFound'), true, 'UTF-8');
+						} elseif (empty($value)) { // Text
+							$odfHandler->setVars($key, $langs->trans('NoData'), true, 'UTF-8');
 						} else {
-							// Text
-							$odfHandler->setVars($key, $value, true, 'UTF-8');
+							$odfHandler->setVars($key, html_entity_decode($value, ENT_QUOTES | ENT_HTML5), true, 'UTF-8');
 						}
 					} catch (OdfException $e) {
 						dol_syslog($e->getMessage(), LOG_INFO);
@@ -580,7 +622,11 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 								$reshook = $hookmanager->executeHooks('ODTSubstitutionLine', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
 								foreach ($tmparray as $key => $val) {
 									try {
-										$listlines->setVars($key, $val, true, 'UTF-8');
+										if (empty($val)) {
+											$listlines->setVars($key, $langs->trans('NoData'), true, 'UTF-8');
+										} else {
+											$listlines->setVars($key, html_entity_decode($val, ENT_QUOTES | ENT_HTML5), true, 'UTF-8');
+										}
 									} catch (OdfException $e) {
 										dol_syslog($e->getMessage(), LOG_INFO);
 									} catch (SegmentException $e) {
@@ -591,29 +637,6 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 							}
 						}
 						$odfHandler->mergeSegment($listlines);
-					}
-
-					$project->fetch($conf->global->DOLIPROJECT_HR_PROJECT);
-
-					$tmparray['project_rh_ref'] = $project->ref;
-					$tmparray['project_rh']     = $project->title;
-
-					foreach ($tmparray as $key => $value) {
-						try {
-							if (preg_match('/logo$/', $key)) {
-								// Image
-								if (file_exists($value)) {
-									$odfHandler->setImage($key, $value);
-								} else {
-									$odfHandler->setVars($key, 'ErrorFileNotFound', true, 'UTF-8');
-								}
-							} else {
-								// Text
-								$odfHandler->setVars($key, $value, true, 'UTF-8');
-							}
-						} catch (OdfException $e) {
-							dol_syslog($e->getMessage(), LOG_INFO);
-						}
 					}
 
 					$tasksArray = $task->getTasksArray(0, 0, ($project->id ?: 0), 0, 0, '', '', '',  $object->fk_user_assign, 0, $extrafields);
@@ -683,6 +706,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 						}
 					}
 
+					// Total time RH
 					$foundtagforlines = 1;
 					try {
 						$listlines = $odfHandler->setSegment('totalrhs');
@@ -721,6 +745,8 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 						$listlines->merge();
 						$odfHandler->mergeSegment($listlines);
 					}
+
+					// Total time consumed
 					$foundtagforlines = 1;
 					try {
 						$listlines = $odfHandler->setSegment('totaltpss');
@@ -760,6 +786,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 						$odfHandler->mergeSegment($listlines);
 					}
 
+					// Total time consumed
 					$foundtagforlines = 1;
 					try {
 						$listlines = $odfHandler->setSegment('totaltimes');
@@ -803,6 +830,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 						$odfHandler->mergeSegment($listlines);
 					}
 
+					// Total time spent
 					$foundtagforlines = 1;
 					try {
 						$listlines = $odfHandler->setSegment('tas');
@@ -854,6 +882,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 						$odfHandler->mergeSegment($listlines);
 					}
 
+					// Diff between time consumed and time spent
 					$foundtagforlines = 1;
 					try {
 						$listlines = $odfHandler->setSegment('diffs');
@@ -956,6 +985,9 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 				}
 
 				$odfHandler = null; // Destroy object
+
+				dol_delete_file($tempdir . "signature.png");
+				dol_delete_file($tempdir . "signature1.png");
 
 				$this->result = array('fullpath'=>$file);
 
