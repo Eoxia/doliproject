@@ -594,6 +594,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 				jQuery('.tredited .right #price_ht').remove();
 				jQuery('.tredited .right #remise_percent').remove();
 				jQuery('.tredited .nowrap').remove();
+				jQuery('.treditedlinefordate').remove();
 			</script>
 		<?php }
 

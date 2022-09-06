@@ -841,4 +841,23 @@ class ActionsDoliproject
 			}
 		}
 	}
+
+	public function deleteFile($parameters, &$object, $action) {
+		if (in_array($parameters['currentcontext'], array('timesheetcard'))) {
+			global $user;
+
+			$signatory = new TimeSheetSignature($this->db);
+
+			$object->status = $object::STATUS_DRAFT;
+			$object->update($user, false);
+			$signatories = $signatory->fetchSignatories($object->id, 'timesheet');
+			if ( ! empty($signatories) && $signatories > 0) {
+				foreach ($signatories as $signatory) {
+					$signatory->status = $signatory::STATUS_REGISTERED;
+					$signatory->signature = '';
+					$signatory->update($user, false);
+				}
+			}
+		}
+	}
 }
