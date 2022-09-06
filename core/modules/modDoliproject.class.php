@@ -108,6 +108,7 @@ class modDoliproject extends DolibarrModules
 			5 => array('DOLIPROJECT_EXCEEDED_TIME_SPENT_COLOR', 'chaine', '#FF0000', '', 0, 'current'),
 			6 => array('DOLIPROJECT_NOT_EXCEEDED_TIME_SPENT_COLOR', 'chaine', '#FFA500', '', 0, 'current'),
 			7 => array('DOLIPROJECT_PERFECT_TIME_SPENT_COLOR', 'chaine', '#008000', '', 0, 'current'),
+			8 => array('DOLIPROJECT_PRODUCT_SERVICE_SET', 'integer', 0, '', 0, 'current'),
 
 			// CONST TIME SHEET
 			10 => array('MAIN_AGENDA_ACTIONAUTO_TIMESHEET_CREATE', 'integer', 1, '', 0, 'current'),
@@ -407,8 +408,8 @@ class modDoliproject extends DolibarrModules
 			$projectRef  = new $conf->global->PROJECT_ADDON();
 
 			$project->ref         = $projectRef->getNextValue('', $project);
-			$project->title       = $langs->trans('HumanResources') . ' - ' . $conf->global->MAIN_INFO_SOCIETE_NOM;
-			$project->description = $langs->trans('HRDescription');
+			$project->title       = $langs->transnoentities('HumanResources') . ' - ' . $conf->global->MAIN_INFO_SOCIETE_NOM;
+			$project->description = $langs->transnoentities('HRDescription');
 			$project->date_c      = dol_now();
 			$currentYear          = dol_print_date(dol_now(), '%Y');
 			$fiscalMonthStart     = $conf->global->SOCIETE_FISCAL_MONTH_START;
@@ -439,25 +440,25 @@ class modDoliproject extends DolibarrModules
 
 				$task->fk_project = $result;
 				$task->ref = $defaultref;
-				$task->label = $langs->trans('Holidays');
+				$task->label = $langs->transnoentities('Holidays');
 				$task->date_c = dol_now();
 				$task->create($user);
 
 				$task->fk_project = $result;
 				$task->ref = $modTask->getNextValue('', null);;
-				$task->label = $langs->trans('PaidHolidays');
+				$task->label = $langs->transnoentities('PaidHolidays');
 				$task->date_c = dol_now();
 				$task->create($user);
 
 				$task->fk_project = $result;
 				$task->ref = $modTask->getNextValue('', null);;
-				$task->label = $langs->trans('SickLeave');
+				$task->label = $langs->transnoentities('SickLeave');
 				$task->date_c = dol_now();
 				$task->create($user);
 
 				$task->fk_project = $result;
 				$task->ref = $modTask->getNextValue('', null);;
-				$task->label = $langs->trans('PublicHoliday');
+				$task->label = $langs->transnoentities('PublicHoliday');
 				$task->date_c = dol_now();
 				$task->create($user);
 
@@ -496,11 +497,40 @@ class modDoliproject extends DolibarrModules
 
 			$bookmark = new Bookmark($db);
 
-			$bookmark->title = $langs->trans('TimeSpent');
+			$bookmark->title = $langs->transnoentities('TimeSpent');
 			$bookmark->url = DOL_URL_ROOT . '/custom/doliproject/view/timespent_day.php?mainmenu=project';
 			$bookmark->target = 0;
 			$bookmark->position = 10;
-			$bookmark->create($user);
+			$bookmark->create();
+
+			dolibarr_set_const($db, 'DOLIPROJECT_TIMESPENT_BOOKMARK_SET', 1, 'integer', 0, '', $conf->entity);
+		}
+
+		if ($conf->global->DOLIPROJECT_PRODUCT_SERVICE_SET == 0 ) {
+			require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+
+			$product = new Product($db);
+
+			$product->ref   = $langs->transnoentities('MealTicket');
+			$product->label = $langs->transnoentities('MealTicket');
+			$product->create($user);
+
+			$product->ref   = $langs->transnoentities('JourneySubscription');
+			$product->label = $langs->transnoentities('JourneySubscription');
+			$product->type  = $product::TYPE_SERVICE;
+			$product->create($user);
+
+			$product->ref   = $langs->transnoentities('13thMonthBonus');
+			$product->label = $langs->transnoentities('13thMonthBonus');
+			$product->type  = $product::TYPE_SERVICE;
+			$product->create($user);
+
+			$product->ref   = $langs->transnoentities('SpecialBonus');
+			$product->label = $langs->transnoentities('SpecialBonus');
+			$product->type  = 1;
+			$product->create($user);
+
+			dolibarr_set_const($db, 'DOLIPROJECT_PRODUCT_SERVICE_SET', 1, 'integer', 0, '', $conf->entity);
 		}
 
 		// Create extrafields during init

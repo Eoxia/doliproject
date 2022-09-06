@@ -291,3 +291,7 @@ FileGenerated
 # Data - Donnée
 SendEmailAt = Envoi de l'email à
 ErrorSetupEmail = Erreur de configuration des mails, vous n'avez pas configuré votre serveur d'envoi de mail
+MealTicket = Ticket restaurant
+JourneySubscription = Abonnement trajet
+13thMonthBonus = Prime 13ème mois
+SpecialBonus = Prime spéciale
