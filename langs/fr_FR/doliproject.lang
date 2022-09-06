@@ -217,6 +217,7 @@ TimeSpentMustBeCompleted = Attention, toutes tes heures de travail n'ont pas ét
 TimeSpentDiff = Attention, tu as consommé trop d'heures de travail du %s au %s <br> Va sur ton pointage de temps du mois de %s pour arranger cela
 GoToTimeSpent = Aller sur le pointage de  temps du mois de %s
 ExpectedWorkedDayMonth = Nombre de jours ouvrés :
+ErrorLinkedElementTimeSheetTimeSpent = Erreur liens entre navette et temps consommé <br> il existe déjà une navette lié au temps consommé affecté à l'utilisateur %s sur la période de %s au %s
 
 # Data - Donnée
 TimeSheet = Navette

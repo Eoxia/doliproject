@@ -846,7 +846,11 @@ class ActionsDoliproject
 		if (in_array($parameters['currentcontext'], array('timesheetcard')) && !preg_match('/signature/', $parameters['file'])) {
 			global $user;
 
+			require_once DOL_DOCUMENT_ROOT . '/projet/class/task.class.php';
+
 			$signatory = new TimeSheetSignature($this->db);
+			$usertmp   = new User($this->db);
+			$task      = new Task($this->db);
 
 			$object->status = $object::STATUS_DRAFT;
 			$object->update($user, false);
@@ -856,6 +860,17 @@ class ActionsDoliproject
 					$signatory->status = $signatory::STATUS_REGISTERED;
 					$signatory->signature = '';
 					$signatory->update($user, false);
+				}
+			}
+
+			$usertmp->fetch($object->fk_user_assign);
+			$filter = ' AND ptt.task_date BETWEEN ' . "'" .dol_print_date($object->date_start, 'dayrfc') . "'" . ' AND ' . "'" . dol_print_date($object->date_end, 'dayrfc'). "'";
+			$alltimespent = $task->fetchAllTimeSpent($usertmp, $filter);
+			foreach ($alltimespent as $timespent) {
+				$task->fetchObjectLinked(null, '', $timespent->timespent_id, 'project_task_time');
+				if (isset($task->linkedObjects['doliproject_timesheet'])) {
+					$object->element = 'doliproject_timesheet';
+					$object->deleteObjectLinked(null, '', $timespent->timespent_id, 'project_task_time');
 				}
 			}
 		}

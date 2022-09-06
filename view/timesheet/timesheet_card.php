@@ -267,20 +267,38 @@ if (empty($reshook)) {
 
 	// Action to set status STATUS_LOCKED
 	if ($action == 'confirm_setLocked' && $permissiontoadd) {
+		$errorlinked = 0;
 		$object->fetch($id);
 		if ( ! $error) {
-			$result = $object->setLocked($user, false);
-			if ($result > 0) {
+			$usertmp->fetch($object->fk_user_assign);
+			$filter = ' AND ptt.task_date BETWEEN ' . "'" .dol_print_date($object->date_start, 'dayrfc') . "'" . ' AND ' . "'" . dol_print_date($object->date_end, 'dayrfc'). "'";
+			$alltimespent = $task->fetchAllTimeSpent($usertmp, $filter);
+			foreach ($alltimespent as $timespent) {
+				$task->fetchObjectLinked(null, '', $timespent->timespent_id, 'project_task_time');
+				if (!isset($task->linkedObjects['doliproject_timesheet'])) {
+					$task->id = $timespent->timespent_id;
+					$task->element = 'project_task_time';
+					$task->add_object_linked('doliproject_timesheet', $object->id);
+				} else {
+					$errorlinked++;
+				}
+			}
+			if ($errorlinked == 0) {
+				$object->setLocked($user, false);
 				// Set locked OK
 				$urltogo = str_replace('__ID__', $result, $backtopage);
 				$urltogo = preg_replace('/--IDFORBACKTOPAGE--/', $id, $urltogo); // New method to autoselect project after a New on another form object creation
 				header("Location: " . $urltogo);
 				exit;
-			} else {
-				// Set locked KO
-				if ( ! empty($object->errors)) setEventMessages(null, $object->errors, 'errors');
-				else setEventMessages($object->error, null, 'errors');
 			}
+		} else {
+			// Set locked KO
+			if ( ! empty($object->errors)) setEventMessages(null, $object->errors, 'errors');
+			else setEventMessages($object->error, null, 'errors');
+		}
+
+		if ($errorlinked > 0) {
+			setEventMessages($langs->trans('ErrorLinkedElementTimeSheetTimeSpent', $usertmp->getFullName($langs), dol_print_date($object->date_start, 'dayreduceformat'), dol_print_date($object->date_end, 'dayreduceformat')), null, 'errors');
 		}
 	}
 
