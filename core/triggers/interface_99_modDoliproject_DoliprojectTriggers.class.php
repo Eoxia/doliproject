@@ -166,14 +166,63 @@ class InterfaceDoliprojectTriggers extends DolibarrTriggers
 			// Timesheet
 			case 'TIMESHEET_CREATE' :
 				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+				require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
+
 				require_once __DIR__ . '/../../class/timesheet.class.php';
-				$signatory = new TimeSheetSignature($this->db);
-				$usertmp   = new User($this->db);
+
+				$signatory  = new TimeSheetSignature($this->db);
+				$usertmp    = new User($this->db);
+				$product    = new Product($this->db);
+				$objectline = new TimeSheetLine($this->db);
 
 				$usertmp->fetch($object->fk_user_assign);
 
 				$signatory->setSignatory($object->id, 'timesheet', 'user', array($object->fk_user_assign), 'TIMESHEET_SOCIETY_ATTENDANT');
 				$signatory->setSignatory($object->id, 'timesheet', 'user', array($usertmp->fk_user), 'TIMESHEET_SOCIETY_RESPONSIBLE');
+
+				$now = dol_now();
+
+				if ($conf->global->DOLIPROJECT_PRODUCT_SERVICE_SET) {
+					$product->fetch('', dol_sanitizeFileName(dol_string_nospecial(trim($langs->transnoentities("MealTicket")))));
+					$objectline->date_creation  = $object->db->idate($now);
+					$objectline->qty            = 0;
+					$objectline->rang           = 1;
+					$objectline->fk_timesheet   = $object->id;
+					$objectline->fk_parent_line = 0;
+					$objectline->fk_product     = $product->id;
+					$objectline->product_type   = 0;
+					$objectline->insert($user);
+
+					$product->fetch('', dol_sanitizeFileName(dol_string_nospecial(trim($langs->transnoentities("JourneySubscription")))));
+					$objectline->date_creation  = $object->db->idate($now);
+					$objectline->qty            = 0;
+					$objectline->rang           = 2;
+					$objectline->fk_timesheet   = $object->id;
+					$objectline->fk_parent_line = 0;
+					$objectline->fk_product     = $product->id;
+					$objectline->product_type   = 1;
+					$objectline->insert($user);
+
+					$product->fetch('', dol_sanitizeFileName(dol_string_nospecial(trim($langs->transnoentities("13thMonthBonus")))));
+					$objectline->date_creation  = $object->db->idate($now);
+					$objectline->qty            = 0;
+					$objectline->rang           = 3;
+					$objectline->fk_timesheet   = $object->id;
+					$objectline->fk_parent_line = 0;
+					$objectline->fk_product     = $product->id;
+					$objectline->product_type   = 1;
+					$objectline->insert($user);
+
+					$product->fetch('', dol_sanitizeFileName(dol_string_nospecial(trim($langs->transnoentities("SpecialBonus")))));
+					$objectline->date_creation  = $object->db->idate($now);
+					$objectline->qty            = 0;
+					$objectline->rang           = 4;
+					$objectline->fk_timesheet   = $object->id;
+					$objectline->fk_parent_line = 0;
+					$objectline->fk_product     = $product->id;
+					$objectline->product_type   = 1;
+					$objectline->insert($user);
+				}
 				break;
 
 			case 'TIMESHEET_MODIFY' :

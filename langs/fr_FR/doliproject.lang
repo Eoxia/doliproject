@@ -207,9 +207,9 @@ AllSignatoriesMustHaveSigned = Tous les signataires doivent avoir signé pour ve
 TimeSheetMustBeLockedToSendEmail = La navette doit être verrouillée pour envoyer un email
 TimeSheetMustBeLocked = La navette doit être verrouillée afin de permettre la génération
 ValidateTimeSheet = Valider la navette
-ConfirmValidateTimeSheet = Êtes-vous sûr de vouloir valider la navette ? <br> La validation permet aux signataires de signer le document mais <b> empêche l'ajout de nouveaux signataires ou la modification de la navettte </b>.
+ConfirmValidateTimeSheet = Êtes-vous sûr de vouloir valider la navette ? <br> La validation permet aux signataires de signer le document mais <b> empêche l'ajout de nouveaux signataires ou la modification de la navette. </b> <br><br> <b>  N'oubliez pas de vérifier les quantité des données complémentaires. </b>
 ReOpenTimeSheet = Ouvrir à nouveau la navette
-ConfirmReOpenTimeSheet = Êtes-vous sûr de vouloir rouvrir la navette ? La réouverture permet la modification de la navettte et l'ajout de nouveaux signataires mais <b>toutes les signatures du document seront perdues</b>.
+ConfirmReOpenTimeSheet = Êtes-vous sûr de vouloir rouvrir la navette ? La réouverture permet la modification de la navette et l'ajout de nouveaux signataires mais <b>toutes les signatures du document seront perdues</b>.
 LockTimeSheet = Verrouiller la navette
 ConfirmLockTimeSheet = Êtes-vous sûr de vouloir verrouiller la navette ?<br>Ce verrouillage permet de figer les données et la génération du document.
 
