@@ -555,6 +555,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	$isavailable = array();
 	$workinghoursArray = $workinghours->fetchCurrentWorkingHours($object->fk_user_assign, 'user');
 	$workinghoursMonth = 0;
+	$nbworkinghoursMonth = 0;
 
 	for ($idw = 0; $idw < $dayInMonth; $idw++) {
 		$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
@@ -592,9 +593,12 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			$currentDay = date('l', $dayinloopfromfirstdaytoshow);
 			$currentDay = 'workinghours_' . strtolower($currentDay);
 			$workinghoursMonth += $workinghoursArray->{$currentDay} / 60;
+			$nbworkinghoursMonth++;
 		}
 	}
-	print '<span class="opacitymediumbycolor">  - ' . $langs->trans("ExpectedWorkedHoursMonth", dol_print_date(dol_mktime(0, 0, 0, $datestart['mon'], $datestart['mday'], $datestart['year']), "%B %Y")) . ' : <strong><a href="' . DOL_URL_ROOT . '/custom/doliproject/view/workinghours_card.php?id=' . $object->fk_user_assign . '" target="_blank">' . price($workinghoursMonth, 1, $langs, 0, 0) . '</a></strong></span>';
+	print '<span class="opacitymediumbycolor">  - ' . $langs->trans("ExpectedWorkedHoursMonth", dol_print_date(dol_mktime(0, 0, 0, $datestart['mon'], $datestart['mday'], $datestart['year']), "%B %Y")) . ' : <strong><a href="' . DOL_URL_ROOT . '/custom/doliproject/view/workinghours_card.php?id=' . $object->fk_user_assign . '" target="_blank">' . price($workinghoursMonth, 1, $langs, 0, 0) . '</a></strong>';
+	print '<span>' . ' - ' . $langs->trans("ExpectedWorkedDayMonth") . ' <strong>' . $nbworkinghoursMonth . '</strong></span>';
+	print '</span>';
 	print '</td></tr>';
 	print '<tr class="liste_total"><td class="liste_total">';
 	print $langs->trans("Total");
@@ -760,7 +764,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			print '<a class="' . (($object->status == $object::STATUS_VALIDATED && ! $signatory->checkSignatoriesSignatures($object->id, 'timesheet')) ? 'butAction' : 'butActionRefused classfortooltip') . '" id="actionButtonSign" title="' . (($object->status == $object::STATUS_VALIDATED && ! $signatory->checkSignatoriesSignatures($object->id, 'timesheet')) ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeValidatedToSign"))) . '" href="' . (($object->status == $object::STATUS_VALIDATED && ! $signatory->checkSignatoriesSignatures($object->id, 'timesheet')) ? dol_buildpath('/custom/doliproject/view/timesheet/timesheet_attendants.php?id=' . $object->id, 3) : '#') . '">' . $langs->trans("Sign") . '</a>';
 
 			// Lock
-			print '<span class="' . (($object->status == $object::STATUS_VALIDATED && $signatory->checkSignatoriesSignatures($object->id, 'timesheet')) ? 'butAction' : 'butActionRefused classfortooltip') . '" id="' . (($object->status == $object::STATUS_VALIDATED && $signatory->checkSignatoriesSignatures($object->id, 'timesheet')) ? 'actionButtonLock' : '') . '" title="' . (($object->status == $object::STATUS_VALIDATED && $signatory->checkSignatoriesSignatures($object->id, 'timesheet')) ? '' : dol_escape_htmltag($langs->trans("AllSignatoriesMustHaveSigned"))) . '">' . $langs->trans("Lock") . '</span>';
+			print '<span class="' . (($object->status == $object::STATUS_VALIDATED && $signatory->checkSignatoriesSignatures($object->id, 'timesheet') && $difftotaltime == 0) ? 'butAction' : 'butActionRefused classfortooltip') . '" id="' . (($object->status == $object::STATUS_VALIDATED && $signatory->checkSignatoriesSignatures($object->id, 'timesheet') && $difftotaltime == 0) ? 'actionButtonLock' : '') . '" title="' . (($object->status == $object::STATUS_VALIDATED && $signatory->checkSignatoriesSignatures($object->id, 'timesheet') && $difftotaltime == 0) ? '' : dol_escape_htmltag($langs->trans("AllSignatoriesMustHaveSignedAndDiffTimeSetAt0"))) . '">' . $langs->trans("Lock") . '</span>';
 
 			// Send
 			//@TODO changer le send to

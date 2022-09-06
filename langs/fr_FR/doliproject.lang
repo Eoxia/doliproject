@@ -203,7 +203,7 @@ TimeSheetMustBeDraft = La navette doit être en brouillon pour accéder à cette
 TimeSheetMustBeDraftToValidate = La navette est déjà validée
 TimeSheetMustBeValidated = La navette doit être validée pour la rouvrir
 TimeSheetMustBeValidatedToSign = La navette doit être validée pour que les signataires puissent signer
-AllSignatoriesMustHaveSigned = Tous les signataires doivent avoir signé pour verrouiller l'objet
+AllSignatoriesMustHaveSignedAndDiffTimeSetAt0 = Tous les signataires doivent avoir signé et l'utilisateur assigné doit avoir consommée toutes ses heures de travail pour verrouiller la navette
 TimeSheetMustBeLockedToSendEmail = La navette doit être verrouillée pour envoyer un email
 TimeSheetMustBeLocked = La navette doit être verrouillée afin de permettre la génération
 ValidateTimeSheet = Valider la navette
@@ -216,6 +216,7 @@ TimeSpentPerfect = Parfait, toutes tes heures de travail ont été consommées
 TimeSpentMustBeCompleted = Attention, toutes tes heures de travail n'ont pas été consommées du %s au %s <br> Va sur ton pointage de temps du mois de %s pour arranger cela
 TimeSpentDiff = Attention, tu as consommé trop d'heures de travail du %s au %s <br> Va sur ton pointage de temps du mois de %s pour arranger cela
 GoToTimeSpent = Aller sur le pointage de  temps du mois de %s
+ExpectedWorkedDayMonth = Nombre de jours ouvrés :
 
 # Data - Donnée
 TimeSheet = Navette
