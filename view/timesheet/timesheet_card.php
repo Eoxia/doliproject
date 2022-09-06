@@ -578,6 +578,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 				$user->rights->timesheet = new stdClass();
 				$user->rights->timesheet->creer = 1;
 				$object->statut = $object::STATUS_DRAFT;
+				if ($object->status >= $object::STATUS_VALIDATED) {
+					$disableedit = 1;
+					$disableremove = 1;
+					$disablemove = 1;
+				}
 			}
 			$object->printObjectLines($action, $mysoc, null, GETPOST('lineid', 'int'), 1); ?>
 			<script>

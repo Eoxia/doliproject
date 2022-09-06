@@ -834,9 +834,10 @@ class ActionsDoliproject
 				$product = new Product($this->db);
 
 				$product->fetch($parameters['line']->fk_product);
-				$parameters['line']->ref         = $product->ref;
-				$parameters['line']->label       = $product->label;
-				$parameters['line']->description = $product->description;
+				$parameters['line']->ref           = $product->ref;
+				$parameters['line']->label         = $product->label;
+				$parameters['line']->product_label = $product->label;
+				$parameters['line']->description   = $product->description;
 			}
 		}
 	}
