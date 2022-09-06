@@ -231,8 +231,8 @@ GoToLock = Verrouiller la navette
 GoToValidate = Valider la navette
 TIMESHEET_SOCIETY_ATTENDANT = Signataire interne
 TIMESHEET_SOCIETY_RESPONSIBLE = Responsable
-NbAttendants = Nombre de signataire
-NbAttendantsDescription = Le nombre de signataire par défaut est de 2
+AddAttendantsConf = Ajouter des signataires
+AddAttendantsDescription = Pouvoir ajouter des signataires pendant la réalisation de la navette <br> (par défaut il y a deux signataires, l'utilisateur assigné et son responsable hiéarchirque s'il est configuré dans son profil utilisateur)
 
 
 

@@ -63,22 +63,6 @@ $form = new Form($db);
 if (!$user->admin) accessforbidden();
 
 /*
- * Actions
- */
-
-if ($action == 'update') {
-	$NbAttendants = GETPOST('NbAttendants', 'alpha');
-
-	if (!empty($NbAttendants) || $NbAttendants === '0') {
-		$result = dolibarr_set_const($db, "DOLIPROJECT_TIMESHEET_NB_ATTENDANTS", $NbAttendants, 'integer', 0, '', $conf->entity);
-		if ($result > 0) {
-			header("Location: " . $_SERVER["PHP_SELF"]);
-			exit;
-		}
-	}
-}
-
-/*
  * View
  */
 
@@ -119,27 +103,17 @@ print ajax_constantonoff('DOLIPROJECT_TIMESHEET_PREFILL_DATE');
 print '</td>';
 print '</tr>';
 
-print '</table>';
-
-print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '" name="timesheet_form">';
-print '<input type="hidden" name="token" value="' . newToken() . '">';
-print '<input type="hidden" name="action" value="update">';
-print '<table class="noborder centpercent">';
-print '<tr class="liste_titre">';
-print '<td>' . $langs->trans("Name") . '</td>';
-print '<td>' . $langs->trans("Description") . '</td>';
-print '<td>' . $langs->trans("Value") . '</td>';
-print '<td>' . $langs->trans("Action") . '</td>';
+print '<tr class="oddeven"><td>';
+print $langs->trans('AddAttendantsConf');
+print "</td><td>";
+print $langs->trans('AddAttendantsDescription');
+print '</td>';
+print '<td class="center">';
+print ajax_constantonoff('DOLIPROJECT_TIMESHEET_ADD_ATTENDANTS');
+print '</td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td><label for="NbAttendants">' . $langs->trans("NbAttendants") . '</label></td>';
-print '<td>' . $langs->trans("NbAttendantsDescription") . '</td>';
-print '<td><input type="number" name="NbAttendants" value="' . $conf->global->DOLIPROJECT_TIMESHEET_NB_ATTENDANTS . '"></td>';
-print '<td><input type="submit" class="button" name="save" value="' . $langs->trans("Save") . '">';
-print '</td></tr>';
-
 print '</table>';
-print '</form>';
 
 // Page end
 print dol_get_fiche_end();

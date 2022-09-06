@@ -437,7 +437,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		print '</td></tr>';
 	}
 
-	if ($object->status == $object::STATUS_DRAFT && $conf->global->DOLIPROJECT_TIMESHEET_NB_ATTENDANTS != count($already_added_users) && $permissiontoadd) {
+	if ($object->status == $object::STATUS_DRAFT && $conf->global->DOLIPROJECT_TIMESHEET_ADD_ATTENDANTS && $permissiontoadd) {
 		print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '">';
 		print '<input type="hidden" name="token" value="' . newToken() . '">';
 		print '<input type="hidden" name="action" value="addSocietyAttendant">';
