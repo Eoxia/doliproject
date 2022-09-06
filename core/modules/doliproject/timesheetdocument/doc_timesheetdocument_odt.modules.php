@@ -566,6 +566,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 //						complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
 
 						unset($tmparray['object_fields']);
+						unset($tmparray['object_lines']);
 
 						// Call the ODTSubstitutionLine hook
 						$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);
@@ -616,6 +617,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 //						complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
 
 								unset($tmparray['object_fields']);
+								unset($tmparray['object_lines']);
 
 								// Call the ODTSubstitutionLine hook
 								$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);
@@ -686,6 +688,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 //						complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
 
 								unset($tmparray['object_fields']);
+								unset($tmparray['object_lines']);
 
 								// Call the ODTSubstitutionLine hook
 								$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);
@@ -729,6 +732,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 //						complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
 
 						unset($tmparray['object_fields']);
+						unset($tmparray['object_lines']);
 
 						// Call the ODTSubstitutionLine hook
 						$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);
@@ -769,6 +773,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 //						complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
 
 						unset($tmparray['object_fields']);
+						unset($tmparray['object_lines']);
 
 						// Call the ODTSubstitutionLine hook
 						$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);
@@ -813,6 +818,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 //						complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
 
 						unset($tmparray['object_fields']);
+						unset($tmparray['object_lines']);
 
 						// Call the ODTSubstitutionLine hook
 						$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);
@@ -865,6 +871,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 //						complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
 
 						unset($tmparray['object_fields']);
+						unset($tmparray['object_lines']);
 
 						// Call the ODTSubstitutionLine hook
 						$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);
@@ -919,6 +926,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 //						complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
 
 						unset($tmparray['object_fields']);
+						unset($tmparray['object_lines']);
 
 						// Call the ODTSubstitutionLine hook
 						$parameters = array('odfHandler'=>&$odfHandler, 'file'=>$file, 'object'=>$object, 'outputlangs'=>$outputlangs, 'substitutionarray'=>&$tmparray, 'line'=>$line);

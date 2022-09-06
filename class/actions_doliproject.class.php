@@ -842,8 +842,8 @@ class ActionsDoliproject
 		}
 	}
 
-	public function deleteFile($parameters, &$object, $action) {
-		if (in_array($parameters['currentcontext'], array('timesheetcard'))) {
+	public function deleteFile($parameters, $object) {
+		if (in_array($parameters['currentcontext'], array('timesheetcard')) && !preg_match('/signature/', $parameters['file'])) {
 			global $user;
 
 			$signatory = new TimeSheetSignature($this->db);

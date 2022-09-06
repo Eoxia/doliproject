@@ -212,6 +212,10 @@ ReOpenTimeSheet = Ouvrir à nouveau la navette
 ConfirmReOpenTimeSheet = Êtes-vous sûr de vouloir rouvrir la navette ? La réouverture permet la modification de la navette et l'ajout de nouveaux signataires mais <b>toutes les signatures du document seront perdues</b>.
 LockTimeSheet = Verrouiller la navette
 ConfirmLockTimeSheet = Êtes-vous sûr de vouloir verrouiller la navette ?<br>Ce verrouillage permet de figer les données et la génération du document.
+TimeSpentPerfect = Parfait, toutes tes heures de travail ont été consommées
+TimeSpentMustBeCompleted = Attention, toutes tes heures de travail n'ont pas été consommées du %s au %s <br> Va sur ton pointage de temps du mois de %s pour arranger cela
+TimeSpentDiff = Attention, tu as consommé trop d'heures de travail du %s au %s <br> Va sur ton pointage de temps du mois de %s pour arranger cela
+GoToTimeSpent = Aller sur le pointage de  temps du mois de %s
 
 # Data - Donnée
 TimeSheet = Navette
@@ -233,6 +237,7 @@ TIMESHEET_SOCIETY_ATTENDANT = Signataire interne
 TIMESHEET_SOCIETY_RESPONSIBLE = Responsable
 AddAttendantsConf = Ajouter des signataires
 AddAttendantsDescription = Pouvoir ajouter des signataires pendant la réalisation de la navette <br> (par défaut il y a deux signataires, l'utilisateur assigné et son responsable hiéarchirque s'il est configuré dans son profil utilisateur)
+
 
 
 

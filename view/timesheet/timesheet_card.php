@@ -60,14 +60,17 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
+require_once DOL_DOCUMENT_ROOT.'/holiday/class/holiday.class.php';
 
 require_once __DIR__ . '/../../class/timesheet.class.php';
+require_once __DIR__ . '/../../class/workinghours.class.php';
 require_once __DIR__ . '/../../lib/doliproject_timesheet.lib.php';
 require_once __DIR__ . '/../../lib/doliproject_function.lib.php';
 
 // Global variables definitions
-global $conf, $db, $hookmanager, $langs, $user;
+global $conf, $db, $hookmanager, $langs, $mysoc, $user;
 
 // Load translation files required by the page
 $langs->loadLangs(array("doliproject@doliproject", "other"));
@@ -87,12 +90,16 @@ $month               = (GETPOST("month", 'int') ? GETPOST("month", "int") : date
 $day                 = (GETPOST("day", 'int') ? GETPOST("day", "int") : date("d"));
 
 // Initialize technical objects
-$object      = new TimeSheet($db);
-$objectline  = new TimeSheetLine($db);
-$signatory   = new TimeSheetSignature($db);
-$extrafields = new ExtraFields($db);
-$project     = new Project($db);
-$product     = new Product($db);
+$object       = new TimeSheet($db);
+$objectline   = new TimeSheetLine($db);
+$signatory    = new TimeSheetSignature($db);
+$extrafields  = new ExtraFields($db);
+$project      = new Project($db);
+$product      = new Product($db);
+$workinghours = new Workinghours($db);
+$holiday      = new Holiday($db);
+$task         = new Task($db);
+$usertmp      = new User($db);
 
 $hookmanager->initHooks(array('timesheetcard', 'globalcard')); // Note that conf->hooks_modules contains array
 
@@ -452,32 +459,32 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	$formconfirm = '';
 	// setDraft confirmation
-	if (($action == 'setDraft' && (empty($conf->use_javascript_ajax) || ! empty($conf->dol_use_jmobile)))		// Output when action = clone if jmobile or no js
-		|| ( ! empty($conf->use_javascript_ajax) && empty($conf->dol_use_jmobile))) {							// Always output when not jmobile nor js
+	if (($action == 'setDraft' && (empty($conf->use_javascript_ajax) || !empty($conf->dol_use_jmobile)))        // Output when action = clone if jmobile or no js
+		|| (!empty($conf->use_javascript_ajax) && empty($conf->dol_use_jmobile))) {                            // Always output when not jmobile nor js
 		$formconfirm .= $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('ReOpenTimeSheet'), $langs->trans('ConfirmReOpenTimeSheet', $object->ref), 'confirm_setdraft', '', 'yes', 'actionButtonInProgress', 350, 600);
 	}
 	// setPendingSignature confirmation
-	if (($action == 'setPendingSignature' && (empty($conf->use_javascript_ajax) || ! empty($conf->dol_use_jmobile)))		// Output when action = clone if jmobile or no js
-		|| ( ! empty($conf->use_javascript_ajax) && empty($conf->dol_use_jmobile))) {							// Always output when not jmobile nor js
+	if (($action == 'setPendingSignature' && (empty($conf->use_javascript_ajax) || !empty($conf->dol_use_jmobile)))        // Output when action = clone if jmobile or no js
+		|| (!empty($conf->use_javascript_ajax) && empty($conf->dol_use_jmobile))) {                            // Always output when not jmobile nor js
 		$formconfirm .= $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('ValidateTimeSheet'), $langs->trans('ConfirmValidateTimeSheet', $object->ref), 'confirm_validate', '', 'yes', 'actionButtonPendingSignature', 350, 600);
 	}
 	// setLocked confirmation
-	if (($action == 'setLocked' && (empty($conf->use_javascript_ajax) || ! empty($conf->dol_use_jmobile)))		// Output when action = clone if jmobile or no js
-		|| ( ! empty($conf->use_javascript_ajax) && empty($conf->dol_use_jmobile))) {							// Always output when not jmobile nor js
+	if (($action == 'setLocked' && (empty($conf->use_javascript_ajax) || !empty($conf->dol_use_jmobile)))        // Output when action = clone if jmobile or no js
+		|| (!empty($conf->use_javascript_ajax) && empty($conf->dol_use_jmobile))) {                            // Always output when not jmobile nor js
 		$formconfirm .= $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('LockTimeSheet'), $langs->trans('ConfirmLockTimeSheet', $object->ref), 'confirm_setLocked', '', 'yes', 'actionButtonLock', 350, 600);
 	}
 	// setArchived confirmation
-	if (($action == 'setArchived' && (empty($conf->use_javascript_ajax) || ! empty($conf->dol_use_jmobile)))		// Output when action = clone if jmobile or no js
-		|| ( ! empty($conf->use_javascript_ajax) && empty($conf->dol_use_jmobile))) {							// Always output when not jmobile nor js
+	if (($action == 'setArchived' && (empty($conf->use_javascript_ajax) || !empty($conf->dol_use_jmobile)))        // Output when action = clone if jmobile or no js
+		|| (!empty($conf->use_javascript_ajax) && empty($conf->dol_use_jmobile))) {                            // Always output when not jmobile nor js
 		$formconfirm .= $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('ArchiveTimeSheet'), $langs->trans('ConfirmArchiveTimeSheet', $object->ref), 'confirm_setArchived', '', 'yes', 'actionButtonArchive', 350, 600);
 	}
 	// Confirmation to delete
 	if ($action == 'delete') {
-		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('DeleteTimeSheet'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 1);
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('DeleteTimeSheet'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 1);
 	}
 	// Confirmation to delete line
 	if ($action == 'ask_deleteline') {
-		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id.'&lineid='.$lineid, $langs->trans('DeleteProductLine'), $langs->trans('ConfirmDeleteProductLine'), 'confirm_deleteline', '', 0, 1);
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&lineid=' . $lineid, $langs->trans('DeleteProductLine'), $langs->trans('ConfirmDeleteProductLine'), 'confirm_deleteline', '', 0, 1);
 	}
 
 	// Call Hook formConfirm
@@ -494,19 +501,19 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	// Object card
 	// ------------------------------------------------------------
-	$linkback = '<a href="'.dol_buildpath('/doliproject/view/timesheet/timesheet_list.php', 1).'">'.$langs->trans("BackToList").'</a>';
+	$linkback = '<a href="' . dol_buildpath('/doliproject/view/timesheet/timesheet_list.php', 1) . '">' . $langs->trans("BackToList") . '</a>';
 
 	$morehtmlref = '<div class="refidno">';
 	// Thirdparty
-	if (! empty($conf->societe->enabled)) {
+	if (!empty($conf->societe->enabled)) {
 		$object->fetch_thirdparty();
 		$morehtmlref .= $langs->trans('ThirdParty') . ' : ' . (is_object($object->thirdparty) ? $object->thirdparty->getNomUrl(1) : '');
 	}
 	// Project
-	 if (! empty($conf->projet->enabled)) {
+	if (!empty($conf->projet->enabled)) {
 		$langs->load("projects");
 		$morehtmlref .= '<br>' . $langs->trans('Project') . ' ';
-		if (! empty($object->fk_project)) {
+		if (!empty($object->fk_project)) {
 			$project->fetch($object->fk_project);
 			$morehtmlref .= ': ' . $project->getNomUrl(1, '', 1);
 		} else {
@@ -520,22 +527,121 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	print '<div class="fichecenter">';
 	print '<div class="fichehalfleft">';
 	print '<div class="underbanner clearboth"></div>';
-	print '<table class="border centpercent tableforfield">'."\n";
+	print '<table class="border centpercent tableforfield">' . "\n";
 
 	// Common attributes
 	//$keyforbreak='fieldkeytoswitchonsecondcolumn';	// We change column just before this field
 
-	unset($object->fields['fk_project']);				// Hide field already shown in banner
-	unset($object->fields['fk_soc']);					// Hide field already shown in banner
+	unset($object->fields['fk_project']);                // Hide field already shown in banner
+	unset($object->fields['fk_soc']);                    // Hide field already shown in banner
 
-	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_view.tpl.php';
+	include DOL_DOCUMENT_ROOT . '/core/tpl/commonfields_view.tpl.php';
 
 	// Categories
 	if ($conf->categorie->enabled) {
-		print '<tr><td class="valignmiddle">'.$langs->trans("Categories").'</td><td>';
+		print '<tr><td class="valignmiddle">' . $langs->trans("Categories") . '</td><td>';
 		print $form->showCategories($object->id, 'timesheet', 1);
 		print "</td></tr>";
 	}
+
+	$now = dol_now();
+	$datestart = dol_getdate($object->date_start, false, 'Europe/Paris');
+	$firstdaytoshow = dol_get_first_day($datestart['year'], $datestart['mon']);
+	$firstdaytoshowgmt = dol_get_first_day($datestart['year'], $datestart['mon'], true);
+	$dayInMonth = cal_days_in_month(CAL_GREGORIAN, $datestart['mon'], $datestart['year']);
+	$lastdaytoshow = dol_get_last_day($datestart['year'], $datestart['mon']);
+	$currentDayCurrent = date('d', $now);
+	$currentMonth = date('m', $now);
+	$isavailable = array();
+	$workinghoursArray = $workinghours->fetchCurrentWorkingHours($object->fk_user_assign, 'user');
+	$workinghoursMonth = 0;
+
+	for ($idw = 0; $idw < $dayInMonth; $idw++) {
+		$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
+		$dayinloopfromfirstdaytoshowgmt = dol_time_plus_duree($firstdaytoshowgmt, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
+
+		$statusofholidaytocheck = Holiday::STATUS_APPROVED;
+
+		$isavailablefordayanduser = $holiday->verifDateHolidayForTimestamp($object->fk_user_assign, $dayinloopfromfirstdaytoshow, $statusofholidaytocheck);
+		$isavailable[$dayinloopfromfirstdaytoshow] = $isavailablefordayanduser; // in projectLinesPerWeek later, we are using $firstdaytoshow and dol_time_plus_duree to loop on each day
+
+		$test = num_public_holiday($dayinloopfromfirstdaytoshowgmt, $dayinloopfromfirstdaytoshowgmt + 86400, $mysoc->country_code);
+		if ($test) {
+			$isavailable[$dayinloopfromfirstdaytoshow] = array('morning' => false, 'afternoon' => false, 'morning_reason' => 'public_holiday', 'afternoon_reason' => 'public_holiday');
+		}
+	}
+
+	$tasksarray = $task->getTasksArray(0, 0, 0, 0, 0, '', '', '', $object->fk_user_assign, 0, array());
+
+	if (count($tasksarray) > 0) {
+		$usertmp->fetch($object->fk_user_assign);
+		$j = 0;
+		$level = 0;
+		$projectsrole = $task->getUserRolesForProjectsOrTasks($usertmp, 0, 0, 0, 1);
+		$tasksrole = $task->getUserRolesForProjectsOrTasks(0, $usertmp, 0, 0, 1);
+		$restrictviewformytask = ((!isset($conf->global->PROJECT_TIME_SHOW_TASK_NOT_ASSIGNED)) ? 2 : $conf->global->PROJECT_TIME_SHOW_TASK_NOT_ASSIGNED);
+		$conf->global->DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS = 0;
+		$totalforvisibletasks = projectLinesPerDayOnMonth($j, $firstdaytoshow, $usertmp, 0, $tasksarray, $level, $projectsrole, $tasksrole, 0, $restrictviewformytask, $isavailable, 0, array(), array(), $dayInMonth, 1);
+	}
+
+	print '<tr class="liste_total"><td class="liste_total">';
+	print $langs->trans("Total");
+	for ($idw = 0; $idw < $dayInMonth; $idw++) {
+		$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
+		if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+			$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+			$currentDay = 'workinghours_' . strtolower($currentDay);
+			$workinghoursMonth += $workinghoursArray->{$currentDay} / 60;
+		}
+	}
+	print '<span class="opacitymediumbycolor">  - ' . $langs->trans("ExpectedWorkedHoursMonth", dol_print_date(dol_mktime(0, 0, 0, $datestart['mon'], $datestart['mday'], $datestart['year']), "%B %Y")) . ' : <strong><a href="' . DOL_URL_ROOT . '/custom/doliproject/view/workinghours_card.php?id=' . $object->fk_user_assign . '" target="_blank">' . price($workinghoursMonth, 1, $langs, 0, 0) . '</a></strong></span>';
+	print '</td></tr>';
+	print '<tr class="liste_total"><td class="liste_total">';
+	print $langs->trans("Total");
+	if ($currentMonth == $datestart['mon']) {
+		$dayInMonthCurrent = $currentDayCurrent;
+	} else {
+		$dayInMonthCurrent = $dayInMonth;
+	}
+	$workinghoursMonth = 0;
+	for ($idw = 0; $idw < $dayInMonthCurrent; $idw++) {
+		$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
+		if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+			$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+			$currentDay = 'workinghours_' . strtolower($currentDay);
+			$workinghoursMonth += $workinghoursArray->{$currentDay} / 60;
+		}
+	}
+	$totalspenttime = $workinghoursMonth;
+	print '<span class="opacitymediumbycolor">  - ' . $langs->trans("SpentWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))) . ' : <strong>' . price($workinghoursMonth, 1, $langs, 0, 0) . '</strong></span>';
+	print '</td></tr>';
+	print '<tr class="liste_total"><td class="liste_total">';
+	print $langs->trans("Total");
+	if (!empty($totalforvisibletasks)) {
+		foreach ($totalforvisibletasks as $tasksingle) {
+			$totalconsumedtime += $tasksingle;
+		}
+	}
+	print '<span class="opacitymediumbycolor">  - '.$langs->trans("ConsumedWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))).' : <strong>'.convertSecondToTime($totalconsumedtime, 'allhourmin').'</strong></span>';
+	print '</td></tr>';
+	print '<tr class="liste_total"><td class="liste_total">';
+	print $langs->trans("Total");
+	$difftotaltime = $totalspenttime * 60 * 60 - $totalconsumedtime;
+	if  ($difftotaltime < 0) {
+		$morecss = colorStringToArray($conf->global->DOLIPROJECT_EXCEEDED_TIME_SPENT_COLOR);
+		$morecssnotice = 'error';
+		$noticetitle = $langs->trans('TimeSpentDiff', dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat")), dol_print_date(dol_mktime(0, 0, 0, $datestart['mon'], $datestart['mday'], $datestart['year']), "%B %Y"));
+	} else if ($difftotaltime > 0) {
+		$morecss = colorStringToArray($conf->global->DOLIPROJECT_NOT_EXCEEDED_TIME_SPENT_COLOR);
+		$morecssnotice = 'warning';
+		$noticetitle = $langs->trans('TimeSpentMustBeCompleted', dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat")), dol_print_date(dol_mktime(0, 0, 0, $datestart['mon'], $datestart['mday'], $datestart['year']), "%B %Y"));
+	} else if ($difftotaltime == 0) {
+		$morecss = colorStringToArray($conf->global->DOLIPROJECT_PERFECT_TIME_SPENT_COLOR);
+		$morecssnotice = 'success';
+		$noticetitle = $langs->trans('TimeSpentPerfect');
+	}
+	print '<span class="opacitymediumbycolor">  - '.$langs->trans("DiffSpentAndConsumedWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))).' : <strong style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'">'.(($difftotaltime != 0) ? convertSecondToTime(abs($difftotaltime), 'allhourmin') : '00:00').'</strong></span>';
+	print '</td></tr>';
 
 	// Other attributes. Fields from hook formObjectOptions and Extrafields.
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_view.tpl.php';
@@ -544,9 +650,16 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	print '</div>';
 	print '</div>';
 
-	print '<div class="clearboth"></div>';
+	print '<div class="clearboth"></div>'; ?>
 
-	print dol_get_fiche_end();
+	<div class="wpeo-notice notice-<?php echo $morecssnotice ?>">
+		<div class="notice-content">
+			<div class="notice-title"><?php echo $noticetitle ?></div>
+		</div>
+		<a class="butAction" style="width = 100%;margin-right:0" href="<?php echo DOL_URL_ROOT . '/custom/doliproject/view/timespent_month.php?year='.$datestart['year'].'&month='.$datestart['mon'].'&day='.$datestart['mday'].'&search_usertoprocessid='.$object->fk_user_assign ?>"><?php echo $langs->trans("GoToTimeSpent", dol_print_date(dol_mktime(0, 0, 0, $datestart['mon'], $datestart['mday'], $datestart['year']), "%B %Y")) ?></a>
+	</div>
+
+	<?php print dol_get_fiche_end();
 
 	/*
 	 * Lines
