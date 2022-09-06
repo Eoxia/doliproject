@@ -74,7 +74,7 @@ if (!empty($conf->categorie->enabled)) {
 }
 
 // Load translation files required by the page
-$langs->loadLangs(array("projects", "other"));
+$langs->loadLangs(array("projects", "other", "salaries"));
 
 // Get parameters
 $action      = GETPOST('action', 'aZ09') ? GETPOST('action', 'aZ09') : 'view'; // The action 'add', 'create', 'edit', 'update', 'view', ...
@@ -544,7 +544,9 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 				} elseif ($key == 'task_duration') {
 					print convertSecondToTime($obj->task_duration, 'allhourmin');
 				} elseif ($key == 'thm') {
-					print price($obj->thm, 1, $langs, 1, -1, -1, $conf->currency);
+					$value = price2num($obj->thm * $obj->task_duration / 3600, 'MT', 1);
+					print '<span class="amount" title="'.$langs->trans("THM").': '.price($obj->thm).'">';
+					print price($value, 1, $langs, 1, -1, -1, $conf->currency);
 				}
 				print '</td>';
 				if (!$i) {
@@ -562,7 +564,7 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 					}
 					$totalarray['val'][$key] += convertSecondToTime($obj->{$key}, 'allhourmin');
 					if ($key == 'thm') {
-						$totalarray['val'][$key] += $obj->{$key};
+						$totalarray['val'][$key] += $value;
 					}
 				}
 			}
