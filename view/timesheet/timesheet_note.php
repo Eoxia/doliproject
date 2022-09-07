@@ -196,6 +196,10 @@ if ($id > 0 || !empty($ref)) {
 
 
 	$cssclass = "titlefield";
+
+	if ($object->status >= $object::STATUS_VALIDATED) {
+		$permissionnote = 0;
+	}
 	include DOL_DOCUMENT_ROOT.'/core/tpl/notes.tpl.php';
 
 	print '</div>';

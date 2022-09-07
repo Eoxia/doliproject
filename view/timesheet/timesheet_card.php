@@ -805,10 +805,14 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 			// Send
 			//@TODO changer le send to
-			print '<a class="' . ($object->status == $object::STATUS_LOCKED ? 'butAction' : 'butActionRefused classfortooltip') . '" id="actionButtonSign" title="' . dol_escape_htmltag($langs->trans("TimeSheetMustBeLockedToSendEmail")) . '" href="' . ($object->status == $object::STATUS_LOCKED ? ($_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=presend&mode=init#formmailbeforetitle&sendto=' . $allLinks['LabourInspectorSociety']->id[0]) : '#') . '">' . $langs->trans('SendMail') . '</a>';
+			//print '<a class="' . ($object->status == $object::STATUS_LOCKED ? 'butAction' : 'butActionRefused classfortooltip') . '" id="actionButtonSign" title="' . dol_escape_htmltag($langs->trans("TimeSheetMustBeLockedToSendEmail")) . '" href="' . ($object->status == $object::STATUS_LOCKED ? ($_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=presend&mode=init#formmailbeforetitle&sendto=' . $allLinks['LabourInspectorSociety']->id[0]) : '#') . '">' . $langs->trans('SendMail') . '</a>';
 
 			// Archive
-			print '<a class="' . ($object->status == $object::STATUS_LOCKED ? 'butAction' : 'butActionRefused classfortooltip') . '" id="actionButtonArchive" title="' . ($object->status == $object::STATUS_LOCKED ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeLocked"))) . '" href="' . ($object->status == $object::STATUS_LOCKED ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=' . (empty(dol_dir_list($upload_dir . '/timesheetdocument/' . dol_sanitizeFileName($object->ref))) ? 'setArchived' : 'confirm_setArchived')) : '#') . '">' . $langs->trans("Archive") . '</a>';
+			if (empty(dol_dir_list($upload_dir . '/timesheetdocument/' . dol_sanitizeFileName($object->ref)))) {
+				print '<span class="' . ($object->status == $object::STATUS_LOCKED ? 'butAction' : 'butActionRefused classfortooltip') . '" id="actionButtonArchive" title="' . ($object->status == $object::STATUS_LOCKED ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeLocked"))) . '" href="' . ($object->status == $object::STATUS_LOCKED ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=setArchived') : '#') . '">' . $langs->trans("Archive") . '</span>';
+			} else {
+				print '<a class="' . ($object->status == $object::STATUS_LOCKED ? 'butAction' : 'butActionRefused classfortooltip') . '" id="" title="' . ($object->status == $object::STATUS_LOCKED ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeLocked"))) . '" href="' . ($object->status == $object::STATUS_LOCKED ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=confirm_setArchived') : '#') . '">' . $langs->trans("Archive") . '</a>';
+			}
 
 			// Delete (need delete permission, or if draft, just need create/modify permission)
 			//print dolGetButtonAction($langs->trans('Delete'), '', 'delete', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=delete&token='.newToken(), '', $permissiontodelete || ($object->status == $object::STATUS_DRAFT && $permissiontoadd));
@@ -836,7 +840,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			$genallowed = $permissiontoadd; // If you can read, you can build the PDF to read content
 			$delallowed = $permissiontodelete; // If you can create/edit, you can remove a file on card
 
-			print doliprojectshowdocuments('doliproject:TimeSheetDocument', $dir_files, $filedir, $urlsource, $genallowed, $delallowed, $conf->global->DOLIPROJECT_TIMESHEETDOCUMENT_DEFAULT_MODEL, 1, 0, 0, 0, 0, '', '', '', $langs->defaultlang, $object, 0, 'remove_file', $object->status == $object::STATUS_LOCKED && empty(dol_dir_list($filedir)), $langs->trans('TimeSheetMustBeLocked'));
+			print doliprojectshowdocuments('doliproject:TimeSheetDocument', $dir_files, $filedir, $urlsource, $genallowed, $object->status == $object::STATUS_LOCKED ? $delallowed : 0, $conf->global->DOLIPROJECT_TIMESHEETDOCUMENT_DEFAULT_MODEL, 1, 0, 0, 0, 0, '', '', '', $langs->defaultlang, $object, 0, 'remove_file', $object->status == $object::STATUS_LOCKED && empty(dol_dir_list($filedir)), $langs->trans('TimeSheetMustBeLocked'));
 		}
 
 		print '</div><div class="fichehalfright">';

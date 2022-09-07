@@ -128,6 +128,7 @@ if ($action == 'addSocietyAttendant') {
 			$usertmp = $user;
 			$usertmp->fetch($attendant_id);
 			setEventMessages($langs->trans('AddAttendantMessage') . ' ' . $usertmp->firstname . ' ' . $usertmp->lastname, array());
+			$signatory->call_trigger('DOLIPROJECTSIGNATURE_ADDATTENDANT', $user);
 			// Creation attendant OK
 			$urltogo = str_replace('__ID__', $result, $backtopage);
 			$urltogo = preg_replace('/--IDFORBACKTOPAGE--/', $id, $urltogo); // New method to autoselect project after a New on another form object creation

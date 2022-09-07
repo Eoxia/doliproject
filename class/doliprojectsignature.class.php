@@ -480,11 +480,6 @@ class DoliProjectSignature extends CommonObject
 					$this->fk_object = $fk_object;
 
 					$result = $this->create($user, false);
-					if ($result > 0) {
-						if ($role == 'PP_EXT_SOCIETY_INTERVENANTS' || $role == 'FP_EXT_SOCIETY_INTERVENANTS') {
-							$this->call_trigger(strtoupper(get_class($this)) . '_ADDATTENDANT', $user);
-						}
-					}
 				}
 			}
 		}

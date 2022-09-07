@@ -261,19 +261,219 @@ class InterfaceDoliprojectTriggers extends DolibarrTriggers
 				$actioncomm->create($user);
 				break;
 
-			case 'ECMFILES_CREATE' :
+			case 'TIMESHEET_VALIDATE' :
 				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
-				require_once __DIR__ . '/../../class/timesheet.class.php';
-				$signatory = new TimeSheetSignature($this->db);
+				require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
+				$now = dol_now();
+				$actioncomm = new ActionComm($this->db);
 
-				$signatories = $signatory->fetchSignatories($object->src_object_id, 'timesheet');
+				$actioncomm->elementtype = 'timesheet@doliproject';
+				$actioncomm->code        = 'AC_TIMESHEET_VALIDATE';
+				$actioncomm->type_code   = 'AC_OTH_AUTO';
+				$actioncomm->label       = $langs->trans('TimeSheetValidateTrigger');
+				$actioncomm->datep       = $now;
+				$actioncomm->fk_element  = $object->id;
+				$actioncomm->userownerid = $user->id;
+				$actioncomm->percentage  = -1;
 
-				if ( ! empty($signatories) && $signatories > 0) {
-					foreach ($signatories as $signatory) {
-						$signatory->signature = $langs->transnoentities("FileGenerated");
-						$signatory->update($user, false);
+				$actioncomm->create($user);
+				break;
+
+			case 'TIMESHEET_UNVALIDATE' :
+				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+				require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
+				$now = dol_now();
+				$actioncomm = new ActionComm($this->db);
+
+				$actioncomm->elementtype = 'timesheet@doliproject';
+				$actioncomm->code        = 'AC_TIMESHEET_UNVALIDATE';
+				$actioncomm->type_code   = 'AC_OTH_AUTO';
+				$actioncomm->label       = $langs->trans('TimeSheetUnValidateTrigger');
+				$actioncomm->datep       = $now;
+				$actioncomm->fk_element  = $object->id;
+				$actioncomm->userownerid = $user->id;
+				$actioncomm->percentage  = -1;
+
+				$actioncomm->create($user);
+				break;
+
+			case 'TIMESHEET_LOCKED' :
+				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+				require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
+				$now = dol_now();
+				$actioncomm = new ActionComm($this->db);
+
+				$actioncomm->elementtype = 'timesheet@doliproject';
+				$actioncomm->code        = 'AC_TIMESHEET_LOCKED';
+				$actioncomm->type_code   = 'AC_OTH_AUTO';
+				$actioncomm->label       = $langs->trans('TimeSheetLockedTrigger');
+				$actioncomm->datep       = $now;
+				$actioncomm->fk_element  = $object->id;
+				$actioncomm->userownerid = $user->id;
+				$actioncomm->percentage  = -1;
+
+				$actioncomm->create($user);
+				break;
+
+			case 'TIMESHEET_ARCHIVED' :
+				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+				require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
+				$now = dol_now();
+				$actioncomm = new ActionComm($this->db);
+
+				$actioncomm->elementtype = 'timesheet@doliproject';
+				$actioncomm->code        = 'AC_TIMESHEET_ARCHIVED';
+				$actioncomm->type_code   = 'AC_OTH_AUTO';
+				$actioncomm->label       = $langs->trans('TimeSheetArchivedTrigger');
+				$actioncomm->datep       = $now;
+				$actioncomm->fk_element  = $object->id;
+				$actioncomm->userownerid = $user->id;
+				$actioncomm->percentage  = -1;
+
+				$actioncomm->create($user);
+				break;
+
+			case 'ECMFILES_CREATE' :
+				if ($object->src_object_type == 'doliproject_timesheet') {
+					dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
+					require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
+
+					require_once __DIR__ . '/../../class/timesheet.class.php';
+
+					$now        = dol_now();
+					$signatory  = new TimeSheetSignature($this->db);
+					$actioncomm = new ActionComm($this->db);
+
+					$signatories = $signatory->fetchSignatories($object->src_object_id, 'timesheet');
+
+					if (!empty($signatories) && $signatories > 0) {
+						foreach ($signatories as $signatory) {
+							$signatory->signature = $langs->transnoentities("FileGenerated");
+							$signatory->update($user, false);
+						}
 					}
+
+					$actioncomm->elementtype = 'timesheet@doliproject';
+					$actioncomm->code        = 'AC_TIMESHEET_GENERATE';
+					$actioncomm->type_code   = 'AC_OTH_AUTO';
+					$actioncomm->label       = $langs->trans('TimeSheetGenerateTrigger');
+					$actioncomm->datep       = $now;
+					$actioncomm->fk_element  = $object->src_object_id;
+					$actioncomm->userownerid = $user->id;
+					$actioncomm->percentage  = -1;
+
+					$actioncomm->create($user);
 				}
+				break;
+
+			case 'DOLIPROJECTSIGNATURE_ADDATTENDANT' :
+				dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
+				require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+				$now        = dol_now();
+				$actioncomm = new ActionComm($this->db);
+
+				$actioncomm->elementtype       = $object->object_type . '@doliproject';
+				$actioncomm->code              = 'AC_DOLIPROJECTSIGNATURE_ADDATTENDANT';
+				$actioncomm->type_code         = 'AC_OTH_AUTO';
+				$actioncomm->label             = $langs->transnoentities('DoliProjectAddAttendantTrigger', $object->firstname . ' ' . $object->lastname);
+				if ($object->element_type == 'socpeople') {
+					$actioncomm->socpeopleassigned = array($object->element_id => $object->element_id);
+				}
+				$actioncomm->datep             = $now;
+				$actioncomm->fk_element        = $object->fk_object;
+				$actioncomm->userownerid       = $user->id;
+				$actioncomm->percentage        = -1;
+
+				$actioncomm->create($user);
+				break;
+
+			case 'DOLIPROJECTSIGNATURE_SIGNED' :
+				dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
+				require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+				$now = dol_now();
+				$actioncomm = new ActionComm($this->db);
+
+				$actioncomm->elementtype = $object->object_type . '@doliproject';
+				$actioncomm->code        = 'AC_DOLIPROJECTSIGNATURE_SIGNED';
+				$actioncomm->type_code   = 'AC_OTH_AUTO';
+
+				$actioncomm->label = $langs->transnoentities('DoliProjectSignatureSignedTrigger') . ' : ' . $object->firstname . ' ' . $object->lastname;
+
+				$actioncomm->datep       = $now;
+				$actioncomm->fk_element  = $object->fk_object;
+				if ($object->element_type == 'socpeople') {
+					$actioncomm->socpeopleassigned = array($object->element_id => $object->element_id);
+				}
+				$actioncomm->userownerid = $user->id;
+				$actioncomm->percentage  = -1;
+
+				$actioncomm->create($user);
+				break;
+
+			case 'DOLIPROJECTSIGNATURE_PENDING_SIGNATURE' :
+
+				dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
+				require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+				$now        = dol_now();
+				$actioncomm = new ActionComm($this->db);
+
+				$actioncomm->elementtype       = $object->object_type . '@doliproject';
+				$actioncomm->code              = 'AC_DOLIPROJECTSIGNATURE_PENDING_SIGNATURE';
+				$actioncomm->type_code         = 'AC_OTH_AUTO';
+				$actioncomm->label             = $langs->transnoentities('DoliProjectSignaturePendingSignatureTrigger') . ' : ' . $object->firstname . ' ' . $object->lastname;
+				$actioncomm->datep             = $now;
+				$actioncomm->fk_element        = $object->fk_object;
+				if ($object->element_type == 'socpeople') {
+					$actioncomm->socpeopleassigned = array($object->element_id => $object->element_id);
+				}
+				$actioncomm->userownerid       = $user->id;
+				$actioncomm->percentage        = -1;
+
+				$actioncomm->create($user);
+				break;
+
+			case 'DOLIPROJECTSIGNATURE_ABSENT' :
+
+				dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
+				require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+				$now        = dol_now();
+				$actioncomm = new ActionComm($this->db);
+
+				$actioncomm->elementtype       = $object->object_type . '@doliproject';
+				$actioncomm->code              = 'AC_DOLIPROJECTSIGNATURE_ABSENT';
+				$actioncomm->type_code         = 'AC_OTH_AUTO';
+				$actioncomm->label             = $langs->transnoentities('DoliProjectSignatureAbsentTrigger') . ' : ' . $object->firstname . ' ' . $object->lastname;
+				$actioncomm->datep             = $now;
+				$actioncomm->fk_element        = $object->fk_object;
+				if ($object->element_type == 'socpeople') {
+					$actioncomm->socpeopleassigned = array($object->element_id => $object->element_id);
+				}
+				$actioncomm->userownerid       = $user->id;
+				$actioncomm->percentage        = -1;
+
+				$actioncomm->create($user);
+				break;
+
+			case 'DOLIPROJECTSIGNATURE_DELETED' :
+
+				dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
+				require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+				$now        = dol_now();
+				$actioncomm = new ActionComm($this->db);
+
+				$actioncomm->elementtype       = $object->object_type . '@doliproject';
+				$actioncomm->code              = 'AC_DOLIPROJECTSIGNATURE_DELETED';
+				$actioncomm->type_code         = 'AC_OTH_AUTO';
+				$actioncomm->label             = $langs->transnoentities('DoliProjectSignatureDeletedTrigger') . ' : ' . $object->firstname . ' ' . $object->lastname;
+				$actioncomm->datep             = $now;
+				$actioncomm->fk_element        = $object->fk_object;
+				if ($object->element_type == 'socpeople') {
+					$actioncomm->socpeopleassigned = array($object->element_id => $object->element_id);
+				}
+				$actioncomm->userownerid       = $user->id;
+				$actioncomm->percentage        = -1;
+
+				$actioncomm->create($user);
 				break;
 
 			default:

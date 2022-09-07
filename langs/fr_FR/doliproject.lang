@@ -179,12 +179,12 @@ TimeSheetDocumentGeneratedWithDolibarr = Fiche de navette générée avec Doliba
 TimeSheetCreateTrigger = Création de la navette
 TimeSheetModifyTrigger = Modification de la navette
 TimeSheetDeleteTrigger = Suppression de la navette
-TimeSheetInprogressTrigger = Plan de prévention rouvert
-TimeSheetPendingSignatureTrigger = Plan de prévention en attente de signature des participants
-TimeSheetLockTrigger = Plan de prévention verrouillé - Prêt pour la génération du documuent
-TimeSheetArchivedTrigger = Plan de prévention archivé
-TimeSheetAddAttendantTrigger = Ajout d'un participant au plan de prévention
-TimeSheetSentByMailTrigger = Email plan de prévention envoyé
+TimeSheetUnValidateTrigger = Navette rouverte
+TimeSheetValidateTrigger = Navette en attente de signature des signataires
+TimeSheetLockedTrigger = Navette verrouillée - Prêt pour la génération du documuent
+TimeSheetArchivedTrigger = Navette archivée
+TimeSheetGenerateTrigger = Fiche navette générée
+TimeSheetSentByMailTrigger = Email navette envoyé
 TimeSheetLineCreateTrigger = Ligne de navette créée
 TimeSheetLineModifyTrigger = Ligne de navette modifiée
 TimeSheetLineDeleteTrigger = Ligne de navette supprimée
@@ -212,6 +212,8 @@ ReOpenTimeSheet = Ouvrir à nouveau la navette
 ConfirmReOpenTimeSheet = Êtes-vous sûr de vouloir rouvrir la navette ? La réouverture permet la modification de la navette et l'ajout de nouveaux signataires mais <b>toutes les signatures du document seront perdues</b>.
 LockTimeSheet = Verrouiller la navette
 ConfirmLockTimeSheet = Êtes-vous sûr de vouloir verrouiller la navette ?<br>Ce verrouillage permet de figer les données et la génération du document.
+ArchiveTimeSheet = Archiver la navette
+ConfirmArchiveTimeSheet = Êtes-vous sûr de vouloir archiver la navette ?<br>Vous n'avez pas générer de document pour cette navette.<br>Cette archivage clotûre la navette.
 TimeSpentPerfect = Parfait, toutes tes heures de travail ont été consommées
 TimeSpentMustBeCompleted = Attention, toutes tes heures de travail n'ont pas été consommées du %s au %s <br> Va sur ton pointage de temps du mois de %s pour arranger cela
 TimeSpentDiff = Attention, tu as consommé trop d'heures de travail du %s au %s <br> Va sur ton pointage de temps du mois de %s pour arranger cela
@@ -242,12 +244,12 @@ AddAttendantsDescription = Pouvoir ajouter des signataires pendant la réalisati
 
 
 
-
 #
 # DoliProjectSignature - Signature
 #
 
 # Trigger - Déclencheur
+DoliProjectAddAttendantTrigger = Ajout d'un signataire
 DoliProjectSignatureSignedTrigger = Signature du signataire effectuée
 DoliProjectSignaturePendingSignatureTrigger = Email envoyé, en attente de la signature du signataire
 DoliProjectSignatureAbsentTrigger = Signataire absent
