@@ -945,6 +945,58 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 						$odfHandler->mergeSegment($listlines);
 					}
 
+					// TimeSheetDet
+					$foundtagforlines = 1;
+					try {
+						$listlines = $odfHandler->setSegment('timesheetdet');
+					} catch (OdfException $e) {
+						// We may arrive here if tags for lines not present into template
+						$foundtagforlines = 0;
+						dol_syslog($e->getMessage(), LOG_INFO);
+					}
+					if ($foundtagforlines) {
+						$linenumber = 0;
+
+						$object->fetchLines();
+						if (is_array($object->lines) && !empty($object->lines)) {
+							foreach ($object->lines as $line) {
+								if ($line->qty > 0) {
+									if ($line->fk_product > 0) {
+										$product = new Product($this->db);
+										$product->fetch($line->fk_product);
+										$tmparray['timesheetdet_label'] = $product->label;
+										$tmparray['timesheetdet_qty'] = $line->qty;
+									} elseif (!empty($line->description)) {
+										$tmparray['timesheetdet_label'] = $line->description;
+										$tmparray['timesheetdet_qty'] = $line->qty;
+									}
+									//$linenumber++;
+									//$tmparray = $this->get_substitutionarray_lines($line, $outputlangs, $linenumber);
+									//complete_substitutions_array($tmparray, $outputlangs, $object, $line, "completesubstitutionarray_lines");
+
+									unset($tmparray['object_fields']);
+									unset($tmparray['object_lines']);
+
+									// Call the ODTSubstitutionLine hook
+									$parameters = array('odfHandler' => &$odfHandler, 'file' => $file, 'object' => $object, 'outputlangs' => $outputlangs, 'substitutionarray' => &$tmparray, 'line' => $line);
+									$reshook = $hookmanager->executeHooks('ODTSubstitutionLine', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
+
+									foreach ($tmparray as $key => $val) {
+										try {
+											$listlines->setVars($key, $val, true, 'UTF-8');
+										} catch (OdfException $e) {
+											dol_syslog($e->getMessage(), LOG_INFO);
+										} catch (SegmentException $e) {
+											dol_syslog($e->getMessage(), LOG_INFO);
+										}
+									}
+									$listlines->merge();
+								}
+							}
+						}
+						$odfHandler->mergeSegment($listlines);
+					}
+
 				} catch (OdfException $e) {
 					$this->error = $e->getMessage();
 					dol_syslog($this->error, LOG_WARNING);
