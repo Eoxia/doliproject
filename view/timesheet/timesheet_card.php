@@ -162,7 +162,7 @@ if (empty($reshook)) {
 
 	$triggermodname = 'TIMESHEET_MODIFY'; // Name of trigger action code to execute when we modify record
 
-	if ($action == 'add' && $permissiontoadd) {
+	if ($action == 'add' && $permissiontoadd && !$cancel) {
 		$usertmp->fetch(GETPOST('fk_user_assign'));
 		$date_start = dol_mktime(12, 0, 0, GETPOST('date_startmonth', 'int'), GETPOST('date_startday', 'int'), GETPOST('date_startyear', 'int'));
 		$date_end   = dol_mktime(12, 0, 0, GETPOST('date_endmonth', 'int'), GETPOST('date_endday', 'int'), GETPOST('date_endyear', 'int'));
