@@ -1191,9 +1191,9 @@ class TimeSheetLine extends CommonObjectLine
 		$this->db->begin();
 
 		$sql  = "UPDATE " . MAIN_DB_PREFIX . "doliproject_timesheetdet SET";
-		$sql .= " qty='" . price2num($this->qty) . "',";
+		$sql .= " qty = " . $this->qty . ",";
 		if (!empty($this->rang)) {
-			$sql .= " rang=" . $this->rang . "',";
+			$sql .= " rang = " . $this->rang . ",";
 		}
 		$sql .= " description='" . $this->db->escape($this->description) . "'";
 

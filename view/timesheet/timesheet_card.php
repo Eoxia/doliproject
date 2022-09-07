@@ -162,6 +162,25 @@ if (empty($reshook)) {
 
 	$triggermodname = 'TIMESHEET_MODIFY'; // Name of trigger action code to execute when we modify record
 
+	if ($action == 'add' && $permissiontoadd) {
+		$usertmp->fetch(GETPOST('fk_user_assign'));
+		$date_start = dol_mktime(12, 0, 0, GETPOST('date_startmonth', 'int'), GETPOST('date_startday', 'int'), GETPOST('date_startyear', 'int'));
+		$date_end   = dol_mktime(12, 0, 0, GETPOST('date_endmonth', 'int'), GETPOST('date_endday', 'int'), GETPOST('date_endyear', 'int'));
+		$filter = ' AND ptt.task_date BETWEEN ' . "'" .dol_print_date($date_start, 'dayrfc') . "'" . ' AND ' . "'" . dol_print_date($date_end, 'dayrfc'). "'";
+		$alltimespent = $task->fetchAllTimeSpent($usertmp, $filter);
+		foreach ($alltimespent as $timespent) {
+			$task->fetchObjectLinked(null, '', $timespent->timespent_id, 'project_task_time');
+			if (isset($task->linkedObjects['doliproject_timesheet'])) {
+				$error++;
+			}
+		}
+
+		if ($error > 0) {
+			setEventMessages($langs->trans('ErrorLinkedElementTimeSheetTimeSpent', $usertmp->getFullName($langs), dol_print_date($date_start, 'dayreduceformat'), dol_print_date($date_end, 'dayreduceformat')), null, 'errors');
+			$action = 'create';
+		}
+	}
+
 	// Actions cancel, add, update, update_extras, confirm_validate, confirm_delete, confirm_deleteline, confirm_clone, confirm_close, confirm_setdraft, confirm_reopen
 	$conf->global->MAIN_DISABLE_PDF_AUTOUPDATE = 1;
 	include DOL_DOCUMENT_ROOT.'/core/actions_addupdatedelete.inc.php';
