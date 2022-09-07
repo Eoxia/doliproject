@@ -120,6 +120,7 @@ $arrayfields = array(
 	'note'           => array('tablealias' => 'ptt.', 'type' => 'text', 'label' => "Note",  'checked' => 1, 'position' => 80, 'visible' => 1),
 	'thm'            => array('tablealias' => 'ptt.', 'type' => 'price', 'label' => "Value",  'checked' => 1, 'position' => 90, 'visible' => 1, 'isameasure'=>1),
 	'invoice_id'     => array('tablealias' => 'ptt.', 'fieldalias' => 'invoice_id', 'type' => 'Facture:compta/facture/class/facture.class.php:1', 'label' => "Facture", 'checked' => 1, 'position' => 100, 'visible' => 1),
+	'ts.rowid'       => array('fieldalias' => 'timesheetid', 'type' => 'TimeSheet:custom/doliproject/class/timesheet.class.php:1', 'label' => "TimeSheet", 'checked' => 1, 'position' => 110, 'visible' => 1),
 );
 
 // Default sort order (if not yet defined by previous GETPOST)
@@ -241,6 +242,8 @@ $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'projet_task_extrafields as ef ON pt.ro
 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'projet_task_time as ptt ON pt.rowid = ptt.fk_task';
 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'societe as s ON p.fk_soc = s.rowid';
 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture as f ON ptt.invoice_id = f.rowid';
+$sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'element_element as ee on ( ee.sourcetype = "doliproject_timesheet" AND ee.targettype = "project_task_time" AND ee.fk_target = ptt.rowid)';
+$sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'doliproject_timesheet as ts ON ee.fk_source = ts.rowid';
 
 // Add table from hooks
 $parameters = array();
@@ -266,7 +269,8 @@ foreach ($search as $key => $val) {
 	if ($key == 'projectref' && !empty($val)) $sql .= ' AND p.rowid=' . (int)$val;
 	if ($key == 'taskid' && !empty($val)) $sql .= ' AND pt.rowid=' . (int)$val;
 	if ($key == 'fk_user' && !empty($val)) $sql .= ' AND ptt.fk_user=' . (int)$val;
-
+	if ($key == 'invoice_id' && !empty($val)) $sql .= ' AND ptt.invoice_id=' . (int)$val;
+	if ($key == 'timesheetid' && !empty($val)) $sql .= ' AND ts.rowid=' . (int)$val;
 }
 
 if (!empty($conf->categorie->enabled)) {
@@ -427,7 +431,7 @@ foreach ($arrayfields as $key => $val) {
 	}
 	if (!empty($arrayfields[$key]['checked'])) {
 		print '<td class="liste_titre' . ($cssforfield ? ' ' . $cssforfield : '') . '">';
-		if (in_array($val['fieldalias'], array('socid','projectref', 'fk_user','taskid'))) {
+		if (in_array($val['fieldalias'], array('socid','projectref', 'fk_user','taskid', 'invoice_id', 'timesheetid'))) {
 			print $form->selectForForms($val['type'], 'search_' . $keysearch, $search[$keysearch], 1, '', '', $morecss);
 		} elseif (preg_match('/^(date|timestamp|datetime)/', $val['type'])) {
 			print '<div class="nowrap">';
@@ -518,7 +522,7 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 
 			if (!empty($arrayfields[$key]['checked'])) {
 				print '<td' . ($cssforfield ? ' class="' . $cssforfield . '"' : '') . '>';
-				if (in_array($val['fieldalias'], array('socid', 'projectref', 'fk_user', 'taskid', 'invoice_id'))) {
+				if (in_array($val['fieldalias'], array('socid', 'projectref', 'fk_user', 'taskid', 'invoice_id', 'timesheetid'))) {
 					$InfoFieldList = explode(':', $val['type']);
 					$classname = $InfoFieldList[0];
 					$classpath = $InfoFieldList[1];

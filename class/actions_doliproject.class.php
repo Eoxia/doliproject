@@ -875,4 +875,62 @@ class ActionsDoliproject
 			}
 		}
 	}
+
+	public function printFieldListOption($parameters) {
+		if (in_array($parameters['currentcontext'], array('projecttasktime'))) {
+			global $langs;
+
+			$parameters['arrayfields']['fk_timesheet'] = array(
+				'label' => $langs->trans('TimeSheet'),
+				'checked' => 1,
+				'enabled' => 1
+			);
+
+			if (!empty($parameters['arrayfields']['fk_timesheet']['checked'])) {
+				print '<td class="liste_titre"></td>';
+			}
+		}
+	}
+
+	public function printFieldListTitle($parameters) {
+		if (in_array($parameters['currentcontext'], array('projecttasktime'))) {
+			global $langs;
+
+			$parameters['arrayfields']['fk_timesheet'] = array(
+				'label' => $langs->trans('TimeSheet'),
+				'checked' => 1,
+				'enabled' => 1
+			);
+
+			if (!empty($parameters['arrayfields']['fk_timesheet']['checked'])) {
+				print_liste_field_titre($parameters['arrayfields']['fk_timesheet']['label'], $_SERVER['PHP_SELF'], 'fk_timesheet', '', $parameters['param'], '', $parameters['sortfield'], $parameters['sortorder'], 'center ');
+			}
+		}
+	}
+
+	public function printFieldListValue($parameters) {
+		if (in_array($parameters['currentcontext'], array('projecttasktime'))) {
+			global $langs;
+
+			require_once DOL_DOCUMENT_ROOT . '/projet/class/task.class.php';
+
+			$task = new Task($this->db);
+
+			$parameters['arrayfields']['fk_timesheet'] = array(
+				'label' => $langs->trans('TimeSheet'),
+				'checked' => 1,
+				'enabled' => 1
+			);
+
+			if (!empty($parameters['arrayfields']['fk_timesheet']['checked'])) {
+				print '<td class="center">';
+				$task->fetchObjectLinked(null, '', $parameters['obj']->rowid, 'project_task_time');
+				if (isset($task->linkedObjects['doliproject_timesheet'])) {
+					$timesheet = (reset($task->linkedObjects['doliproject_timesheet']));
+					print $timesheet->getNomUrl(1);
+				}
+				print '</td>';
+			}
+		}
+	}
 }
