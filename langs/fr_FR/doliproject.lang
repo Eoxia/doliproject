@@ -112,7 +112,7 @@ DoliProjectNewTimeSpent = Temps consommé (en minutes)
 DivideTimeIntoTasks = Répartir entre les tâches du projet
 ShowOnlyFavoriteTasks = Afficher uniquement les tâches favorites
 SpendMoreTimeThanPlanned = Pointer plus de temps que planifié
-SpendMoreTimeThanPlannedHelp = Cette option permet de pointer plus de temps que le temps renseigné dans l'onglet "Horaires" de l'utilisateur
+SpendMoreTimeThanPlannedDescription = Cette option permet de pointer plus de temps que le temps renseigné dans l'onglet "Horaires" de l'utilisateur
 ConsumedTime = Temps pointé
 ExpectedWorkedHoursMonth = Heures de travail prévues au mois de %s
 SpentWorkedHoursMonth = Heures de travail passées du %s au %s
@@ -220,6 +220,7 @@ TimeSpentDiff = Attention, tu as consommé trop d'heures de travail du %s au %s 
 GoToTimeSpent = Aller sur le pointage de  temps du mois de %s
 ExpectedWorkedDayMonth = Nombre de jours ouvrés :
 ErrorLinkedElementTimeSheetTimeSpent = Erreur liens entre navette et temps consommé <br> il existe déjà une navette lié au temps consommé affecté à l'utilisateur %s sur la période de %s au %s
+ConsumedWorkedDayMonth = Nombre de jour pointés : 
 
 # Data - Donnée
 TimeSheet = Navette

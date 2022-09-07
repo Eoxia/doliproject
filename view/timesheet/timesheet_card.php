@@ -631,10 +631,14 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			$currentDay = 'workinghours_' . strtolower($currentDay);
 			$workinghoursMonth += $workinghoursArray->{$currentDay} / 60;
 			$nbworkinghoursMonth++;
+			if ($totalforvisibletasks[$dayinloopfromfirstdaytoshow] > 0) {
+				$nbconsumedworkinghoursMonth++;
+			}
 		}
 	}
 	print '<span class="opacitymediumbycolor">  - ' . $langs->trans("ExpectedWorkedHoursMonth", dol_print_date(dol_mktime(0, 0, 0, $datestart['mon'], $datestart['mday'], $datestart['year']), "%B %Y")) . ' : <strong><a href="' . DOL_URL_ROOT . '/custom/doliproject/view/workinghours_card.php?id=' . $object->fk_user_assign . '" target="_blank">' . price($workinghoursMonth, 1, $langs, 0, 0) . '</a></strong>';
 	print '<span>' . ' - ' . $langs->trans("ExpectedWorkedDayMonth") . ' <strong>' . $nbworkinghoursMonth . '</strong></span>';
+	print '<span>' . ' - ' . $langs->trans("ConsumedWorkedDayMonth") . ' <strong>' . $nbconsumedworkinghoursMonth . '</strong></span>';
 	print '</span>';
 	print '</td></tr>';
 	print '<tr class="liste_total"><td class="liste_total">';
