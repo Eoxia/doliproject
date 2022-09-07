@@ -1,6 +1,5 @@
 <?php
-/* Copyright (C) 2004-2017 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2020 SuperAdmin
+/* Copyright (C) 2022 EOXIA <dev@eoxia.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +16,9 @@
  */
 
 /**
- * \file    doliproject/admin/about.php
+ * \file    admin/about.php
  * \ingroup doliproject
- * \brief   About page of module Doliproject.
+ * \brief   About page of module DoliProject.
  */
 
 // Load Dolibarr environment
@@ -37,51 +36,43 @@ if (!$res && file_exists("../../../main.inc.php")) $res = @include "../../../mai
 if (!$res) die("Include of main fails");
 
 // Libraries
-require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
-require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once '../lib/doliproject.lib.php';
+require_once '../core/modules/modDoliproject.class.php';
+
+// Global variables definitions
+global $db, $langs, $user;
 
 // Translations
 $langs->loadLangs(array("errors", "admin", "doliproject@doliproject"));
 
+// Initialize objects
+// Technical objets
+$modDoliproject = new modDoliproject($db);
+
 // Access control
 if (!$user->admin) accessforbidden();
-
-// Parameters
-$action = GETPOST('action', 'alpha');
-$backtopage = GETPOST('backtopage', 'alpha');
-
-
-/*
- * Actions
- */
-
-// None
-
 
 /*
  * View
  */
 
-$form = new Form($db);
+$help_url = 'FR:Module_DoliProject';
+$title    = $langs->trans("DoliProjectAbout");
+$morejs   = array("/doliproject/js/doliproject.js.php");
+$morecss  = array("/doliproject/css/doliproject.css");
 
-$morejs = array("/doliproject/js/doliproject.js.php");
-
-$page_name = "DoliprojectAbout";
-llxHeader('', $langs->trans($page_name), '', '', 0, 0, $morejs);
+llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss);
 
 // Subheader
-$linkback = '<a href="'.($backtopage ? $backtopage : DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
+$linkback = '<a href="'.DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1'.'">'.$langs->trans("BackToModuleList").'</a>';
 
-print load_fiche_titre($langs->trans($page_name), $linkback, 'object_doliproject@doliproject');
+print load_fiche_titre($title, $linkback, 'object_doliproject@doliproject');
 
 // Configuration header
 $head = doliprojectAdminPrepareHead();
 print dol_get_fiche_head($head, 'about', '', 0, 'doliproject@doliproject');
 
-dol_include_once('/doliproject/core/modules/modDoliproject.class.php');
-$tmpmodule = new modDoliproject($db);
-print $tmpmodule->getDescLong();
+print $modDoliproject->getDescLong();
 
 // Page end
 print dol_get_fiche_end();

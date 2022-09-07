@@ -1,6 +1,5 @@
 <?php
-/* Copyright (C) 2004-2017 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2020 SuperAdmin
+/* Copyright (C) 2022 EOXIA <dev@eoxia.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +16,9 @@
  */
 
 /**
- * \file    doliproject/admin/about.php
+ * \file    admin/project.php
  * \ingroup doliproject
- * \brief   About page of module Doliproject.
+ * \brief   DoliProject project/task config page.
  */
 
 // Load Dolibarr environment
@@ -44,32 +43,37 @@ require_once DOL_DOCUMENT_ROOT . "/core/class/html.formprojet.class.php";
 
 require_once '../lib/doliproject.lib.php';
 
+// Global variables definitions
+global $conf, $db, $langs, $user;
+
 // Translations
 $langs->loadLangs(array("errors", "admin", "doliproject@doliproject"));
 
-// Access control
-if (!$user->admin) accessforbidden();
-
 // Parameters
-$action = GETPOST('action', 'alpha');
+$action     = GETPOST('action', 'alpha');
 $backtopage = GETPOST('backtopage', 'alpha');
 
+// Initialize objects
+// View objets
+$form        = new Form($db);
+$formother   = new FormOther($db);
+$formproject = new FormProjets($db);
+
+// Access control
+if (!$user->admin) accessforbidden();
 
 /*
  * Actions
  */
 
-if (($action == 'update' && ! GETPOST("cancel", 'alpha')) || ($action == 'updateedit')) {
+if ($action == 'update') {
 	$HRProject = GETPOST('HRProject', 'none');
-	$HRProject = preg_split('/_/', $HRProject);
+	$HRProject = explode('_', $HRProject);
 
 	dolibarr_set_const($db, "DOLIPROJECT_HR_PROJECT", $HRProject[0], 'integer', 0, '', $conf->entity);
 	setEventMessages($langs->transnoentities('TicketProjectUpdated'), array());
-
-	if ($action != 'updateedit' && ! $error) {
-		header("Location: " . $_SERVER["PHP_SELF"]);
-		exit;
-	}
+	header("Location: " . $_SERVER["PHP_SELF"]);
+	exit;
 }
 
 if ($action == 'updateThemeColor') {
@@ -99,32 +103,29 @@ if ($action == 'updateThemeColor') {
  * View
  */
 
-$form = new Form($db);
-$formother = new FormOther($db);
-if ( ! empty($conf->projet->enabled)) { $formproject = new FormProjets($db); }
+$help_url = 'FR:Module_DoliProject';
+$title    = $langs->trans("ProjectsAndTasks");
+$morejs   = array("/doliproject/js/doliproject.js.php");
+$morecss  = array("/doliproject/css/doliproject.css");
 
-$morejs = array("/doliproject/js/doliproject.js.php");
-
-$page_name = "DoliprojectAbout";
-llxHeader('', $langs->trans($page_name), '', '', 0, 0, $morejs);
+llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss);
 
 // Subheader
-$linkback = '<a href="'.($backtopage ? $backtopage : DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
+$linkback = '<a href="'.DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1'.'">'.$langs->trans("BackToModuleList").'</a>';
 
-print load_fiche_titre($langs->trans($page_name), $linkback, 'object_doliproject@doliproject');
+print load_fiche_titre($title, $linkback, 'object_doliproject@doliproject');
 
 // Configuration header
 $head = doliprojectAdminPrepareHead();
-dol_fiche_head($head, 'projecttasks', '', -1, 'doliproject@doliproject');
-dol_get_fiche_head($head, 'projecttasks', '', -1, 'doliproject@doliproject');
+print dol_get_fiche_head($head, 'projecttasks', '', -1, 'doliproject@doliproject');
 
 // Project
-print load_fiche_titre($langs->transnoentities("HRProject"), '', '');
+print load_fiche_titre($langs->transnoentities("HRProject"), '', 'project');
 
 print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '" name="project_form">';
 print '<input type="hidden" name="token" value="' . newToken() . '">';
 print '<input type="hidden" name="action" value="update">';
-print '<table class="noborder centpercent editmode">';
+print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td>' . $langs->transnoentities("Name") . '</td>';
 print '<td>' . $langs->transnoentities("SelectProject") . '</td>';
@@ -133,8 +134,8 @@ print '</tr>';
 
 if ( ! empty($conf->projet->enabled)) {
 	$langs->load("projects");
-	print '<tr class="oddeven"><td><label for="TSProject">' . $langs->transnoentities("HRProject") . '</label></td><td>';
-	$numprojet = $formproject->select_projects(0,  $conf->global->DOLIPROJECT_HR_PROJECT, 'HRProject', 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'maxwidth500');
+	print '<tr class="oddeven"><td><label for="HRProject">' . $langs->transnoentities("HRProject") . '</label></td><td>';
+	$formproject->select_projects(0,  (GETPOST('projectid')) ? GETPOST('projectid') : $conf->global->DOLIPROJECT_HR_PROJECT, 'HRProject', 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'maxwidth500');
 	print ' <a href="' . DOL_URL_ROOT . '/projet/card.php?&action=create&status=1&backtopage=' . urlencode($_SERVER["PHP_SELF"] . '?action=create') . '"><span class="fa fa-plus-circle valignmiddle" title="' . $langs->transnoentities("AddProject") . '"></span></a>';
 	print '<td><input type="submit" class="button" name="save" value="' . $langs->transnoentities("Save") . '">';
 	print '</td></tr>';
@@ -144,42 +145,39 @@ print '</table>';
 print '</form>';
 
 //Time spent
-print load_fiche_titre($langs->transnoentities("TimeSpent"), '', '');
+print load_fiche_titre($langs->transnoentities("TimeSpent"), '', 'clock');
 
-print '<table class="noborder centpercent editmode">';
+print '<table class="noborder centpercent">';
 
 print '<tr class="liste_titre">';
 print '<td>' . $langs->transnoentities("Parameters") . '</td>';
+print '<td>' . $langs->transnoentities("Description") . '</td>';
 print '<td class="center">' . $langs->transnoentities("Status") . '</td>';
-print '<td class="center">' . $langs->transnoentities("Action") . '</td>';
-print '<td class="center">' . $langs->transnoentities("ShortInfo") . '</td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>' . $langs->transnoentities("SpendMoreTimeThanPlanned") . '</td>';
+print '<tr class="oddeven"><td>';
+print $langs->transnoentities("SpendMoreTimeThanPlanned");
+print '</td><td>';
+print $langs->transnoentities("SpendMoreTimeThanPlannedDescription");
+print '</td>';
 print '<td class="center">';
 print ajax_constantonoff('DOLIPROJECT_SPEND_MORE_TIME_THAN_PLANNED');
-print '</td>';
-print '<td class="center">';
-print '';
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("SpendMoreTimeThanPlannedHelp"), 1, 'help');
 print '</td>';
 print '</tr>';
 
 print '</table>';
 
-//Theme dasboard time spent
-print load_fiche_titre($langs->transnoentities("ThemeDashboardTimeSpent"), '', '');
+//Theme dashboard time spent
+print load_fiche_titre($langs->transnoentities("ThemeDashboardTimeSpent"), '', 'clock');
 
 print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '" name="color_form">';
 print '<input type="hidden" name="token" value="' . newToken() . '">';
 print '<input type="hidden" name="action" value="updateThemeColor">';
-print '<table class="noborder centpercent editmode">';
+print '<table class="noborder centpercent">';
 
 print '<tr class="liste_titre">';
 print '<td>' . $langs->transnoentities("Parameters") . '</td>';
-print '<td class="center">' . $langs->transnoentities("Value") . '</td>';
+print '<td>' . $langs->transnoentities("Value") . '</td>';
 print '</tr>';
 
 print '<tr class="oddeven">';
@@ -215,5 +213,6 @@ print '</div>';
 print '</form>';
 
 // Page end
+print dol_get_fiche_end();
 llxFooter();
 $db->close();

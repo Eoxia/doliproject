@@ -40,7 +40,6 @@ if (!$res) die("Include of main fails");
 require_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
 
 require_once '../lib/doliproject.lib.php';
-require_once '../class/timesheet.class.php';
 
 // Global variables definitions
 global $conf, $db, $langs, $user;
@@ -49,18 +48,13 @@ global $conf, $db, $langs, $user;
 $langs->loadLangs(array("admin", "doliproject@doliproject"));
 
 // Get parameters
-$action     = GETPOST('action', 'alpha');
-$backtopage = GETPOST('backtopage', 'alpha');
-$value      = GETPOST('value', 'alpha');
-$type       = GETPOST('type', 'alpha');
-$const 		= GETPOST('const', 'alpha');
-$label 		= GETPOST('label', 'alpha');
-$modele     = GETPOST('module', 'alpha');
+$action = GETPOST('action', 'alpha');
+$value  = GETPOST('value', 'alpha');
+$type   = GETPOST('type', 'alpha');
+$const  = GETPOST('const', 'alpha');
+$label  = GETPOST('label', 'alpha');
 
 // Initialize objects
-// Technical objets
-$timesheet = new TimeSheet($db);
-
 // View objects
 $form = new Form($db);
 
@@ -80,39 +74,6 @@ if ($action == 'set') {
 	header("Location: " . $_SERVER["PHP_SELF"]);
 }
 
-// Generate a specimen PDF
-if ($action == 'specimen') {
-	$timesheet->initAsSpecimen();
-
-	// Search template files
-	$file = ''; $classname = ''; $filefound = 0;
-	$dirmodels = array_merge(array('/'), (array) $conf->modules_parts['models']);
-	foreach ($dirmodels as $reldir) {
-		$file = dol_buildpath('/custom'.$reldir."core/modules/doliproject/timesheetdocument/pdf_".$modele.".modules.php", 0);
-		if (file_exists($file)) {
-			$filefound = 1;
-			$classname = "pdf_".$modele;
-			break;
-		}
-	}
-
-	//Generate specimen file
-	if ($filefound) {
-		require_once $file;
-		$module = new $classname($db);
-		if ($module->write_file($timesheet, $langs) > 0) {
-			header("Location: ".DOL_URL_ROOT."/document.php?modulepart=doliproject&file=SPECIMEN.pdf");
-			return;
-		} else {
-			setEventMessages($timesheet->error, $timesheet->errors, 'errors');
-			dol_syslog($timesheet->error, LOG_ERR);
-		}
-	} else {
-		setEventMessages($langs->trans("ErrorModuleNotFound"), null, 'errors');
-		dol_syslog($langs->trans("ErrorModuleNotFound"), LOG_ERR);
-	}
-}
-
 // Set default model Or set numering module
 if ($action == 'setdoc') {
 	$constforval = "DOLIPROJECT_TIMESHEETDOCUMENT_DEFAULT_MODEL";
@@ -122,7 +83,7 @@ if ($action == 'setdoc') {
 		$conf->global->$constforval = $value;
 	}
 
-	// On active le modele
+	// On active le model
 	$ret = delDocumentModel($value, $type);
 	if ($ret > 0) {
 		$ret = addDocumentModel($value, $type, $label);
@@ -144,7 +105,7 @@ $morecss  = array("/doliproject/css/doliproject.css");
 llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss);
 
 // Subheader
-$linkback = '<a href="'.($backtopage ?: DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
+$linkback = '<a href="'.DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1'.'">'.$langs->trans("BackToModuleList").'</a>';
 
 print load_fiche_titre($title, $linkback, 'doliproject@doliproject');
 
@@ -157,7 +118,7 @@ $types = array(
 );
 
 $pictos = array(
-	'TimeSheetDocument' => '<i class="fas fa-file"></i>'
+	'TimeSheetDocument' => '<i class="fas fa-file"></i> '
 );
 
 foreach ($types as $type => $documentType) {
@@ -215,13 +176,12 @@ foreach ($types as $type => $documentType) {
 								print img_picto($langs->trans("Activated"), 'switch_on');
 							}
 							else {
-								print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setmod&value='.preg_replace('/\.php$/', '', $file).'&const='.$module->scandir.'&label='.urlencode($module->name).'" alt="'.$langs->trans("Default").'">'.img_picto($langs->trans("Disabled"), 'switch_off').'</a>';
+								print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setmod&value='.preg_replace('/\.php$/', '', $file).'&const='.$module->scandir.'&label='.urlencode($module->name).'">'.img_picto($langs->trans("Disabled"), 'switch_off').'</a>';
 							}
 							print '</td>';
 
-							// Example for listing risks action
-							$htmltooltip = '';
-							$htmltooltip .= ''.$langs->trans("Version").': <b>'.$module->getVersion().'</b><br>';
+							// Example for timesheet
+							$htmltooltip = '' . $langs->trans("Version") . ': <b>' . $module->getVersion() . '</b><br>';
 							$nextval = $module->getNextValue($module);
 							if ("$nextval" != $langs->trans("NotAvailable")) {  // Keep " on nextval
 								$htmltooltip .= $langs->trans("NextValue").': ';
@@ -250,12 +210,12 @@ foreach ($types as $type => $documentType) {
 	}
 
 	/*
-	*  Documents models for Listing Risks Action
+	*  Documents models for TimeSheet
 	*/
 	$trad = "DoliProjectTemplateDocument" . $type;
 	print load_fiche_titre($langs->trans($trad), '', '');
 
-	// Defini tableau def des modeles
+	// Define models table
 	$def = array();
 	$sql = "SELECT nom";
 	$sql .= " FROM ".MAIN_DB_PREFIX."document_model";
@@ -265,15 +225,13 @@ foreach ($types as $type => $documentType) {
 	if ($resql) {
 		$i = 0;
 		$num_rows = $db->num_rows($resql);
-		while ($i < $num_rows)
-		{
+		while ($i < $num_rows) {
 			$array = $db->fetch_array($resql);
-			array_push($def, $array[0]);
+			$def[] = $array[0];
 			$i++;
 		}
 	}
-	else
-	{
+	else {
 		dol_print_error($db);
 	}
 
@@ -307,66 +265,56 @@ foreach ($types as $type => $documentType) {
 						require_once $dir.'/'.$file;
 						$module = new $classname($db);
 
+						print '<tr class="oddeven"><td>';
+						print (empty($module->name) ? $name : $module->name);
+						print "</td><td>";
+						if (method_exists($module, 'info')) print $module->info($langs);
+						else print $module->description;
+						print '</td>';
 
-						$modulequalified = 1;
-						if ($module->version == 'development' && $conf->global->MAIN_FEATURES_LEVEL < 2) $modulequalified = 0;
-						if ($module->version == 'experimental' && $conf->global->MAIN_FEATURES_LEVEL < 1) $modulequalified = 0;
-
-						if ($modulequalified) {
-							print '<tr class="oddeven"><td>';
-							print (empty($module->name) ? $name : $module->name);
-							print "</td><td>";
-							if (method_exists($module, 'info')) print $module->info($langs);
-							else print $module->description;
-							print '</td>';
-
-							// Active
-							if (in_array($name, $def)) {
-								print '<td class="center">';
-								print '<a href="'.$_SERVER["PHP_SELF"].'?action=del&amp;value='.$name.'&amp;const='.$module->scandir.'&amp;label='.urlencode($module->name).'&type='.preg_split('/_/',$documentType)[0].'">';
-								print img_picto($langs->trans("Enabled"), 'switch_on');
-								print '</a>';
-								print "</td>";
-							}
-							else
-							{
-								print '<td class="center">';
-								print '<a href="'.$_SERVER["PHP_SELF"].'?action=set&amp;value='.$name.'&amp;const='.$module->scandir.'&amp;label='.urlencode($module->name).'&type='.preg_split('/_/',$documentType)[0].'">'.img_picto($langs->trans("Disabled"), 'switch_off').'</a>';
-								print "</td>";
-							}
-
-							// Default
-							print '<td class="center">';
-							$defaultModelConf = 'DOLIPROJECT_' . strtoupper($documentType) . '_DEFAULT_MODEL';
-							if ($conf->global->$defaultModelConf == $name) {
-								print img_picto($langs->trans("Default"), 'on');
-							}
-							else {
-								print '<a href="'.$_SERVER["PHP_SELF"].'?action=setdoc&amp;value='.$name.'&amp;const='.$module->scandir.'&amp;label='.urlencode($module->name).'" alt="'.$langs->trans("Default").'">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
-							}
-							print '</td>';
-
-							// Info
-							$htmltooltip = ''.$langs->trans("Name").': '.$module->name;
-							$htmltooltip .= '<br>'.$langs->trans("Type").': '.($module->type ? $module->type : $langs->trans("Unknown"));
-							$htmltooltip .= '<br>'.$langs->trans("Width").'/'.$langs->trans("Height").': '.$module->page_largeur.'/'.$module->page_hauteur;
-							$htmltooltip .= '<br><br><u>'.$langs->trans("FeaturesSupported").':</u>';
-							$htmltooltip .= '<br>'.$langs->trans("Logo").': '.yn($module->option_logo, 1, 1);
-							print '<td class="center">';
-							print $form->textwithpicto('', $htmltooltip, -1, 0);
-							print '</td>';
-
-							// Preview
-							print '<td class="center">';
-							if ($module->type == 'pdf') {
-								print '<a href="'.$_SERVER["PHP_SELF"].'?action=specimen&module='.$name.'">'.img_object($langs->trans("Preview"), 'pdf').'</a>';
-							}
-							else {
-								print img_object($langs->trans("PreviewNotAvailable"), 'generic');
-							}
-							print '</td>';
-							print '</tr>';
+						// Active
+						print '<td class="center">';
+						if (in_array($name, $def)) {
+							print '<a href="'.$_SERVER["PHP_SELF"].'?action=del&value='.$name.'&const='.$module->scandir.'&label='.urlencode($module->name).'&type='. explode('_', $documentType)[0].'">';
+							print img_picto($langs->trans("Enabled"), 'switch_on');
+							print '</a>';
 						}
+						else {
+							print '<a href="'.$_SERVER["PHP_SELF"].'?action=set&value='.$name.'&const='.$module->scandir.'&label='.urlencode($module->name).'&type='. explode('_', $documentType)[0].'">'.img_picto($langs->trans("Disabled"), 'switch_off').'</a>';
+						}
+						print "</td>";
+
+						// Default
+						print '<td class="center">';
+						$defaultModelConf = 'DOLIPROJECT_' . strtoupper($documentType) . '_DEFAULT_MODEL';
+						if ($conf->global->$defaultModelConf == $name) {
+							print img_picto($langs->trans("Default"), 'on');
+						}
+						else {
+							print '<a href="'.$_SERVER["PHP_SELF"].'?action=setdoc&value='.$name.'&const='.$module->scandir.'&label='.urlencode($module->name).'">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+						}
+						print '</td>';
+
+						// Info
+						$htmltooltip = ''.$langs->trans("Name").': '.$module->name;
+						$htmltooltip .= '<br>'.$langs->trans("Type").': '.($module->type ?: $langs->trans("Unknown"));
+						$htmltooltip .= '<br>'.$langs->trans("Width").'/'.$langs->trans("Height").': '.$module->page_largeur.'/'.$module->page_hauteur;
+						$htmltooltip .= '<br><br><u>'.$langs->trans("FeaturesSupported").':</u>';
+						$htmltooltip .= '<br>'.$langs->trans("Logo").': '.yn($module->option_logo, 1, 1);
+						print '<td class="center">';
+						print $form->textwithpicto('', $htmltooltip, -1, 0);
+						print '</td>';
+
+						// Preview
+						print '<td class="center">';
+						if ($module->type == 'pdf') {
+							print '<a href="'.$_SERVER["PHP_SELF"].'?action=specimen&module='.$name.'">'.img_object($langs->trans("Preview"), 'pdf').'</a>';
+						}
+						else {
+							print img_object($langs->trans("PreviewNotAvailable"), 'generic');
+						}
+						print '</td>';
+						print '</tr>';
 					}
 				}
 			}
