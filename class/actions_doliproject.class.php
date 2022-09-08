@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2020 SuperAdmin
+/* Copyright (C) 2022 EOXIA <dev@eoxia.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,9 @@
  */
 
 /**
- * \file    doliproject/class/actions_doliproject.class.php
+ * \file    class/actions_doliproject.class.php
  * \ingroup doliproject
- * \brief   Example hook overload.
- *
- * Put detailed description here.
+ * \brief   DoliProject hook overload.
  */
 
 /**
@@ -31,72 +29,51 @@ class ActionsDoliproject
 	/**
 	 * @var DoliDB Database handler.
 	 */
-	public $db;
+	public DoliDB $db;
 
 	/**
 	 * @var string Error code (or message)
 	 */
-	public $error = '';
+	public string $error = '';
 
 	/**
 	 * @var array Errors
 	 */
-	public $errors = array();
-
+	public array $errors = array();
 
 	/**
 	 * @var array Hook results. Propagated to $hookmanager->resArray for later reuse
 	 */
-	public $results = array();
+	public array $results = array();
 
 	/**
 	 * @var string String displayed by executeHook() immediately after return
 	 */
-	public $resprints;
-
+	public string $resprints;
 
 	/**
 	 * Constructor
 	 *
-	 *  @param		DoliDB		$db      Database handler
+	 *  @param DoliDB $db Database handler
 	 */
-	public function __construct($db)
+	public function __construct(DoliDB $db)
 	{
 		$this->db = $db;
-	}
-
-
-	/**
-	 * Execute action
-	 *
-	 * @param	array			$parameters		Array of parameters
-	 * @param	CommonObject    $object         The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
-	 * @param	string			$action      	'add', 'update', 'view'
-	 * @return	int         					<0 if KO,
-	 *                           				=0 if OK but we want to process standard actions too,
-	 *                            				>0 if OK and we want to replace standard actions.
-	 */
-	public function getNomUrl($parameters, &$object, &$action)
-	{
-		global $db, $langs, $conf, $user;
-		$this->resprints = '';
-		return 0;
 	}
 
 	/**
 	 * Overloading the doActions function : replacing the parent's function with the one below
 	 *
-	 * @param   array           $parameters     Hook metadatas (context, etc...)
-	 * @param   CommonObject    $object         The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
-	 * @param   string          $action         Current action (if set). Generally create or edit or null
-	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
-	 * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
+	 * @param  array  $parameters Hook metadata (context, etc...)
+	 * @param  object $object     The object to process
+	 * @param  string $action     Current action (if set). Generally create or edit or null
+	 * @return int                0 < on error, 0 on success, 1 to replace standard code
 	 */
-	public function doActions($parameters, &$object, &$action, $hookmanager)
+	public function doActions(array $parameters, object $object, string $action): int
 	{
 		require_once DOL_DOCUMENT_ROOT.'/core/modules/project/task/mod_task_simple.php';
 
-		global $conf, $user, $langs;
+		global $langs;
 
 		$error = 0; // Error counter
 
@@ -341,15 +318,22 @@ class ActionsDoliproject
 		}
 	}
 
-	public function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager)
+	/**
+	 * Overloading the addMoreActionsButtons function : replacing the parent's function with the one below
+	 *
+	 * @param  array  $parameters Hook metadata (context, etc...)
+	 * @param  object $object     The object to process
+	 * @return int                0 < on error, 0 on success, 1 to replace standard code
+	 */
+	public function addMoreActionsButtons(array $parameters, object $object): int
 	{
-		global $conf, $user, $langs;
+		global $langs;
 
 		$error = 0; // Error counter
 
 		if (in_array('invoicecard', explode(':', $parameters['context'])))
 		{
-			//Creation of the link that will be send
+			//Creation of the link that will be sendid
 			if ( isset( $_SERVER['HTTPS'] ) ) {
 				if ( $_SERVER['HTTPS'] == 'on' ) {
 				$server_protocol = 'https';
@@ -483,34 +467,37 @@ class ActionsDoliproject
 		}
 	}
 
-	public function printCommonFooter($parameters, &$object, &$action, $hookmanager)
+	/**
+	 * Overloading the printCommonFooter function : replacing the parent's function with the one below
+	 *
+	 * @param  array     $parameters Hook metadata (context, etc...)
+	 * @throws Exception
+	 */
+	public function printCommonFooter(array $parameters)
 	{
 		global $conf, $user, $langs;
 		$langs->load('projects');
-		if (in_array('ticketcard', explode(':', $parameters['context'])))
-		{
+		if (in_array('ticketcard', explode(':', $parameters['context']))) {
 			if (GETPOST('action') == 'presend_addmessage') {
 				$ticket = new Ticket($this->db);
 				$result = $ticket->fetch('',GETPOST('ref','alpha'),GETPOST('track_id','alpha'));
 				dol_syslog(var_export($ticket, true), LOG_DEBUG);
-				if ($result > 0 && ((int)$ticket->id) > 0) {
-					if ( is_array($ticket->array_options) && array_key_exists('options_fk_task',$ticket->array_options) && $ticket->array_options['options_fk_task']>0) {
-					?>
-					<script>
-						let InputTime = document.createElement("input");
-						InputTime.id = "timespent";
-						InputTime.name = "timespent";
-						InputTime.type = "number";
-						InputTime.value = <?php echo (!empty($conf->global->DOLIPROJECT_DEFAUT_TICKET_TIME)?$conf->global->DOLIPROJECT_DEFAUT_TICKET_TIME:0); ?>;
-						let $tr = $('<tr>');
-						$tr.append($('<td>').append('<?php echo $langs->trans('DoliProjectNewTimeSpent');?>'));
-						$tr.append($('<td>').append(InputTime));
+				if ($result > 0 && ($ticket->id) > 0) {
+					if ( is_array($ticket->array_options) && array_key_exists('options_fk_task',$ticket->array_options) && $ticket->array_options['options_fk_task']>0) { ?>
+						<script>
+							let InputTime = document.createElement("input");
+							InputTime.id = "timespent";
+							InputTime.name = "timespent";
+							InputTime.type = "number";
+							InputTime.value = <?php echo (!empty($conf->global->DOLIPROJECT_DEFAUT_TICKET_TIME)?$conf->global->DOLIPROJECT_DEFAUT_TICKET_TIME:0); ?>;
+							let $tr = $('<tr>');
+							$tr.append($('<td>').append('<?php echo $langs->trans('DoliProjectNewTimeSpent');?>'));
+							$tr.append($('<td>').append(InputTime));
 
-						let currElement = $("form[name='ticket'] > table tbody");
-						currElement.append($tr);
-					</script>
-					<?php
-					} else {
+							let currElement = $("form[name='ticket'] > table tbody");
+							currElement.append($tr);
+						</script>
+					<?php } else {
 						setEventMessage($langs->trans('MessageNoTaskLink'),'warnings');
 					}
 				} else {
@@ -520,8 +507,8 @@ class ActionsDoliproject
 			}  else if ((GETPOST('action') == '' || empty(GETPOST('action')) || GETPOST('action') == 'view')) {
 				require_once __DIR__ . '/../../../projet/class/task.class.php';
 
-				$task           = new Task($this->db);
-				$ticket         = new Ticket($this->db);
+				$task   = new Task($this->db);
+				$ticket = new Ticket($this->db);
 
 				$ticket->fetch(GETPOST('id'));
 				$ticket->fetch_optionals();
@@ -533,31 +520,6 @@ class ActionsDoliproject
 				if (!empty($task_id) && $task_id > 0) { ?>
 					<script>
 						jQuery('#ticket_extras_fk_task_<?php echo $ticket->id ?>').html(<?php echo json_encode($task->getNomUrl(1, 'blank', 'task', 1)) ?>);
-					</script>
-				<?php }
-			} else if (GETPOST('action') == 'edit_extras') {
-				require_once __DIR__ . '/../../../projet/class/task.class.php';
-
-				$task           = new Task($this->db);
-				$ticket         = new Ticket($this->db);
-
-				$ticket->fetch(GETPOST('id'));
-				$ticket->fetch_optionals();
-
-				$alltasks = $task->getTasksArray(null, null, $ticket->fk_project);
-				if (is_array($alltasks) && !empty($alltasks)) {
-					foreach ($alltasks as $tasksingle) {
-						$taskArray[$tasksingle->id] = $tasksingle->ref . ' - ' . $tasksingle->label;
-					}
-				}
-
-				if (is_array($taskArray) && !empty($taskArray)) { ?>
-					<script>
-						var options = $('#options_fk_task option');
-
-						var values = $.map(options ,function(option) {
-							return option.text(<?php echo $taskArray ?>);
-						});
 					</script>
 				<?php }
 			}
@@ -583,13 +545,14 @@ class ActionsDoliproject
 						type: "POST",
 						processData: false,
 						contentType: false,
-						success: function ( resp ) {
-							if ($('.toggleTaskFavorite').hasClass('fas')) {
-								$('.toggleTaskFavorite').removeClass('fas')
-								$('.toggleTaskFavorite').addClass('far')
-							} else if ($('.toggleTaskFavorite').hasClass('far')) {
-								$('.toggleTaskFavorite').removeClass('far')
-								$('.toggleTaskFavorite').addClass('fas')
+						success: function() {
+							let element = $('.toggleTaskFavorite');
+							if (element.hasClass('fas')) {
+								element.removeClass('fas')
+								element.addClass('far')
+							} else if (element.hasClass('far')) {
+								element.removeClass('far')
+								element.addClass('fas')
 							}
 						},
 						error: function ( resp ) {
@@ -597,19 +560,21 @@ class ActionsDoliproject
 						}
 					});
 				}
-				jQuery('.fas.fa-tasks').closest('.tabBar').find('.marginbottomonly.refid').html(<?php echo json_encode($favoriteStar) ?> + jQuery('.fas.fa-tasks').closest('.tabBar').find('.marginbottomonly.refid').html());
+				let element = jQuery('.fas.fa-tasks');
+				element.closest('.tabBar').find('.marginbottomonly.refid').html(<?php echo json_encode($favoriteStar) ?> + element.closest('.tabBar').find('.marginbottomonly.refid').html());
 			</script>
 			<?php
 		}
-		if (in_array($parameters['currentcontext'], array('projecttaskscard'))) {
+		if ($parameters['currentcontext'] == 'projecttaskscard') {
 			global $db;
+
 			require_once __DIR__ . '/../lib/doliproject_function.lib.php';
 
 			$task = new Task($db);
+
 			$tasksarray = $task->getTasksArray(0, 0, GETPOST('id'));
 			if (is_array($tasksarray) && !empty($tasksarray)) {
 				foreach ($tasksarray as $linked_task) {
-
 					if (isTaskFavorite($linked_task->id, $user->id)) {
 						$favoriteStar = '<span class="fas fa-star toggleTaskFavorite" id="'. $linked_task->id .'" onclick="toggleTaskFavoriteWithId(this.id)"></span>';
 					} else {
@@ -617,22 +582,24 @@ class ActionsDoliproject
 					}
 					?>
 					<script>
-						jQuery('#row-'+<?php echo json_encode($linked_task->id) ?>).find('.nowraponall').html(jQuery('#row-'+<?php echo json_encode($linked_task->id) ?>).find('.nowraponall').html()  + ' ' + <?php echo json_encode($favoriteStar) ?>  )
+						let element = jQuery('#row-'+<?php echo json_encode($linked_task->id) ?>);
+						element.find('.nowraponall').html(element.find('.nowraponall').html()  + ' ' + <?php echo json_encode($favoriteStar) ?>)
 					</script>
 					<?php
 				}
 			}
 		}
-		if (in_array($parameters['currentcontext'], array('tasklist'))) {
+		if ($parameters['currentcontext'] == 'tasklist') {
 			global $db;
+
 			require_once __DIR__ . '/../lib/doliproject_function.lib.php';
 
 			$task = new Task($db);
+
 			$tasksarray = $task->getTasksArray(0, 0, GETPOST('id'));
 
 			if (is_array($tasksarray) && !empty($tasksarray)) {
 				foreach ($tasksarray as $linked_task) {
-
 					if (isTaskFavorite($linked_task->id, $user->id)) {
 						$favoriteStar = '<span class="fas fa-star toggleTaskFavorite" id="'. $linked_task->id .'" onclick="toggleTaskFavoriteWithId(this.id)"></span>';
 					} else {
@@ -640,20 +607,19 @@ class ActionsDoliproject
 					}
 					?>
 					<script>
-						console.log('oui')
 						if (typeof taskId == null) {
-							let taskId = <?php echo json_encode($linked_task->id); ?>
+							<?php echo json_encode($linked_task->id); ?>
 						} else {
 							taskId = <?php echo json_encode($linked_task->id); ?>
 						}
-						jQuery("tr[data-rowid="+taskId+"] .nowraponall:not(.tdoverflowmax150)").html(jQuery("tr[data-rowid="+taskId+"] .nowraponall:not(.tdoverflowmax150)").html()  + ' ' + <?php echo json_encode($favoriteStar) ?>  )
-
+						let element = jQuery("tr[data-rowid="+taskId+"] .nowraponall:not(.tdoverflowmax150)");
+						element.html(element.html()  + ' ' + <?php echo json_encode($favoriteStar) ?>)
 					</script>
 					<?php
 				}
 			}
 		}
-		if (in_array($parameters['currentcontext'], array('invoicereccard'))) {
+		if ($parameters['currentcontext'] == 'invoicereccard') {
 			if (GETPOST('action') == 'create') {
 				require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 
@@ -672,7 +638,7 @@ class ActionsDoliproject
 				<?php }
 			}
 		}
-		if (preg_match('/categoryindex/', $parameters['context'])) {	    // do something only for the context 'somecontext1' or 'somecontext2'
+		if (preg_match('/categoryindex/', $parameters['context'])) {
 			print '<script src="../custom/doliproject/js/doliproject.js.php"></script>';
 		}
 		if (GETPOST('action') == 'toggleTaskFavorite') {
@@ -691,7 +657,7 @@ class ActionsDoliproject
 					type: "POST",
 					processData: false,
 					contentType: false,
-					success: function ( resp ) {
+					success: function() {
 						let taskContainer = $('#'+taskId)
 
 						if (taskContainer.hasClass('fas')) {
@@ -702,7 +668,7 @@ class ActionsDoliproject
 							taskContainer.addClass('fas')
 						}
 					},
-					error: function ( resp ) {
+					error: function(resp) {
 
 					}
 				});
@@ -714,15 +680,11 @@ class ActionsDoliproject
 	/**
 	 * Overloading the constructCategory function : replacing the parent's function with the one below
 	 *
-	 * @param   array           $parameters     Hook metadatas (context, etc...)
-	 * @param   CommonObject    $object         The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
-	 * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
+	 * @param  array $parameters Hook metadata (context, etc...)
 	 */
-	public function constructCategory($parameters, &$object)
+	public function constructCategory(array $parameters)
 	{
-		$error = 0; // Error counter
-
-		if (in_array($parameters['currentcontext'], array('category', 'invoicecard', 'invoicereccard', 'timesheetcard'))) { // do something only for the context 'somecontext1' or 'somecontext2'
+		if (in_array($parameters['currentcontext'], array('category', 'invoicecard', 'invoicereccard', 'timesheetcard'))) {
 			$tags = array(
 				'invoice' => array(
 					'id' => 436370001,
@@ -743,22 +705,23 @@ class ActionsDoliproject
 					'obj_table' => 'doliproject_timesheet',
 				)
 			);
-		}
 
-		if (!$error) {
 			$this->results = $tags;
-			return 0; // or return 1 to replace standard code
-		} else {
-			$this->errors[] = 'Error message';
-			return -1;
 		}
 	}
 
-	public function formObjectOptions($parameters, &$object, &$action, $hookmanager)
+	/**
+	 * Overloading the formObjectOptions function : replacing the parent's function with the one below
+	 *
+	 * @param array  $parameters Hook metadata (context, etc...)
+	 * @param object $object     Object
+	 * @param string $action     Current action (if set). Generally create or edit or null
+	 */
+	public function formObjectOptions(array $parameters, object $object, string $action)
 	{
 		global $conf, $langs;
 
-		if (in_array($parameters['currentcontext'], array('invoicecard'))) {
+		if ($parameters['currentcontext'] == 'invoicecard') {
 			require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 
 			$form = new Form($this->db);
@@ -787,7 +750,7 @@ class ActionsDoliproject
 //					print img_picto('', 'category').$form->multiselectarray('categories', $cate_arbo, $arrayselected, '', 0, 'quatrevingtpercent widthcentpercentminusx', 0, 0);
 //					print "</td></tr>";
 //				}
-			} else if($action == '') {
+			} else if ($action == '') {
 				// Categories
 				if ($conf->categorie->enabled) {
 					print '<tr><td class="valignmiddle">'.$langs->trans("Categories").'</td><td>';
@@ -796,7 +759,7 @@ class ActionsDoliproject
 				}
 			}
 		}
-		if (in_array($parameters['currentcontext'], array('invoicereccard'))) {
+		if ($parameters['currentcontext'] == 'invoicereccard') {
 			require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 
 			$form = new Form($this->db);
@@ -812,25 +775,41 @@ class ActionsDoliproject
 		}
 	}
 
-	public function afterCreationOfRecurringInvoice($parameters, &$object) {
+	/**
+	 * Overloading the afterCreationOfRecurringInvoice function : replacing the parent's function with the one below
+	 *
+	 * @param array  $parameters Hook metadata (context, etc...)
+	 * @param object $object     Object
+	 */
+	public function afterCreationOfRecurringInvoice(array $parameters, object $object) {
 		if (in_array($parameters['currentcontext'], array('cron', 'cronjoblist'))) {
 			require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 			require_once __DIR__ . '/../lib/doliproject_function.lib.php';
+
 			$cat = new Categorie($this->db);
+
 			$categories = $cat->containing($parameters['facturerec']->id, 'invoicerec');
 			if (is_array($categories) && !empty($categories)) {
 				foreach ($categories as $category) {
 					$categoryArray[] =  $category->id;
 				}
+				if (!empty($categoryArray)) {
+					setCategoriesObject($categoryArray, 'invoice', false, $object);
+				}
 			}
-			setCategoriesObject($categoryArray, 'invoice', false, $object);
 		}
 	}
 
-	public function printObjectLine($parameters, &$object, $action) {
-		if (in_array($parameters['currentcontext'], array('timesheetcard'))) {
+	/**
+	 * Overloading the printObjectLine function : replacing the parent's function with the one below
+	 *
+	 * @param array $parameters Hook metadata (context, etc...)
+	 */
+	public function printObjectLine(array $parameters) {
+		if ($parameters['currentcontext'] == 'timesheetcard') {
 			if ($parameters['line']->fk_product > 0) {
 				require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+
 				$product = new Product($this->db);
 
 				$product->fetch($parameters['line']->fk_product);
@@ -842,8 +821,15 @@ class ActionsDoliproject
 		}
 	}
 
-	public function deleteFile($parameters, $object) {
-		if (in_array($parameters['currentcontext'], array('timesheetcard')) && !preg_match('/signature/', $parameters['file'])) {
+	/**
+	 * Overloading the deleteFile function : replacing the parent's function with the one below
+	 *
+	 * @param  array     $parameters Hook metadata (context, etc...)
+	 * @param  object    $object     Object
+	 * @throws Exception
+	 */
+	public function deleteFile(array $parameters, object $object) {
+		if ($parameters['currentcontext'] == 'timesheetcard' && !preg_match('/signature/', $parameters['file'])) {
 			global $user;
 
 			require_once DOL_DOCUMENT_ROOT . '/projet/class/task.class.php';
@@ -876,8 +862,13 @@ class ActionsDoliproject
 		}
 	}
 
-	public function printFieldListOption($parameters) {
-		if (in_array($parameters['currentcontext'], array('projecttasktime'))) {
+	/**
+	 * Overloading the printFieldListOption function : replacing the parent's function with the one below
+	 *
+	 * @param array $parameters Hook metadata (context, etc...)
+	 */
+	public function printFieldListOption(array $parameters) {
+		if ($parameters['currentcontext'] == 'projecttasktime') {
 			global $langs;
 
 			$parameters['arrayfields']['fk_timesheet'] = array(
@@ -892,8 +883,13 @@ class ActionsDoliproject
 		}
 	}
 
-	public function printFieldListTitle($parameters) {
-		if (in_array($parameters['currentcontext'], array('projecttasktime'))) {
+	/**
+	 * Overloading the printFieldListTitle function : replacing the parent's function with the one below
+	 *
+	 * @param array $parameters Hook metadata (context, etc...)
+	 */
+	public function printFieldListTitle(array $parameters) {
+		if ($parameters['currentcontext'] == 'projecttasktime') {
 			global $langs;
 
 			$parameters['arrayfields']['fk_timesheet'] = array(
@@ -908,8 +904,13 @@ class ActionsDoliproject
 		}
 	}
 
-	public function printFieldListValue($parameters) {
-		if (in_array($parameters['currentcontext'], array('projecttasktime'))) {
+	/**
+	 * Overloading the printFieldListValue function : replacing the parent's function with the one below
+	 *
+	 * @param array $parameters Hook metadata (context, etc...)
+	 */
+	public function printFieldListValue(array $parameters) {
+		if ($parameters['currentcontext'] == 'projecttasktime') {
 			global $langs;
 
 			require_once DOL_DOCUMENT_ROOT . '/projet/class/task.class.php';

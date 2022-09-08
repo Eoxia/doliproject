@@ -37,8 +37,6 @@ if (!$res && file_exists("../../../main.inc.php")) $res = @include "../../../mai
 if (!$res) die("Include of main fails");
 
 // Libraries
-require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
-
 require_once './core/modules/modDoliproject.class.php';
 
 // Global variables definitions
@@ -60,12 +58,14 @@ if (! $user->rights->doliproject->lire) accessforbidden();
  * View
  */
 
-$morejs  = array("/doliproject/js/doliproject.js.php");
-$morecss = array("/doliproject/css/doliproject.css");
+$help_url = 'FR:Module_DoliProject';
+$title    = $langs->trans("DoliProjectArea");
+$morejs   = array("/doliproject/js/doliproject.js.php");
+$morecss  = array("/doliproject/css/doliproject.css");
 
-llxHeader("", $langs->trans("DoliProjectArea") . ' ' . $doliproject->version, '', '', 0, 0, $morejs, $morecss);
+llxHeader('', $title . ' ' . $doliproject->version, $help_url, '', 0, 0, $morejs, $morecss);
 
-print load_fiche_titre($langs->trans("DoliProjectArea") . ' ' . $doliproject->version, '', 'doliproject.png@doliproject');
+print load_fiche_titre($title . ' ' . $doliproject->version, '', 'doliproject.png@doliproject');
 
 // End of page
 llxFooter();

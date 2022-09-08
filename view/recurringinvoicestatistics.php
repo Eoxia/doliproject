@@ -109,7 +109,7 @@ print load_fiche_titre($title, '', $picto);
 
 dol_mkdir($dir);
 
-$stats = new FactureRecStats($db, $socid, $mode, ($userid > 0 ? $userid : 0), ($typent_id > 0 ? $typent_id : 0), ($categ_id > 0 ? $categ_id : 0),  ($categinvoicerec_id > 0 ? $categinvoicerec_id : 0));
+$stats = new FactureRecStats($db, (int) $socid, $mode, ($userid > 0 ? $userid : 0), ($typent_id > 0 ? $typent_id : 0), ($categ_id > 0 ? $categ_id : 0),  ($categinvoicerec_id > 0 ? $categinvoicerec_id : 0));
 if ($mode == 'customer') {
 	if ($object_status != '' && $object_status >= 0) {
 		$stats->where .= ' AND f.suspended IN ('.$db->sanitize($object_status).')';
@@ -204,7 +204,7 @@ if (!$mesg) {
 }
 
 // Build graphic average amount of object
-$data = $stats->getAverageByMonthWithPrevYear($endyear, $startyear, 0, 0, $conf->global->SOCIETE_FISCAL_MONTH_START);
+$data = $stats->getAverageByMonthWithPrevYear($endyear, $startyear, 0, $conf->global->SOCIETE_FISCAL_MONTH_START);
 
 if (empty($user->rights->societe->client->voir) || $user->socid) {
 	$filename_avg = $dir.'/invoicerecsaverage-'.$user->id.'-'.$year.'.png';

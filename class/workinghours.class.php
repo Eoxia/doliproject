@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2021 EOXIA <dev@eoxia.com>
+/* Copyright (C) 2022 EOXIA <dev@eoxia.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 /**
  * \file        class/workinghours.class.php
- * \ingroup     digiriskdolibarr
+ * \ingroup     doliproject
  * \brief       This file is a CRUD class file for Workinghours (Create/Read/Update/Delete)
  */
 
@@ -47,29 +47,29 @@ class Workinghours extends CommonObject
 	 * @var int  Does this object support multicompany module ?
 	 * 0=No test on entity, 1=Test with field entity, 'field@table'=Test with link by field@table
 	 */
-	public $ismultientitymanaged = 1;
+	public int $ismultientitymanaged = 1;
 
 	/**
 	 * @var int  Does object support extrafields ? 0=No, 1=Yes
 	 */
-	public $isextrafieldmanaged = 1;
+	public int $isextrafieldmanaged = 1;
 
 	/**
 	 * @var string String with name of icon for workinghours. Must be the part after the 'object_' into object_workinghours.png
 	 */
-	public $picto = 'workinghours@digiriskdolibarr';
+	public string $picto = 'workinghours@doliproject';
 
 	/**
 	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
-	public $fields = array(
-		'rowid'         => array('type' => 'integer', 'label' => 'TechnicalID', 'enabled' => '1', 'position' => 1, 'notnull' => 1, 'visible' => 0, 'noteditable' => '1', 'index' => 1, 'comment' => "Id"),
-		'entity'        => array('type' => 'integer', 'label' => 'Entity', 'enabled' => '1', 'position' => 10, 'notnull' => 1, 'visible' => -1,),
-		'date_creation' => array('type' => 'datetime', 'label' => 'DateCreation', 'enabled' => '1', 'position' => 20, 'notnull' => 1, 'visible' => -2,),
-		'tms'           => array('type' => 'timestamp', 'label' => 'DateModification', 'enabled' => '1', 'position' => 30, 'notnull' => 0, 'visible' => -2,),
-		'status'        => array('type' => 'smallint', 'label' => 'Status', 'enabled' => '1', 'position' => 40, 'notnull' => 0, 'visible' => -1,),
-		'element_type'  => array('type' => 'varchar(50)', 'label' => 'ElementType', 'enabled' => '1', 'position' => 50, 'notnull' => 0, 'visible' => -1,),
-		'element_id'    => array('type' => 'integer', 'label' => 'ElementID', 'enabled' => '1', 'position' => 60, 'notnull' => 1, 'visible' => -1,),
+	public array $fields = array(
+		'rowid'                  => array('type' => 'integer', 'label' => 'TechnicalID', 'enabled' => '1', 'position' => 1, 'notnull' => 1, 'visible' => 0, 'noteditable' => '1', 'index' => 1, 'comment' => "Id"),
+		'entity'                 => array('type' => 'integer', 'label' => 'Entity', 'enabled' => '1', 'position' => 10, 'notnull' => 1, 'visible' => -1,),
+		'date_creation'          => array('type' => 'datetime', 'label' => 'DateCreation', 'enabled' => '1', 'position' => 20, 'notnull' => 1, 'visible' => -2,),
+		'tms'                    => array('type' => 'timestamp', 'label' => 'DateModification', 'enabled' => '1', 'position' => 30, 'notnull' => 0, 'visible' => -2,),
+		'status'                 => array('type' => 'smallint', 'label' => 'Status', 'enabled' => '1', 'position' => 40, 'notnull' => 0, 'visible' => -1,),
+		'element_type'           => array('type' => 'varchar(50)', 'label' => 'ElementType', 'enabled' => '1', 'position' => 50, 'notnull' => 0, 'visible' => -1,),
+		'element_id'             => array('type' => 'integer', 'label' => 'ElementID', 'enabled' => '1', 'position' => 60, 'notnull' => 1, 'visible' => -1,),
 		'schedule_monday'        => array('type' => 'varchar(128)', 'label' => 'Day 0', 'enabled' => '1', 'position' => 70, 'notnull' => 0, 'visible' => 1,),
 		'schedule_tuesday'       => array('type' => 'varchar(128)', 'label' => 'Day 1', 'enabled' => '1', 'position' => 80, 'notnull' => 0, 'visible' => 1,),
 		'schedule_wednesday'     => array('type' => 'varchar(128)', 'label' => 'Day 2', 'enabled' => '1', 'position' => 90, 'notnull' => 0, 'visible' => 1,),
@@ -77,14 +77,14 @@ class Workinghours extends CommonObject
 		'schedule_friday'        => array('type' => 'varchar(128)', 'label' => 'Day 4', 'enabled' => '1', 'position' => 110, 'notnull' => 0, 'visible' => 1,),
 		'schedule_saturday'      => array('type' => 'varchar(128)', 'label' => 'Day 5', 'enabled' => '1', 'position' => 120, 'notnull' => 0, 'visible' => 1,),
 		'schedule_sunday'        => array('type' => 'varchar(128)', 'label' => 'Day 6', 'enabled' => '1', 'position' => 130, 'notnull' => 0, 'visible' => 1,),
-		'workinghours_monday'        => array('type' => 'integer', 'label' => 'Day 0', 'enabled' => '1', 'position' => 170, 'notnull' => 0, 'visible' => 1,),
-		'workinghours_tuesday'       => array('type' => 'integer', 'label' => 'Day 1', 'enabled' => '1', 'position' => 180, 'notnull' => 0, 'visible' => 1,),
-		'workinghours_wednesday'     => array('type' => 'integer', 'label' => 'Day 2', 'enabled' => '1', 'position' => 190, 'notnull' => 0, 'visible' => 1,),
-		'workinghours_thursday'      => array('type' => 'integer', 'label' => 'Day 3', 'enabled' => '1', 'position' => 200, 'notnull' => 0, 'visible' => 1,),
-		'workinghours_friday'        => array('type' => 'integer', 'label' => 'Day 4', 'enabled' => '1', 'position' => 210, 'notnull' => 0, 'visible' => 1,),
-		'workinghours_saturday'      => array('type' => 'integer', 'label' => 'Day 5', 'enabled' => '1', 'position' => 220, 'notnull' => 0, 'visible' => 1,),
-		'workinghours_sunday'        => array('type' => 'integer', 'label' => 'Day 6', 'enabled' => '1', 'position' => 230, 'notnull' => 0, 'visible' => 1,),
-		'fk_user_creat' => array('type' => 'integer:User:user/class/user.class.php', 'label' => 'UserAuthor', 'enabled' => '1', 'position' => 140, 'notnull' => 1, 'visible' => -2, 'foreignkey' => 'user.rowid',),
+		'workinghours_monday'    => array('type' => 'integer', 'label' => 'Day 0', 'enabled' => '1', 'position' => 170, 'notnull' => 0, 'visible' => 1,),
+		'workinghours_tuesday'   => array('type' => 'integer', 'label' => 'Day 1', 'enabled' => '1', 'position' => 180, 'notnull' => 0, 'visible' => 1,),
+		'workinghours_wednesday' => array('type' => 'integer', 'label' => 'Day 2', 'enabled' => '1', 'position' => 190, 'notnull' => 0, 'visible' => 1,),
+		'workinghours_thursday'  => array('type' => 'integer', 'label' => 'Day 3', 'enabled' => '1', 'position' => 200, 'notnull' => 0, 'visible' => 1,),
+		'workinghours_friday'    => array('type' => 'integer', 'label' => 'Day 4', 'enabled' => '1', 'position' => 210, 'notnull' => 0, 'visible' => 1,),
+		'workinghours_saturday'  => array('type' => 'integer', 'label' => 'Day 5', 'enabled' => '1', 'position' => 220, 'notnull' => 0, 'visible' => 1,),
+		'workinghours_sunday'    => array('type' => 'integer', 'label' => 'Day 6', 'enabled' => '1', 'position' => 230, 'notnull' => 0, 'visible' => 1,),
+		'fk_user_creat'          => array('type' => 'integer:User:user/class/user.class.php', 'label' => 'UserAuthor', 'enabled' => '1', 'position' => 140, 'notnull' => 1, 'visible' => -2, 'foreignkey' => 'user.rowid',),
 	);
 
 	public $rowid;
@@ -146,12 +146,12 @@ class Workinghours extends CommonObject
 	/**
 	 * Create object into database
 	 *
-	 * @param User $user User that creates
-	 * @param bool $notrigger false=launch triggers after, true=disable triggers
-	 * @return int             <0 if KO, Id of created object if OK
+	 * @param  User       $user       User that creates
+	 * @param  bool       $notrigger  false=launch triggers after, true=disable triggers
+	 * @return int                    0 < if KO, ID of created object if OK
 	 * @throws Exception
 	 */
-	public function create(User $user, $notrigger = false)
+	public function create(User $user, bool $notrigger = false): int
 	{
 		$sql                                                                              = "UPDATE " . MAIN_DB_PREFIX . "$this->table_element";
 		$sql                                                                             .= " SET status = 0";
@@ -168,12 +168,12 @@ class Workinghours extends CommonObject
 	/**
 	 * Load object in memory from the database
 	 *
-	 * @param	int    $id				Id object
-	 * @param	string $ref				Ref
-	 * @param	string	$morewhere		More SQL filters (' AND ...')
-	 * @return 	int         			<0 if KO, 0 if not found, >0 if OK
+	 * @param  int         $id        ID object
+	 * @param  string|null $ref       Ref
+	 * @param  string      $morewhere More SQL filters (' AND ...')
+	 * @return int                    0 < if KO, 0 if not found, >0 if OK
 	 */
-	public function fetch($id, $ref = null, $morewhere = '')
+	public function fetch(int $id, string $ref = null, string $morewhere = ''): int
 	{
 		return $this->fetchCommon($id, $ref, $morewhere);
 	}
@@ -181,18 +181,17 @@ class Workinghours extends CommonObject
 	/**
 	 * Load list of objects in memory from the database.
 	 *
-	 * @param  string      $sortorder    Sort Order
-	 * @param  string      $sortfield    Sort field
-	 * @param  int         $limit        limit
-	 * @param  int         $offset       Offset
-	 * @param  array       $filter       Filter array. Example array('field'=>'valueforlike', 'customurl'=>...)
-	 * @param  string      $filtermode   Filter mode (AND or OR)
-	 * @return array|int                 int <0 if KO, array of pages if OK
+	 * @param  string    $sortorder  Sort Order
+	 * @param  string    $sortfield  Sort field
+	 * @param  int       $limit      Limit
+	 * @param  int       $offset     Offset
+	 * @param  array     $filter     Filter array. Example array('field'=>'value', 'customurl'=>...)
+	 * @param  string    $filtermode Filter mode (AND/OR)
+	 * @return array|int             int <0 if KO, array of pages if OK
+	 * @throws Exception
 	 */
-	public function fetchAll($sortorder = '', $sortfield = '', $limit = 0, $offset = 0, array $filter = array(), $filtermode = 'AND')
+	public function fetchAll(string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = array(), string $filtermode = 'AND')
 	{
-		global $conf;
-
 		dol_syslog(__METHOD__, LOG_DEBUG);
 
 		$records = array();
@@ -233,7 +232,7 @@ class Workinghours extends CommonObject
 
 		$resql = $this->db->query($sql);
 		if ($resql) {
-			$num = $this->db->num_rows($resql);
+			$this->db->num_rows($resql);
 
 			while ($obj = $this->db->fetch_object($resql)) {
 				$record = new self($this->db);
@@ -255,15 +254,12 @@ class Workinghours extends CommonObject
 	/**
 	 * Load list of objects in memory from the database.
 	 *
-	 * @param  string      $sortorder    Sort Order
-	 * @param  string      $sortfield    Sort field
-	 * @param  int         $limit        limit
-	 * @param  int         $offset       Offset
-	 * @param  array       $filter       Filter array. Example array('field'=>'valueforlike', 'customurl'=>...)
-	 * @param  string      $filtermode   Filter mode (AND or OR)
-	 * @return array|int                 int <0 if KO, array of pages if OK
+	 * @param  int        $id   ID object
+	 * @param  string     $type Type of object
+	 * @return array|int        int <0 if KO, array of pages if OK
+	 * @throws Exception
 	 */
-	public function fetchCurrentWorkingHours($id, $type)
+	public function fetchCurrentWorkingHours(int $id, string $type)
 	{
 		$current_workinghours = $this->fetchAll('', '',0,0, array('element_type' => $type, 'element_id' => $id, 'status' => 1));
 		if (is_array($current_workinghours) && !empty($current_workinghours)) {
@@ -273,11 +269,11 @@ class Workinghours extends CommonObject
 	}
 
 	/**
-	 *    Return label of contact status
+	 * Return label of contact status
 	 *
-	 * @return    string                Label of contact status
+	 * @return string Label of contact status
 	 */
-	public function getLibStatut()
+	public function getLibStatut(): string
 	{
 		return '';
 	}

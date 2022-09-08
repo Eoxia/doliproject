@@ -42,7 +42,7 @@ class DoliProjectSignature extends CommonObject
 	/**
 	 * @var string ID of module.
 	 */
-	public $module = 'doliproject';
+	public string $module = 'doliproject';
 
 	/**
 	 * @var string ID to identify managed object.
@@ -58,25 +58,25 @@ class DoliProjectSignature extends CommonObject
 	 * @var int  Does this object support multicompany module ?
 	 * 0=No test on entity, 1=Test with field entity, 'field@table'=Test with link by field@table
 	 */
-	public $ismultientitymanaged = 1;
+	public int $ismultientitymanaged = 1;
 
 	/**
 	 * @var int  Does object support extrafields ? 0=No, 1=Yes
 	 */
-	public $isextrafieldmanaged = 0;
+	public int $isextrafieldmanaged = 0;
 
 	/**
 	 * @var string String with name of icon for doliprojectsignature. Must be the part after the 'object_' into object_doliprojectsignature.png
 	 */
-	public $picto = 'object_signature@doliproject';
+	public string $picto = 'object_signature@doliproject';
 
 	/**
-	 * @var string Label status of const.
+	 * @var array Label status of const.
 	 */
 	public $labelStatus;
 
 	/**
-	 * @var string Label status short of const.
+	 * @var array Label status short of const.
 	 */
 	public $labelStatusShort;
 
@@ -93,7 +93,7 @@ class DoliProjectSignature extends CommonObject
 	/**
 	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
-	public $fields = array(
+	public array $fields = array(
 		'rowid'                => array('type' => 'integer', 'label' => 'TechnicalID', 'enabled' => '1', 'position' => 1, 'notnull' => 1, 'visible' => 0, 'noteditable' => '1', 'index' => 1, 'comment' => "Id"),
 		'entity'               => array('type' => 'integer', 'label' => 'Entity', 'enabled' => '1', 'position' => 10, 'notnull' => 1, 'visible' => -1,),
 		'date_creation'        => array('type' => 'datetime', 'label' => 'DateCreation', 'enabled' => '1', 'position' => 20, 'notnull' => 1, 'visible' => -2,),
@@ -133,14 +133,11 @@ class DoliProjectSignature extends CommonObject
 	public $phone;
 	public $society_name;
 	public $signature_date;
-	public $signature_location;
-	public $signature_comment;
 	public $element_id;
 	public $element_type;
 	public $signature;
 	public $stamp;
 	public $signature_url;
-	public $transaction_url;
 	public $last_email_sent_date;
 	public $object_type;
 	public $fk_object;
@@ -183,23 +180,22 @@ class DoliProjectSignature extends CommonObject
 	 *
 	 * @param  User $user      User that creates
 	 * @param  bool $notrigger false=launch triggers after, true=disable triggers
-	 * @return int             <0 if KO, Id of created object if OK
+	 * @return int             0 < if KO, id of created object if OK
 	 */
-	public function create(User $user, $notrigger = false)
+	public function create(User $user, bool $notrigger = false): int
 	{
-		$result = $this->createCommon($user, $notrigger);
-		return $result;
+		return $this->createCommon($user, $notrigger);
 	}
 
 	/**
 	 * Load object in memory from the database
 	 *
-	 * @param int    $id   Id object
-	 * @param string $ref  Ref
-	 * @param string $morewhere  More SQL filters (' AND ...')
-	 * @return int         <0 if KO, 0 if not found, >0 if OK
+	 * @param  int         $id        ID object
+	 * @param  string|null $ref       Ref
+	 * @param  string      $morewhere More SQL filters (' AND ...')
+	 * @return int                    0 < if KO, 0 if not found, >0 if OK
 	 */
-	public function fetch($id, $ref = null, $morewhere = '')
+	public function fetch(int $id, string $ref = null, string $morewhere = ''): int
 	{
 		return $this->fetchCommon($id, $ref, $morewhere);
 	}
@@ -207,17 +203,17 @@ class DoliProjectSignature extends CommonObject
 	/**
 	 * Load list of objects in memory from the database.
 	 *
-	 * @param string $sortorder Sort Order
-	 * @param string $sortfield Sort field
-	 * @param int $limit limit
-	 * @param int $offset Offset
-	 * @param array $filter Filter array. Example array('field'=>'valueforlike', 'customurl'=>...)
-	 * @param string $filtermode Filter mode (AND or OR)
-	 * @param string $old_table_element
-	 * @return array|int                 int <0 if KO, array of pages if OK
+	 * @param  string    $sortorder         Sort Order
+	 * @param  string    $sortfield         Sort field
+	 * @param  int       $limit             Limit
+	 * @param  int       $offset            Offset
+	 * @param  array     $filter            Filter array. Example array('field'=>'value', 'customurl'=>...)
+	 * @param  string    $filtermode        Filter mode (AND/OR)
+	 * @param  string    $old_table_element Old table element due to rework
+	 * @return array|int                    int <0 if KO, array of pages if OK
 	 * @throws Exception
 	 */
-	public function fetchAll($sortorder = '', $sortfield = '', $limit = 0, $offset = 0, array $filter = array(), $filtermode = 'AND', $old_table_element = '')
+	public function fetchAll(string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = array(), string $filtermode = 'AND', string $old_table_element = '')
 	{
 		dol_syslog(__METHOD__, LOG_DEBUG);
 
@@ -294,9 +290,9 @@ class DoliProjectSignature extends CommonObject
 	 *
 	 * @param  User $user      User that modifies
 	 * @param  bool $notrigger false=launch triggers after, true=disable triggers
-	 * @return int             <0 if KO, >0 if OK
+	 * @return int             0 < if KO, >0 if OK
 	 */
-	public function update(User $user, $notrigger = false)
+	public function update(User $user, bool $notrigger = false): int
 	{
 		return $this->updateCommon($user, $notrigger);
 	}
@@ -304,11 +300,11 @@ class DoliProjectSignature extends CommonObject
 	/**
 	 * Delete object in database
 	 *
-	 * @param User $user       User that deletes
-	 * @param bool $notrigger  false=launch triggers after, true=disable triggers
-	 * @return int             <0 if KO, >0 if OK
+	 * @param  User $user      User that deletes
+	 * @param  bool $notrigger false=launch triggers after, true=disable triggers
+	 * @return int             0 < if KO, >0 if OK
 	 */
-	public function delete(User $user, $notrigger = false)
+	public function delete(User $user, bool $notrigger = false): int
 	{
 		return $this->deleteCommon($user, $notrigger);
 	}
@@ -316,11 +312,11 @@ class DoliProjectSignature extends CommonObject
 	/**
 	 *	Set registered status
 	 *
-	 *	@param	User	$user			Object user that modify
-	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
-	 *	@return	int						<0 if KO, >0 if OK
+	 *	@param  User $user      Object user that modify
+	 *  @param  int  $notrigger 1=Does not execute triggers, 0=Execute triggers
+	 *	@return int             0 < if KO, >0 if OK
 	 */
-	public function setRegistered($user, $notrigger = 0)
+	public function setRegistered(User $user, int $notrigger = 0): int
 	{
 		return $this->setStatusCommon($user, self::STATUS_REGISTERED, $notrigger, 'DOLIPROJECTSIGNATURE_REGISTERED');
 	}
@@ -328,11 +324,11 @@ class DoliProjectSignature extends CommonObject
 	/**
 	 *	Set pending status
 	 *
-	 *	@param	User	$user			Object user that modify
-	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
-	 *	@return	int						<0 if KO, >0 if OK
+	 *	@param  User $user      Object user that modify
+	 *  @param  int  $notrigger 1=Does not execute triggers, 0=Execute triggers
+	 *	@return int             0 < if KO, >0 if OK
 	 */
-	public function setPending($user, $notrigger = 0)
+	public function setPending(User $user, int $notrigger = 0): int
 	{
 		return $this->setStatusCommon($user, self::STATUS_PENDING_SIGNATURE, $notrigger, 'DOLIPROJECTSIGNATURE_PENDING_SIGNATURE');
 	}
@@ -340,11 +336,11 @@ class DoliProjectSignature extends CommonObject
 	/**
 	 *	Set signed status
 	 *
-	 *	@param	User	$user			Object user that modify
-	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
-	 *	@return	int						<0 if KO, >0 if OK
+	 *	@param  User $user     Object user that modify
+	 *  @param  int $notrigger 1=Does not execute triggers, 0=Execute triggers
+	 *	@return int            0 < if KO, >0 if OK
 	 */
-	public function setSigned($user, $notrigger = 0)
+	public function setSigned(User $user, int $notrigger = 0): int
 	{
 		return $this->setStatusCommon($user, self::STATUS_SIGNED, $notrigger, 'DOLIPROJECTSIGNATURE_SIGNED');
 	}
@@ -352,11 +348,11 @@ class DoliProjectSignature extends CommonObject
 	/**
 	 *	Set absent status
 	 *
-	 *	@param	User	$user			Object user that modify
-	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
-	 *	@return	int						<0 if KO, >0 if OK
+	 *	@param  User $user     Object user that modify
+	 *  @param  int $notrigger 1=Does not execute triggers, 0=Execute triggers
+	 *	@return int            0 < if KO, >0 if OK
 	 */
-	public function setAbsent($user, $notrigger = 0)
+	public function setAbsent(User $user, int $notrigger = 0): int
 	{
 		return $this->setStatusCommon($user, self::STATUS_ABSENT, $notrigger, 'DOLIPROJECTSIGNATURE_ABSENT');
 	}
@@ -364,11 +360,11 @@ class DoliProjectSignature extends CommonObject
 	/**
 	 *	Set deleted status
 	 *
-	 *	@param	User	$user			Object user that modify
-	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
-	 *	@return	int						<0 if KO, >0 if OK
+	 *	@param  User $user      Object user that modify
+	 *  @param  int  $notrigger 1=Does not execute triggers, 0=Execute triggers
+	 *	@return int             0 < if KO, >0 if OK
 	 */
-	public function setDeleted($user, $notrigger = 0)
+	public function setDeleted(User $user, int $notrigger = 0): int
 	{
 		return $this->setStatusCommon($user, self::STATUS_DELETED, $notrigger, 'DOLIPROJECTSIGNATURE_DELETED');
 	}
@@ -376,10 +372,10 @@ class DoliProjectSignature extends CommonObject
 	/**
 	 *  Return the label of the status
 	 *
-	 *  @param  int		$mode          0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto, 6=Long label + Picto
-	 *  @return	string 			       Label of status
+	 *  @param  int    $mode 0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto, 6=Long label + Picto
+	 *  @return string       Label of status
 	 */
-	public function getLibStatut($mode = 0)
+	public function getLibStatut(int $mode = 0): string
 	{
 		return $this->LibStatut($this->status, $mode);
 	}
@@ -387,11 +383,11 @@ class DoliProjectSignature extends CommonObject
 	/**
 	 *  Return the status
 	 *
-	 *  @param	int		$status        Id status
-	 *  @param  int		$mode          0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto, 6=Long label + Picto
-	 *  @return string 			       Label of status
+	 *  @param  int    $status Id status
+	 *  @param  int    $mode   0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto, 6=Long label + Picto
+	 *  @return string         Label of status
 	 */
-	public function LibStatut($status, $mode = 0)
+	public function LibStatut(int $status, int $mode = 0): string
 	{
 		if (empty($this->labelStatus) || empty($this->labelStatusShort)) {
 			global $langs;
@@ -416,16 +412,16 @@ class DoliProjectSignature extends CommonObject
 	/**
 	 * Create signatory in database
 	 *
-	 * @param int $fk_object ID of object linked
-	 * @param $object_type
-	 * @param string $element_type Type of resource
-	 * @param array $element_ids Id of resource
-	 * @param string $role Role of resource
-	 * @param int $noupdate Update previous signatories
+	 * @param  int    $fk_object    ID of object linked
+	 * @param  string $object_type  Type of object
+	 * @param  string $element_type Type of resource
+	 * @param  array  $element_ids  ID of resource
+	 * @param  string $role         Role of resource
+	 * @param  int    $noupdate     Update previous signatories
 	 * @return int
 	 * @throws Exception
 	 */
-	public function setSignatory($fk_object, $object_type, $element_type, $element_ids, $role = "", $noupdate = 0)
+	public function setSignatory(int $fk_object, string $object_type, string $element_type, array $element_ids, string $role = "", int $noupdate = 0): int
 	{
 		global $conf, $user;
 
@@ -475,11 +471,11 @@ class DoliProjectSignature extends CommonObject
 					$this->element_type = $element_type;
 					$this->element_id   = $element_id;
 
-					$this->signature_url = generate_random_id(16);
+					$this->signature_url = generate_random_id();
 
 					$this->fk_object = $fk_object;
 
-					$result = $this->create($user, false);
+					$result = $this->create($user);
 				}
 			}
 		}
@@ -493,20 +489,20 @@ class DoliProjectSignature extends CommonObject
 	/**
 	 * Fetch signatory from database
 	 *
-	 * @param string $role Role of resource
-	 * @param int $fk_object ID of object linked
-	 * @param string $object_type ID of object linked
+	 * @param  string    $role        Role of resource
+	 * @param  int       $fk_object   ID of object linked
+	 * @param  string    $object_type ID of object linked
 	 * @return array|int
 	 * @throws Exception
 	 */
-	public function fetchSignatory($role, $fk_object, $object_type)
+	public function fetchSignatory(string $role, int $fk_object, string $object_type)
 	{
 		$filter = array('customsql' => 'fk_object=' . $fk_object . ' AND status!=0 AND object_type="' . $object_type . '"');
 		if (strlen($role)) {
 			$filter['customsql'] .= ' AND role = "' . $role . '"';
-			return $this->fetchAll('', '', 0, 0, $filter, 'AND');
+			return $this->fetchAll('', '', 0, 0, $filter);
 		} else {
-			$signatories = $this->fetchAll('', '', 0, 0, $filter, 'AND');
+			$signatories = $this->fetchAll('', '', 0, 0, $filter);
 			if ( ! empty($signatories) && $signatories > 0) {
 				$signatoriesArray = array();
 				foreach ($signatories as $signatory) {
@@ -522,27 +518,27 @@ class DoliProjectSignature extends CommonObject
 	/**
 	 * Fetch signatories in database with parent ID
 	 *
-	 * @param $fk_object
-	 * @param $object_type
-	 * @param string $morefilter
+	 * @param  int           $fk_object   ID of object linked
+	 * @param  string        $object_type Type of object
+	 * @param  string        $morefilter  Filter
 	 * @return array|integer
 	 * @throws Exception
 	 */
-	public function fetchSignatories($fk_object, $object_type, $morefilter = '1 = 1')
+	public function fetchSignatories(int $fk_object, string $object_type, string $morefilter = '1 = 1')
 	{
 		$filter      = array('customsql' => 'fk_object=' . $fk_object . ' AND ' . $morefilter . ' AND object_type="' . $object_type . '"' . ' AND status > 0');
-		return $this->fetchAll('', '', 0, 0, $filter, 'AND');
+		return $this->fetchAll('', '', 0, 0, $filter);
 	}
 
 	/**
 	 * Check if signatories signed
 	 *
-	 * @param $fk_object
-	 * @param $object_type
+	 * @param  int       $fk_object   ID of object linked
+	 * @param  string    $object_type Type of object
 	 * @return int
 	 * @throws Exception
 	 */
-	public function checkSignatoriesSignatures($fk_object, $object_type)
+	public function checkSignatoriesSignatures(int $fk_object, string $object_type): int
 	{
 		$morefilter = 'status != 0';
 
@@ -565,12 +561,12 @@ class DoliProjectSignature extends CommonObject
 	/**
 	 * Delete signatories signatures
 	 *
-	 * @param $fk_object
-	 * @param $object_type
+	 * @param  int       $fk_object   ID of object linked
+	 * @param  string    $object_type Type of object
 	 * @return int
 	 * @throws Exception
 	 */
-	public function deleteSignatoriesSignatures($fk_object, $object_type)
+	public function deleteSignatoriesSignatures(int $fk_object, string $object_type): int
 	{
 		global $user;
 
@@ -594,17 +590,17 @@ class DoliProjectSignature extends CommonObject
 	/**
 	 * Set previous signatories status to 0
 	 *
-	 * @param string $role Role of resource
-	 * @param int $fk_object ID of object linked
-	 * @param string $object_type type of object linked
+	 * @param  string    $role        Role of resource
+	 * @param  int       $fk_object   ID of object linked
+	 * @param  string    $object_type Type of object linked
 	 * @return int
 	 * @throws Exception
 	 */
-	public function deletePreviousSignatories($role, $fk_object, $object_type)
+	public function deletePreviousSignatories(string $role, int $fk_object, string $object_type): int
 	{
 		global $user;
 		$filter              = array('customsql' => ' role="' . $role . '" AND fk_object=' . $fk_object . ' AND status=1 AND object_type="' . $object_type . '"');
-		$signatoriesToDelete = $this->fetchAll('', '', 0, 0, $filter, 'AND');
+		$signatoriesToDelete = $this->fetchAll('', '', 0, 0, $filter);
 
 		if ( ! empty($signatoriesToDelete) && $signatoriesToDelete > 0) {
 			foreach ($signatoriesToDelete as $signatoryToDelete) {

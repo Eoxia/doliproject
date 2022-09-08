@@ -34,7 +34,7 @@ class TimeSheet extends CommonObject
 	/**
 	 * @var string ID of module.
 	 */
-	public $module = 'doliproject';
+	public string $module = 'doliproject';
 
 	/**
 	 * @var string ID to identify managed object.
@@ -50,17 +50,27 @@ class TimeSheet extends CommonObject
 	 * @var int  Does this object support multicompany module ?
 	 * 0=No test on entity, 1=Test with field entity, 'field@table'=Test with link by field@table
 	 */
-	public $ismultientitymanaged = 0;
+	public int $ismultientitymanaged = 0;
 
 	/**
 	 * @var int  Does object support extrafields ? 0=No, 1=Yes
 	 */
-	public $isextrafieldmanaged = 1;
+	public int $isextrafieldmanaged = 1;
 
 	/**
 	 * @var string String with name of icon for timesheet. Must be the part after the 'object_' into object_timesheet.png
 	 */
-	public $picto = 'timesheet@doliproject';
+	public string $picto = 'timesheet@doliproject';
+
+	/**
+	 * @var array Label status of const.
+	 */
+	public array $labelStatus;
+
+	/**
+	 * @var array Label status short of const.
+	 */
+	public array $labelStatusShort;
 
 	const STATUS_DRAFT = 0;
 	const STATUS_VALIDATED = 1;
@@ -77,7 +87,7 @@ class TimeSheet extends CommonObject
 	 *  'notnull' is set to 1 if not null in database. Set to -1 if we must set data to null if empty ('' or 0).
 	 *  'visible' says if field is visible in list (Examples: 0=Not visible, 1=Visible on list and create/update/view forms, 2=Visible on list only, 3=Visible on create/update/view form only (not list), 4=Visible on list and update/view form only (not create). 5=Visible on list and view only (not create/not update). Using a negative value means field is not shown by default on list but can be selected for viewing)
 	 *  'noteditable' says if field is not editable (1 or 0)
-	 *  'default' is a default value for creation (can still be overwrote by the Setup of Default Values if field is editable in creation form). Note: If default is set to '(PROV)' and field is 'ref', the default value will be set to '(PROVid)' where id is rowid when a new record is created.
+	 *  'default' is a default value for creation (can still be overwroted by the Setup of Default Values if field is editable in creation form). Note: If default is set to '(PROV)' and field is 'ref', the default value will be set to '(PROVid)' where id is rowid when a new record is created.
 	 *  'index' if we want an index in database.
 	 *  'foreignkey'=>'tablename.field' if the field is a foreign key (it is recommanded to name the field fk_...).
 	 *  'searchall' is 1 if we want to search in this field when making a search from the quick search button.
@@ -89,7 +99,7 @@ class TimeSheet extends CommonObject
 	 *  'arrayofkeyval' to set a list of values if type is a list of predefined values. For example: array("0"=>"Draft","1"=>"Active","-1"=>"Cancel"). Note that type can be 'integer' or 'varchar'
 	 *  'autofocusoncreate' to have field having the focus on a create form. Only 1 field should have this property set to 1.
 	 *  'comment' is not used. You can store here any text of your choice. It is not used by application.
-	 *	'validate' is 1 if need to validate with $this->validateField()
+	 *	'validate' is 1 if you need to validate with $this->validateField()
 	 *  'copytoclipboard' is 1 or 2 to allow to add a picto to copy value into clipboard (1=picto after label, 2=picto after value)
 	 *
 	 *  Note: To have value dynamic, you can set value to 0 in definition and edit the value on the fly into the constructor.
@@ -98,7 +108,7 @@ class TimeSheet extends CommonObject
 	/**
 	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
-	public $fields = array(
+	public array $fields = array(
 		'rowid'          => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
 		'ref'            => array('type'=>'varchar(128)', 'label'=>'Ref', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'visible'=>4, 'noteditable'=>'1', 'default'=>'(PROV)', 'index'=>1, 'searchall'=>1, 'showoncombobox'=>'1', 'validate'=>'1', 'comment'=>"Reference of object"),
 		'ref_ext'        => array('type'=>'varchar(128)', 'label'=>'RefExt', 'enabled'=>'1', 'position'=>20, 'notnull'=>0, 'visible'=>0,),
@@ -156,12 +166,12 @@ class TimeSheet extends CommonObject
 	 /**
 	  * @var string    Field with ID of parent key if this object has a parent
 	  */
-	 public $fk_element = 'fk_timesheet';
+	 public string $fk_element = 'fk_timesheet';
 
 	 /**
 	  * @var string    Name of subtable class that manage subtable lines
 	  */
-	 public $class_element_line = 'TimeSheetline';
+	 public string $class_element_line = 'TimeSheetline';
 
 	 /**
 	  * @var array	List of child tables. To test if we can delete object.
@@ -170,7 +180,7 @@ class TimeSheet extends CommonObject
 
 	 /**
 	  * @var array    List of child tables. To know object to delete on cascade.
-	  *               If name matches '@ClassNAme:FilePathClass;ParentFkFieldName' it will
+	  *               If name matches @ClassNAme:FilePathClass;ParentFkFieldName it will
 	  *               call method deleteByParentField(parentId, ParentFkFieldName) to fetch and delete child object
 	  */
 	 protected $childtablesoncascade = array('doliproject_timesheetdet');
@@ -223,22 +233,21 @@ class TimeSheet extends CommonObject
 	 *
 	 * @param  User $user      User that creates
 	 * @param  bool $notrigger false=launch triggers after, true=disable triggers
-	 * @return int             <0 if KO, Id of created object if OK
+	 * @return int             0 < if KO, ID of created object if OK
 	 */
-	public function create(User $user, $notrigger = false)
+	public function create(User $user, bool $notrigger = false): int
 	{
-		$resultcreate = $this->createCommon($user, $notrigger);
-		return $resultcreate;
+		return $this->createCommon($user, $notrigger);
 	}
 
 	/**
 	 * Load object in memory from the database
 	 *
-	 * @param int    $id   Id object
-	 * @param string $ref  Ref
-	 * @return int         <0 if KO, 0 if not found, >0 if OK
+	 * @param  int         $id  ID object
+	 * @param  string|null $ref Ref
+	 * @return int              0 < if KO, 0 if not found, >0 if OK
 	 */
-	public function fetch($id, $ref = null)
+	public function fetch(int $id, string $ref = null): int
 	{
 		$result = $this->fetchCommon($id, $ref);
 		if ($result > 0 && !empty($this->table_element_line)) {
@@ -250,30 +259,28 @@ class TimeSheet extends CommonObject
 	/**
 	 * Load object lines in memory from the database
 	 *
-	 * @return int         <0 if KO, 0 if not found, >0 if OK
+	 * @return int 0 < if KO, 0 if not found, >0 if OK
 	 */
-	public function fetchLines()
+	public function fetchLines(): int
 	{
 		$this->lines = array();
-		$result = $this->fetchLinesCommon();
-		return $result;
+		return $this->fetchLinesCommon();
 	}
 
 	/**
 	 * Load list of objects in memory from the database.
 	 *
-	 * @param  string      $sortorder    Sort Order
-	 * @param  string      $sortfield    Sort field
-	 * @param  int         $limit        limit
-	 * @param  int         $offset       Offset
-	 * @param  array       $filter       Filter array. Example array('field'=>'valueforlike', 'customurl'=>...)
-	 * @param  string      $filtermode   Filter mode (AND or OR)
-	 * @return array|int                 int <0 if KO, array of pages if OK
+	 * @param  string      $sortorder  Sort Order
+	 * @param  string      $sortfield  Sort field
+	 * @param  int         $limit      Limit
+	 * @param  int         $offset     Offset
+	 * @param  array       $filter     Filter array. Example array('field'=>'value', 'customurl'=>...)
+	 * @param  string      $filtermode Filter mode (AND/OR)
+	 * @return array|int               int <0 if KO, array of pages if OK
+	 * @throws Exception
 	 */
-	public function fetchAll($sortorder = '', $sortfield = '', $limit = 0, $offset = 0, array $filter = array(), $filtermode = 'AND')
+	public function fetchAll(string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = array(), string $filtermode = 'AND')
 	{
-		global $conf;
-
 		dol_syslog(__METHOD__, LOG_DEBUG);
 
 		$records = array();
@@ -344,9 +351,9 @@ class TimeSheet extends CommonObject
 	 *
 	 * @param  User $user      User that modifies
 	 * @param  bool $notrigger false=launch triggers after, true=disable triggers
-	 * @return int             <0 if KO, >0 if OK
+	 * @return int             0 < if KO, >0 if OK
 	 */
-	public function update(User $user, $notrigger = false)
+	public function update(User $user, bool $notrigger = false): int
 	{
 		return $this->updateCommon($user, $notrigger);
 	}
@@ -354,11 +361,11 @@ class TimeSheet extends CommonObject
 	/**
 	 * Delete object in database
 	 *
-	 * @param User $user       User that deletes
-	 * @param bool $notrigger  false=launch triggers after, true=disable triggers
-	 * @return int             <0 if KO, >0 if OK
+	 * @param  User $user      User that deletes
+	 * @param  bool $notrigger false=launch triggers after, true=disable triggers
+	 * @return int             0 < if KO, >0 if OK
 	 */
-	public function delete(User $user, $notrigger = false)
+	public function delete(User $user, bool $notrigger = false): int
 	{
 		return $this->deleteCommon($user, $notrigger);
 	}
@@ -366,12 +373,12 @@ class TimeSheet extends CommonObject
 	/**
 	 *  Delete a line of object in database
 	 *
-	 *	@param  User	$user       User that delete
-	 *  @param	int		$idline		Id of line to delete
-	 *  @param 	bool 	$notrigger  false=launch triggers after, true=disable triggers
-	 *  @return int         		>0 if OK, <0 if KO
+	 *	@param  User $user      User that delete
+	 *  @param  int  $idline	ID of line to delete
+	 *  @param  bool $notrigger false=launch triggers after, true=disable triggers
+	 *  @return int             >0 if OK, <0 if KO
 	 */
-	public function deleteLine(User $user, $idline, $notrigger = false)
+	public function deleteLine(User $user, int $idline, bool $notrigger = false): int
 	{
 		if ($this->status < 0) {
 			$this->error = 'ErrorDeleteLineNotAllowedByObjectStatus';
@@ -382,15 +389,16 @@ class TimeSheet extends CommonObject
 	}
 
 	/**
-	 *	Validate object
+	 *    Validate object
 	 *
-	 *	@param		User	$user     		User making status change
-	 *  @param		int		$notrigger		1=Does not execute triggers, 0= execute triggers
-	 *	@return  	int						<=0 if OK, 0=Nothing done, >0 if KO
+	 * @param  User      $user      User making status change
+	 * @param  int       $notrigger 1=Does not execute triggers, 0= execute triggers
+	 * @return int                  0 < if OK, 0=Nothing done, >0 if KO
+	 * @throws Exception
 	 */
-	public function validate($user, $notrigger = 0)
+	public function validate(User $user, int $notrigger = 0): int
 	{
-		global $conf, $langs;
+		global $conf;
 
 		require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
@@ -402,20 +410,12 @@ class TimeSheet extends CommonObject
 			return 0;
 		}
 
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->doliproject->timesheet->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->doliproject->timesheet->timesheet_advance->validate))))
-		 {
-		 $this->error='NotEnoughPermissions';
-		 dol_syslog(get_class($this)."::valid ".$this->error, LOG_ERR);
-		 return -1;
-		 }*/
-
 		$now = dol_now();
 
 		$this->db->begin();
 
 		// Define new ref
-		if (!$error && (preg_match('/^[\(]?PROV/i', $this->ref) || empty($this->ref))) { // empty should not happened, but when it occurs, the test save life
+		if ((preg_match('/^\(?PROV/i', $this->ref) || empty($this->ref))) { // empty should not happen, but when it occurs, the test save life
 			$num = $this->getNextNumRef();
 		} else {
 			$num = $this->ref;
@@ -433,7 +433,7 @@ class TimeSheet extends CommonObject
 			if (!empty($this->fields['fk_user_valid'])) {
 				$sql .= ", fk_user_valid = ".((int) $user->id);
 			}
-			$sql .= " WHERE rowid = ".((int) $this->id);
+			$sql .= " WHERE rowid = ".($this->id);
 
 			dol_syslog(get_class($this)."::validate()", LOG_DEBUG);
 			$resql = $this->db->query($sql);
@@ -457,7 +457,7 @@ class TimeSheet extends CommonObject
 			$this->oldref = $this->ref;
 
 			// Rename directory if dir was a temporary ref
-			if (preg_match('/^[\(]?PROV/i', $this->ref)) {
+			if (preg_match('/^\(?PROV/i', $this->ref)) {
 				// Now we rename also files into index
 				$sql = 'UPDATE '.MAIN_DB_PREFIX."ecm_files set filename = CONCAT('".$this->db->escape($this->newref)."', SUBSTR(filename, ".(strlen($this->ref) + 1).")), filepath = 'timesheet/".$this->db->escape($this->newref)."'";
 				$sql .= " WHERE filename LIKE '".$this->db->escape($this->ref)."%' AND filepath = 'timesheet/".$this->db->escape($this->ref)."' and entity = ".$conf->entity;
@@ -506,13 +506,14 @@ class TimeSheet extends CommonObject
 	}
 
 	/**
-	 *	Set draft status
+	 *    Set draft status
 	 *
-	 *	@param	User	$user			Object user that modify
-	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
-	 *	@return	int						<0 if KO, >0 if OK
+	 * @param  User      $user      Object user that modify
+	 * @param  int       $notrigger 1=Does not execute triggers, 0=Execute triggers
+	 * @return int                  0 < if KO, >0 if OK
+	 * @throws Exception
 	 */
-	public function setDraft($user, $notrigger = 0)
+	public function setDraft(User $user, int $notrigger = 0): int
 	{
 		// Protection
 		if ($this->status <= self::STATUS_DRAFT) {
@@ -525,25 +526,25 @@ class TimeSheet extends CommonObject
 	}
 
 	/**
-	 *	Set lock status
+	 *	Set locked status
 	 *
-	 *	@param	User	$user			Object user that modify
-	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
-	 *	@return	int						<0 if KO, 0=Nothing done, >0 if OK
+	 *	@param  User $user	    Object user that modify
+	 *  @param  int  $notrigger 1=Does not execute triggers, 0=Execute triggers
+	 *	@return	int				0 < if KO, 0=Nothing done, >0 if OK
 	 */
-	public function setLocked($user, $notrigger = 0)
+	public function setLocked(User $user, int $notrigger = 0): int
 	{
 		return $this->setStatusCommon($user, self::STATUS_LOCKED, $notrigger, 'TIMESHEET_LOCKED');
 	}
 
 	/**
-	 *	Set close status
+	 *	Set archived status
 	 *
-	 *	@param	User	$user			Object user that modify
-	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
-	 *	@return	int						<0 if KO, >0 if OK
+	 *	@param  User $user	    Object user that modify
+	 *  @param  int  $notrigger 1=Does not execute triggers, 0=Execute triggers
+	 *	@return	int			    0 < if KO, >0 if OK
 	 */
-	public function setArchived($user, $notrigger = 0)
+	public function setArchived(User $user, int $notrigger = 0): int
 	{
 		return $this->setStatusCommon($user, self::STATUS_ARCHIVED, $notrigger, 'TIMESHEET_ARCHIVED');
 	}
@@ -551,16 +552,16 @@ class TimeSheet extends CommonObject
 	/**
 	 *  Return a link to the object card (with optionaly the picto)
 	 *
-	 *  @param  int     $withpicto                  Include picto in link (0=No picto, 1=Include picto into link, 2=Only picto)
-	 *  @param  string  $option                     On what the link point to ('nolink', ...)
-	 *  @param  int     $notooltip                  1=Disable tooltip
-	 *  @param  string  $morecss                    Add more css on link
-	 *  @param  int     $save_lastsearch_value      -1=Auto, 0=No save of lastsearch_values when clicking, 1=Save lastsearch_values whenclicking
-	 *  @return	string                              String with URL
+	 *  @param  int     $withpicto              Include picto in link (0=No picto, 1=Include picto into link, 2=Only picto)
+	 *  @param  string  $option                 On what the link point to ('nolink', ...)
+	 *  @param  int     $notooltip              1=Disable tooltip
+	 *  @param  string  $morecss                Add more css on link
+	 *  @param  int     $save_lastsearch_value -1=Auto, 0=No save of lastsearch_values when clicking, 1=Save lastsearch_values whenclicking
+	 *  @return	string                          String with URL
 	 */
-	public function getNomUrl($withpicto = 0, $option = '', $notooltip = 0, $morecss = '', $save_lastsearch_value = -1)
+	public function getNomUrl(int $withpicto = 0, string $option = '', int $notooltip = 0, string $morecss = '', int $save_lastsearch_value = -1): string
 	{
-		global $conf, $langs, $hookmanager;
+		global $conf, $langs;
 
 		if (!empty($conf->dol_no_mouse_hover)) {
 			$notooltip = 1; // Force disable tooltips
@@ -614,35 +615,6 @@ class TimeSheet extends CommonObject
 
 		$result .= $linkstart;
 
-//		if (empty($this->showphoto_on_popup)) {
-//			if ($withpicto) {
-//				$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), ($notooltip ? (($withpicto != 2) ? 'class="paddingright"' : '') : 'class="'.(($withpicto != 2) ? 'paddingright ' : '').'classfortooltip"'), 0, 0, $notooltip ? 0 : 1);
-//			}
-//		} else {
-//			if ($withpicto) {
-//				require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-//
-//				list($class, $module) = explode('@', $this->picto);
-//				$upload_dir = $conf->$module->multidir_output[$conf->entity]."/$class/".dol_sanitizeFileName($this->ref);
-//				$filearray = dol_dir_list($upload_dir, "files");
-//				$filename = $filearray[0]['name'];
-//				if (!empty($filename)) {
-//					$pospoint = strpos($filearray[0]['name'], '.');
-//
-//					$pathtophoto = $class.'/'.$this->ref.'/thumbs/'.substr($filename, 0, $pospoint).'_mini'.substr($filename, $pospoint);
-//					if (empty($conf->global->{strtoupper($module.'_'.$class).'_FORMATLISTPHOTOSASUSERS'})) {
-//						$result .= '<div class="floatleft inline-block valignmiddle divphotoref"><div class="photoref"><img class="photo'.$module.'" alt="No photo" border="0" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart='.$module.'&entity='.$conf->entity.'&file='.urlencode($pathtophoto).'"></div></div>';
-//					} else {
-//						$result .= '<div class="floatleft inline-block valignmiddle divphotoref"><img class="photouserphoto userphoto" alt="No photo" border="0" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart='.$module.'&entity='.$conf->entity.'&file='.urlencode($pathtophoto).'"></div>';
-//					}
-//
-//					$result .= '</div>';
-//				} else {
-//					$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), ($notooltip ? (($withpicto != 2) ? 'class="paddingright"' : '') : 'class="'.(($withpicto != 2) ? 'paddingright ' : '').'classfortooltip"'), 0, 0, $notooltip ? 0 : 1);
-//				}
-//			}
-//		}
-
 		if ($withpicto) $result .= '<i class="fas fa-calendar-check"></i>' . ' ';
 		if ($withpicto != 2) {
 			$result .= $this->ref;
@@ -667,23 +639,22 @@ class TimeSheet extends CommonObject
 	/**
 	 *  Return the label of the status
 	 *
-	 *  @param  int		$mode          0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto, 6=Long label + Picto
-	 *  @return	string 			       Label of status
+	 *  @param  int     $mode 0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto, 6=Long label + Picto
+	 *  @return	string 	      Label of status
 	 */
-	public function getLibStatut($mode = 0)
+	public function getLibStatut(int $mode = 0): string
 	{
 		return $this->LibStatut($this->status, $mode);
 	}
 
-	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
 	/**
 	 *  Return the status
 	 *
-	 *  @param	int		$status        Id status
-	 *  @param  int		$mode          0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto, 6=Long label + Picto
-	 *  @return string 			       Label of status
+	 *  @param  int    $status Id status
+	 *  @param  int    $mode   0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto, 6=Long label + Picto
+	 *  @return string 		   Label of status
 	 */
-	public function LibStatut($status, $mode = 0)
+	public function LibStatut(int $status, int $mode = 0): string
 	{
 		// phpcs:enable
 		if (empty($this->labelStatus) || empty($this->labelStatusShort)) {
@@ -711,42 +682,23 @@ class TimeSheet extends CommonObject
 	/**
 	 *	Load the info information in the object
 	 *
-	 *	@param  int		$id       Id of object
+	 *	@param  int   $id ID of object
 	 *	@return	void
 	 */
-	public function info($id)
+	public function info(int $id)
 	{
 		$sql = "SELECT rowid, date_creation as datec, tms as datem,";
 		$sql .= " fk_user_creat, fk_user_modif";
 		$sql .= " FROM ".MAIN_DB_PREFIX.$this->table_element." as t";
-		$sql .= " WHERE t.rowid = ".((int) $id);
+		$sql .= " WHERE t.rowid = ".($id);
 
 		$result = $this->db->query($sql);
 		if ($result) {
 			if ($this->db->num_rows($result)) {
 				$obj = $this->db->fetch_object($result);
 				$this->id = $obj->rowid;
-				if (!empty($obj->fk_user_author)) {
-					$cuser = new User($this->db);
-					$cuser->fetch($obj->fk_user_author);
-					$this->user_creation = $cuser;
-				}
 
-				if (!empty($obj->fk_user_valid)) {
-					$vuser = new User($this->db);
-					$vuser->fetch($obj->fk_user_valid);
-					$this->user_validation = $vuser;
-				}
-
-				if (!empty($obj->fk_user_cloture)) {
-					$cluser = new User($this->db);
-					$cluser->fetch($obj->fk_user_cloture);
-					$this->user_cloture = $cluser;
-				}
-
-				$this->date_creation     = $this->db->jdate($obj->datec);
-				$this->date_modification = $this->db->jdate($obj->datem);
-				$this->date_validation   = $this->db->jdate($obj->datev);
+				$this->date_creation = $this->db->jdate($obj->date_creation);
 			}
 
 			$this->db->free($result);
@@ -757,13 +709,13 @@ class TimeSheet extends CommonObject
 
 	/**
 	 * Initialise object with example values
-	 * Id must be 0 if object instance is a specimen
+	 * ID must be 0 if object instance is a specimen
 	 *
 	 * @return void
 	 */
 	public function initAsSpecimen()
 	{
-		// Set here init that are not commonf fields
+		// Set here init that are not common fields
 		// $this->property1 = ...
 		// $this->property2 = ...
 
@@ -771,16 +723,17 @@ class TimeSheet extends CommonObject
 	}
 
 	/**
-	 * 	Create an array of lines
+	 * Create an array of lines
 	 *
-	 * 	@return array|int		array of lines if OK, <0 if KO
+	 * @return array|int array of lines if OK, <0 if KO
+	 * @throws Exception
 	 */
 	public function getLinesArray()
 	{
 		$this->lines = array();
 
 		$objectline = new TimeSheetLine($this->db);
-		$result = $objectline->fetchAll('ASC', 'rang', 0, 0, array('customsql'=>'fk_timesheet = '.((int) $this->id)));
+		$result = $objectline->fetchAll('ASC', 'rang', 0, 0, array('customsql'=>'fk_timesheet = '.($this->id)));
 
 		if (is_numeric($result)) {
 			$this->error = $objectline->error;
@@ -793,11 +746,11 @@ class TimeSheet extends CommonObject
 	}
 
 	/**
-	 *  Returns the reference to the following non used object depending on the active numbering module.
+	 * Returns the reference to the following non-used object depending on the active numbering module.
 	 *
-	 *  @return string      		Object free reference
+	 *  @return string Object free reference
 	 */
-	public function getNextNumRef()
+	public function getNextNumRef(): string
 	{
 		global $langs, $conf;
 		$langs->load("doliproject@doliproject");
@@ -813,7 +766,7 @@ class TimeSheet extends CommonObject
 			$classname = $conf->global->DOLIPROJECT_TIMESHEET_ADDON;
 
 			// Include file with class
-			$dirmodels = array_merge(array('/'), (array) $conf->modules_parts['models']);
+			$dirmodels = array_merge(array('/'), $conf->modules_parts['models']);
 			foreach ($dirmodels as $reldir) {
 				$dir = dol_buildpath($reldir."core/modules/doliproject/timesheet/");
 
@@ -851,11 +804,11 @@ class TimeSheet extends CommonObject
 	 * Sets object to supplied categories.
 	 *
 	 * Deletes object from existing categories not supplied.
-	 * Adds it to non existing supplied categories.
-	 * Existing categories are left untouch.
+	 * Adds it to non-existing supplied categories.
+	 * Existing categories are left untouched.
 	 *
 	 * @param  int[]|int $categories Category or categories IDs
-	 * @return void
+	 * @return float|int
 	 */
 	public function setCategories($categories)
 	{
@@ -865,20 +818,19 @@ class TimeSheet extends CommonObject
 	/**
 	 *  Create a document onto disk according to template module.
 	 *
-	 *  @param	    string		$modele			Force template to use ('' to not force)
-	 *  @param		Translate	$outputlangs	objet lang a utiliser pour traduction
-	 *  @param      int			$hidedetails    Hide details of lines
-	 *  @param      int			$hidedesc       Hide description
-	 *  @param      int			$hideref        Hide ref
-	 *  @param      null|array  $moreparams     Array to provide more information
-	 *  @return     int         				0 if KO, 1 if OK
+	 *  @param  string     $modele	    Force template to use ('' to not force)
+	 *  @param  Translate  $outputlangs	Objet lang use for translate
+	 *  @param  int        $hidedetails Hide details of lines
+	 *  @param  int        $hidedesc    Hide description
+	 *  @param  int        $hideref     Hide ref
+	 *  @param  array|null $moreparams  Array to provide more information
+	 *  @return int         		    0 if KO, 1 if OK
 	 */
-	public function generateDocument($modele, $outputlangs, $hidedetails = 0, $hidedesc = 0, $hideref = 0, $moreparams = null)
+	public function generateDocument(string $modele, Translate $outputlangs, int $hidedetails = 0, int $hidedesc = 0, int $hideref = 0, array $moreparams = null): int
 	{
 		global $conf, $langs;
 
 		$result = 0;
-		$includedocgeneration = 1;
 
 		$langs->load("doliproject@doliproject");
 
@@ -894,14 +846,13 @@ class TimeSheet extends CommonObject
 
 		$modelpath = "core/modules/doliproject/timesheetdocument/";
 
-		if ($includedocgeneration && !empty($modele)) {
+		if (!empty($modele)) {
 			$result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams['object']);
 		}
 
 		return $result;
 	}
 }
-
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
 
@@ -935,12 +886,10 @@ class TimeSheetLine extends CommonObjectLine
 	 */
 	public $table_element = 'doliproject_timesheetdet';
 
-
 	/**
 	 * @var int  Does object support extrafields ? 0=No, 1=Yes
 	 */
-	public $isextrafieldmanaged = 0;
-
+	public int $isextrafieldmanaged = 0;
 
 	/**
 	 *  'type' field format ('integer', 'integer:ObjectClass:PathToClass[:AddCreateButtonOrNot[:Filter[:Sortfield]]]', 'sellist:TableName:LabelFieldName[:KeyFieldName[:KeyFieldParent[:Filter[:Sortfield]]]]', 'varchar(x)', 'double(24,8)', 'real', 'price', 'text', 'text:none', 'html', 'date', 'datetime', 'timestamp', 'duration', 'mail', 'phone', 'url', 'password')
@@ -952,7 +901,7 @@ class TimeSheetLine extends CommonObjectLine
 	 *  'notnull' is set to 1 if not null in database. Set to -1 if we must set data to null if empty ('' or 0).
 	 *  'visible' says if field is visible in list (Examples: 0=Not visible, 1=Visible on list and create/update/view forms, 2=Visible on list only, 3=Visible on create/update/view form only (not list), 4=Visible on list and update/view form only (not create). 5=Visible on list and view only (not create/not update). Using a negative value means field is not shown by default on list but can be selected for viewing)
 	 *  'noteditable' says if field is not editable (1 or 0)
-	 *  'default' is a default value for creation (can still be overwrote by the Setup of Default Values if field is editable in creation form). Note: If default is set to '(PROV)' and field is 'ref', the default value will be set to '(PROVid)' where id is rowid when a new record is created.
+	 *  'default' is a default value for creation (can still be overwroted by the Setup of Default Values if field is editable in creation form). Note: If default is set to '(PROV)' and field is 'ref', the default value will be set to '(PROVid)' where id is rowid when a new record is created.
 	 *  'index' if we want an index in database.
 	 *  'foreignkey'=>'tablename.field' if the field is a foreign key (it is recommanded to name the field fk_...).
 	 *  'searchall' is 1 if we want to search in this field when making a search from the quick search button.
@@ -964,7 +913,7 @@ class TimeSheetLine extends CommonObjectLine
 	 *  'arrayofkeyval' to set a list of values if type is a list of predefined values. For example: array("0"=>"Draft","1"=>"Active","-1"=>"Cancel"). Note that type can be 'integer' or 'varchar'
 	 *  'autofocusoncreate' to have field having the focus on a create form. Only 1 field should have this property set to 1.
 	 *  'comment' is not used. You can store here any text of your choice. It is not used by application.
-	 *	'validate' is 1 if need to validate with $this->validateField()
+	 *	'validate' is 1 if you need to validate with $this->validateField()
 	 *  'copytoclipboard' is 1 or 2 to allow to add a picto to copy value into clipboard (1=picto after label, 2=picto after value)
 	 *
 	 *  Note: To have value dynamic, you can set value to 0 in definition and edit the value on the fly into the constructor.
@@ -973,7 +922,7 @@ class TimeSheetLine extends CommonObjectLine
 	/**
 	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
-	public $fields = array(
+	public array $fields = array(
 		'rowid'          => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
 		'date_creation'  => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'visible'=>0,),
 		'qty'            => array('type'=>'real', 'label'=>'Quantity', 'enabled'=>'1', 'position'=>20, 'notnull'=>0, 'visible'=>0,),
@@ -1008,10 +957,10 @@ class TimeSheetLine extends CommonObjectLine
 	/**
 	 *	Load time sheet line from database
 	 *
-	 *	@param	int		$rowid      id of invoice line to get
-	 *	@return	int					<0 if KO, >0 if OK
+	 *	@param  int $rowid ID of timesheet line to get
+	 *	@return	int		   0 < if KO, >0 if OK
 	 */
-	public function fetch($rowid)
+	public function fetch(int $rowid): int
 	{
 		$sql  = 'SELECT tsd.rowid, tsd.date_creation, tsd.qty, tsd.rang, tsd.description, tsd.product_type,';
 		$sql .= ' tsd.fk_timesheet, tsd.fk_product, tsd.fk_parent_line';
@@ -1045,16 +994,17 @@ class TimeSheetLine extends CommonObjectLine
 	/**
 	 * Load timesheet line from database
 	 *
-	 * @param string $sortorder Sort Order
-	 * @param string $sortfield Sort field
-	 * @param int $limit offset limit
-	 * @param int $offset offset limit
-	 * @param array $filter filter array
-	 * @param string $filtermode filter mode (AND or OR)
-	 * @param int $parent_id
+	 * @param  string    $sortorder  Sort Order
+	 * @param  string    $sortfield  Sort field
+	 * @param  int       $limit      Offset limit
+	 * @param  int       $offset     Offset limit
+	 * @param  array     $filter     Filter array
+	 * @param  string    $filtermode Filter mode (AND/OR)
+	 * @param  int       $parent_id  Parent ID
 	 * @return array|int
+	 * @throws Exception
 	 */
-	public function fetchAll($sortorder = '', $sortfield = '', $limit = 0, $offset = 0, array $filter = array(), $filtermode = 'AND', $parent_id = 0)
+	public function fetchAll($sortorder = '', $sortfield = '', $limit = 0, $offset = 0, array $filter = array(), $filtermode = 'AND', int $parent_id = 0)
 	{
 		$sql  = 'SELECT tsd.rowid, tsd.date_creation, tsd.qty, tsd.rang, tsd.description, tsd.product_type,';
 		$sql .= ' tsd.fk_timesheet, tsd.fk_product, tsd.fk_parent_line';
@@ -1109,7 +1059,9 @@ class TimeSheetLine extends CommonObjectLine
 			}
 			$this->db->free($resql);
 
-			return $records;
+			if (!empty($records)) {
+				return $records;
+			}
 		} else {
 			$this->errors[] = 'Error '.$this->db->lasterror();
 			dol_syslog(__METHOD__.' '.join(',', $this->errors), LOG_ERR);
@@ -1121,12 +1073,12 @@ class TimeSheetLine extends CommonObjectLine
 	/**
 	 *    Insert line into database
 	 *
-	 * @param User $user
-	 * @param bool $notrigger 1 no triggers
-	 * @return int       <0 if KO, >0 if OK
+	 * @param  User      $user
+	 * @param  bool      $notrigger 1 no triggers
+	 * @return int                  0 < if KO, >0 if OK
 	 * @throws Exception
 	 */
-	public function insert(User $user, $notrigger = false)
+	public function insert(User $user, bool $notrigger = false): int
 	{
 		global $user;
 
@@ -1136,7 +1088,7 @@ class TimeSheetLine extends CommonObjectLine
 		$this->db->begin();
 		$now = dol_now();
 
-		// Insertion dans base de la ligne
+		// Insertion dans base de la line
 		$sql  = 'INSERT INTO ' . MAIN_DB_PREFIX . 'doliproject_timesheetdet';
 		$sql .= ' (date_creation, qty, rang, description, product_type,';
 		$sql .= ' fk_timesheet, fk_product, fk_parent_line)';
@@ -1176,12 +1128,12 @@ class TimeSheetLine extends CommonObjectLine
 	/**
 	 *    Update line into database
 	 *
-	 * @param User $user User object
-	 * @param bool $notrigger Disable triggers
-	 * @return        int                    <0 if KO, >0 if OK
+	 * @param  User      $user      User object
+	 * @param  bool      $notrigger Disable triggers
+	 * @return int                  0 < if KO, >0 if OK
 	 * @throws Exception
 	 */
-	public function update(User $user, $notrigger = false)
+	public function update(User $user, bool $notrigger = false): int
 	{
 		global $user;
 
@@ -1221,12 +1173,12 @@ class TimeSheetLine extends CommonObjectLine
 	/**
 	 *    Delete line in database
 	 *
-	 * @param User $user
-	 * @param bool $notrigger
-	 * @return        int                   <0 if KO, >0 if OK
+	 * @param  User        $user      User object
+	 * @param  bool        $notrigger Disable triggers
+	 * @return int                    0 <if KO, >0 if OK
 	 * @throws Exception
 	 */
-	public function delete(User $user, $notrigger = false)
+	public function delete(User $user, bool $notrigger = false): int
 	{
 		global $user;
 
@@ -1271,7 +1223,7 @@ class TimeSheetSignature extends DoliProjectSignature
 	/**
 	 * @var string String with name of icon for document. Must be the part after the 'object_' into object_document.png
 	 */
-	public $picto = 'timesheet@doliproject';
+	public string $picto = 'timesheet@doliproject';
 
 	/**
 	 * Constructor

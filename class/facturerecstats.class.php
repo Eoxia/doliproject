@@ -18,7 +18,7 @@
 /**
  *       \file       class/facturerecstats.class.php
  *       \ingroup    doliproject
- *       \brief      Fichier de la classe de gestion des stats des factures récurrentes
+ *       \brief      Recurring invoice class to manage statistics reports
  */
 include_once DOL_DOCUMENT_ROOT.'/custom/doliproject/class/doliprojectstats.php';
 include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
@@ -30,45 +30,82 @@ include_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
  */
 class FactureRecStats extends DoliProjectStats
 {
-	public $socid;
-	public $userid;
+	/**
+	 * @var int  ID soc
+	 */
+	public int $socid;
+
+	/**
+	 * @var int ID user
+	 */
+	public int $userid;
 
 	/**
 	 * @var string Name of table without prefix where object is stored
 	 */
-	public $table_element;
+	public string $table_element;
 
-	public $from;
-	public $field;
-	public $where;
-	public $join;
+	/**
+	 * @var string Suffix to add to name of cache file (to avoid file name conflicts)
+	 */
+	public string $cachefilesuffix = '';
+
+	/**
+	 * @var string SQL from
+	 */
+	public string $from;
+
+	/**
+	 * @var string SQL field
+	 */
+	public string $field;
+
+	/**
+	 * @var string SQL where
+	 */
+	public string $where;
+
+	/**
+	 * @var string SQL join
+	 */
+	public string $join;
+
+	/**
+	 * @var string SQL from line
+	 */
+	public string $from_line;
+
+	/**
+	 * @var string SQL field line
+	 */
+	public string $field_line;
 
 	/**
 	 * 	Constructor
 	 *
-	 * 	@param	DoliDB		$db			          Database handler
-	 * 	@param 	int			$socid		          Id third party for filter. This value must be forced during the new to external user company if user is an external user.
-	 * 	@param 	string		$mode	   	          Option ('customer', 'supplier')
-	 * 	@param	int			$userid    	          Id user for filter (creation user)
-	 * 	@param	int			$typentid             Id typent of thirdpary for filter
-	 * 	@param	int			$categid              Id category of thirdpary for filter
-	 * 	@param	int			$categinvoicerecid    Id category of Invoice rec for filter
+	 * 	@param DoliDB $db			     Database handler
+	 * 	@param int    $socid		     ID third party for filter. This value must be forced during the new to external user company if user is an external user.
+	 * 	@param string $mode	   	         Option ('customer', 'supplier')
+	 * 	@param int    $userid    	     ID user for filter (creation user)
+	 * 	@param int    $typentid          ID typent of thirdparty for filter
+	 * 	@param int    $categid           ID category of thirdparty for filter
+	 * 	@param int    $categinvoicerecid ID category of Invoice rec for filter
 	 */
-	public function __construct($db, $socid, $mode, $userid = 0, $typentid = 0, $categid = 0, $categinvoicerecid = 0)
+	public function __construct(DoliDB $db, int $socid, string $mode, int $userid = 0, int $typentid = 0, int $categid = 0, int $categinvoicerecid = 0)
 	{
-		global $user, $conf;
+		global $user;
 
-		$this->db = $db;
-		$this->socid = ($socid > 0 ? $socid : 0);
-		$this->userid = $userid;
+		$this->db              = $db;
+		$this->socid           = ($socid > 0 ?: 0);
+		$this->userid          = $userid;
 		$this->cachefilesuffix = $mode;
-		$this->join = '';
+		$this->join            = '';
 
 		if ($mode == 'customer') {
-			$object = new FactureRec($this->db);
-			$this->from = MAIN_DB_PREFIX.$object->table_element." as fr";
-			$this->from_line = MAIN_DB_PREFIX.$object->table_element_line." as tl";
-			$this->field = 'total_ht';
+			$object           = new FactureRec($this->db);
+			$this->from       = MAIN_DB_PREFIX.$object->table_element." as fr";
+			$this->from_line  = MAIN_DB_PREFIX.$object->table_element_line." as tl";
+			$this->field      = 'total_ht';
 			$this->field_line = 'total_ht';
 		}
 //		if ($mode == 'supplier') {
@@ -91,7 +128,7 @@ class FactureRecStats extends DoliProjectStats
 			$this->where .= " AND fr.fk_soc = ".((int) $this->socid);
 		}
 		if ($this->userid > 0) {
-			$this->where .= ' AND fr.fk_user_author = '.((int) $this->userid);
+			$this->where .= ' AND fr.fk_user_author = '.($this->userid);
 		}
 //		if (!empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) {
 //			$this->where .= " AND f.type IN (0,1,2,5)";
@@ -101,31 +138,31 @@ class FactureRecStats extends DoliProjectStats
 
 		if ($typentid) {
 			$this->join .= ' LEFT JOIN '.MAIN_DB_PREFIX.'societe as s ON s.rowid = fr.fk_soc';
-			$this->where .= ' AND s.fk_typent = '.((int) $typentid);
+			$this->where .= ' AND s.fk_typent = '.($typentid);
 		}
 
 		if ($categid) {
 			$this->join .= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_societe as cs ON cs.fk_soc = fr.fk_soc';
 			$this->join .= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie as c ON c.rowid = cs.fk_categorie';
-			$this->where .= ' AND c.rowid = '.((int) $categid);
+			$this->where .= ' AND c.rowid = '.($categid);
 		}
 
 		if ($categinvoicerecid) {
 			$this->join .= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_invoicerec as cir ON cir.fk_invoicerec = fr.rowid';
 			$this->join .= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie as c ON c.rowid = cir.fk_categorie';
-			$this->where .= ' AND c.rowid = '.((int) $categinvoicerecid);
+			$this->where .= ' AND c.rowid = '.($categinvoicerecid);
 		}
 	}
 
-
 	/**
-	 * 	Return recurring invoices number by month for a year
+	 * Return recurring invoices number by month for a year
 	 *
-	 *	@param	int		$year		Year to scan
-	 *	@param	int		$format		0=Label of abscissa is a translated text, 1=Label of abscissa is month number, 2=Label of abscissa is first letter of month
-	 *	@return	array				Array of values
+	 * @param  int        $year   Year to scan
+	 * @param  int        $format 0=Label of abscissa is a translated text, 1=Label of abscissa is month number, 2=Label of abscissa is first letter of month
+	 * @return array              Array of values
+	 * @throws Exception
 	 */
-	public function getNbByMonth($year, $format = 0)
+	public function getNbByMonth(int $year, int $format = 0): array
 	{
 		global $user;
 
@@ -140,18 +177,17 @@ class FactureRecStats extends DoliProjectStats
 		$sql .= " GROUP BY dm";
 		$sql .= $this->db->order('dm', 'DESC');
 
-		$res = $this->_getNbByMonth($year, $sql, $format);
-
-		return $res;
+		return $this->_getNbByMonth($sql, $format);
 	}
 
 
 	/**
-	 * 	Return recurring invoices number per year
+	 * Return recurring invoices number per year
 	 *
-	 *	@return		array	Array with number by year
+	 * @return array     Array with number by year
+	 * @throws Exception
 	 */
-	public function getNbByYear()
+	public function getNbByYear(): array
 	{
 		global $user;
 
@@ -170,13 +206,14 @@ class FactureRecStats extends DoliProjectStats
 
 
 	/**
-	 * 	Return the recurring invoices amount by month for a year
+	 * Return the recurring invoices amount by month for a year
 	 *
-	 *	@param	int		$year		Year to scan
-	 *	@param	int		$format		0=Label of abscissa is a translated text, 1=Label of abscissa is month number, 2=Label of abscissa is first letter of month
-	 *	@return	array				Array with amount by month
+	 * @param  int        $year   Year to scan
+	 * @param  int        $format 0=Label of abscissa is a translated text, 1=Label of abscissa is month number, 2=Label of abscissa is first letter of month
+	 * @return array              Array with amount by month
+	 * @throws Exception
 	 */
-	public function getAmountByMonth($year, $format = 0)
+	public function getAmountByMonth(int $year, int $format = 0): array
 	{
 		global $user;
 
@@ -191,18 +228,18 @@ class FactureRecStats extends DoliProjectStats
 		$sql .= " GROUP BY dm";
 		$sql .= $this->db->order('dm', 'DESC');
 
-		$res = $this->_getAmountByMonth($year, $sql, $format);
-
-		return $res;
+		return $this->_getAmountByMonth($sql, $format);
 	}
 
 	/**
-	 *	Return average amount
+	 * Return average amount
 	 *
-	 *	@param	int		$year	Year to scan
-	 *	@return	array			Array of values
+	 * @param  int       $year   Year to scan
+	 * @param  int       $format 0=Label of abscissa is a translated text, 1=Label of abscissa is month number, 2=Label of abscissa is first letter of month
+	 * @return array             Array of values
+	 * @throws Exception
 	 */
-	public function getAverageByMonth($year)
+	public function getAverageByMonth(int $year, int $format = 0): array
 	{
 		global $user;
 
@@ -217,15 +254,16 @@ class FactureRecStats extends DoliProjectStats
 		$sql .= " GROUP BY dm";
 		$sql .= $this->db->order('dm', 'DESC');
 
-		return $this->_getAverageByMonth($year, $sql);
+		return $this->_getAverageByMonth($sql, $format);
 	}
 
 	/**
-	 *	Return nb, total and average
+	 * Return nb, total and average
 	 *
-	 *	@return	array	Array of values
+	 * @return array     Array of values
+	 * @throws Exception
 	 */
-	public function getAllByYear()
+	public function getAllByYear(): array
 	{
 		global $user;
 
@@ -243,13 +281,12 @@ class FactureRecStats extends DoliProjectStats
 	}
 
 	/**
-	 *      Return the recurring invoices amount by year for a number of past years
+	 * Return the recurring invoices amount by year for a number of past years
 	 *
-	 *      @param  int             $numberYears    Years to scan
-	 *      @param  int             $format         0=Label of abscissa is a translated text, 1=Label of abscissa is year, 2=Label of abscissa is last number of year
-	 *      @return array                           Array with amount by year
+	 * @param  int   $numberYears Years to scan
+	 * @return array              Array with amount by year
 	 */
-	public function getAmountByYear($numberYears, $format = 0)
+	public function getAmountByYear(int $numberYears): array
 	{
 		global $user;
 
@@ -266,8 +303,7 @@ class FactureRecStats extends DoliProjectStats
 		$sql .= " GROUP BY dm";
 		$sql .= $this->db->order('dm', 'ASC');
 
-		$res = $this->_getAmountByYear($sql);
-		return $res;
+		return $this->_getAmountByYear($sql);
 	}
 }
 

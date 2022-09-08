@@ -1,15 +1,12 @@
 'use strict';
 
 var gulp         = require('gulp');
-var watch        = require('gulp-watch');
-var concat       = require('gulp-concat');
 var sass         = require('gulp-sass')(require('sass'));
 var rename       = require('gulp-rename');
-var uglify       = require('gulp-uglify');
 var autoprefixer = require('gulp-autoprefixer');
 
 var paths = {
-	scss_core : [ 'css/scss/**/*.scss', 'css/' ],
+	scss_core : [ 'css/scss/**/*.scss', 'css/' ]
 };
 
 /** Core */
@@ -26,7 +23,6 @@ gulp.task( 'scss_core', function () {
 		.pipe(rename('./doliproject.min.css'))
 		.pipe(gulp.dest(paths.scss_core[1]));
 });
-
 
 /** Watch */
 gulp.task( 'default', function () {
