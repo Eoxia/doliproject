@@ -1,4 +1,4 @@
--- Copyright (C) ---Put here your own copyright and developer email---
+-- Copyright (C) 2022 EOXIA <dev@eoxia.com>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -13,8 +13,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
-
--- BEGIN MODULEBUILDER INDEXES
 ALTER TABLE llx_doliproject_timesheet ADD INDEX idx_doliproject_timesheet_rowid (rowid);
 ALTER TABLE llx_doliproject_timesheet ADD INDEX idx_doliproject_timesheet_ref (ref);
 ALTER TABLE llx_doliproject_timesheet ADD INDEX idx_doliproject_timesheet_status (status);
@@ -22,9 +20,4 @@ ALTER TABLE llx_doliproject_timesheet ADD INDEX idx_doliproject_timesheet_fk_use
 ALTER TABLE llx_doliproject_timesheet ADD INDEX idx_doliproject_timesheet_fk_soc (fk_soc);
 ALTER TABLE llx_doliproject_timesheet ADD INDEX idx_doliproject_timesheet_fk_project (fk_project);
 ALTER TABLE llx_doliproject_timesheet ADD CONSTRAINT llx_doliproject_timesheet_fk_user_creat FOREIGN KEY (fk_user_creat) REFERENCES llx_user(rowid);
--- END MODULEBUILDER INDEXES
-
---ALTER TABLE llx_doliproject_timesheet ADD UNIQUE INDEX uk_doliproject_timesheet_fieldxy(fieldx, fieldy);
-
---ALTER TABLE llx_doliproject_timesheet ADD CONSTRAINT llx_doliproject_timesheet_fk_field FOREIGN KEY (fk_field) REFERENCES llx_doliproject_myotherobject(rowid);
 

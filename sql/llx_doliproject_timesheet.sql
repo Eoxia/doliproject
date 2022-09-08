@@ -1,4 +1,4 @@
--- Copyright (C) ---Put here your own copyright and developer email---
+-- Copyright (C) 2022 EOXIA <dev@eoxia.com>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -15,28 +15,26 @@
 
 
 CREATE TABLE llx_doliproject_timesheet(
-	-- BEGIN MODULEBUILDER FIELDS
-	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
-	ref varchar(128) DEFAULT '(PROV)' NOT NULL, 
-	ref_ext varchar(128),
-    entity          integer DEFAULT 1 NOT NULL,
-	label varchar(255), 
-	description text, 
-	note_public text, 
-	note_private text, 
-	date_creation datetime NOT NULL, 
-	date_start datetime NOT NULL, 
-	date_end datetime NOT NULL, 
-	tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
-	last_main_doc varchar(255), 
-	import_key varchar(14), 
-	model_pdf varchar(255), 
-	model_odt varchar(255), 
-	status integer NOT NULL, 
-	fk_user_assign integer NOT NULL, 
-	fk_soc integer, 
-	fk_project integer, 
-	fk_user_creat integer NOT NULL, 
-	fk_user_modif integer
-	-- END MODULEBUILDER FIELDS
+	rowid          integer AUTO_INCREMENT PRIMARY KEY NOT NULL,
+	ref            varchar(128) DEFAULT '(PROV)' NOT NULL,
+	ref_ext        varchar(128),
+    entity         integer DEFAULT 1 NOT NULL,
+	label          varchar(255),
+	description    text,
+	note_public    text,
+	note_private   text,
+	date_creation  datetime NOT NULL,
+	date_start     datetime NOT NULL,
+	date_end       datetime NOT NULL,
+	tms            timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	last_main_doc  varchar(255),
+	import_key     varchar(14),
+	model_pdf      varchar(255),
+	model_odt      varchar(255),
+	status         integer NOT NULL,
+	fk_user_assign integer NOT NULL,
+	fk_soc         integer,
+	fk_project     integer,
+	fk_user_creat  integer NOT NULL,
+	fk_user_modif  integer
 ) ENGINE=innodb;
