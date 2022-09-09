@@ -609,7 +609,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 						$odfHandler->mergeSegment($listlines);
 					}
 
-					$tasksArray = $task->getTasksArray(0, 0, ($project->id ?: 0), 0, 0, '', '', '',  $object->fk_user_assign, 0, $extrafields);
+					$tasksArray = $task->getTasksArray(0, 0, $conf->global->DOLIPROJECT_HR_PROJECT, 0, 0, '', '', '',  $object->fk_user_assign, 0, $extrafields);
 					$segment = array(
 						array(
 						'csss',

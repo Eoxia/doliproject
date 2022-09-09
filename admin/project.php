@@ -135,7 +135,7 @@ print '</tr>';
 if ( ! empty($conf->projet->enabled)) {
 	$langs->load("projects");
 	print '<tr class="oddeven"><td><label for="HRProject">' . $langs->transnoentities("HRProject") . '</label></td><td>';
-	$formproject->select_projects(0,  (GETPOST('projectid')) ? GETPOST('projectid') : $conf->global->DOLIPROJECT_HR_PROJECT, 'HRProject', 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'maxwidth500');
+	$formproject->select_projects(-1,  (GETPOST('projectid')) ? GETPOST('projectid') : $conf->global->DOLIPROJECT_HR_PROJECT, 'HRProject', 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'maxwidth500');
 	print ' <a href="' . DOL_URL_ROOT . '/projet/card.php?&action=create&status=1&backtopage=' . urlencode($_SERVER["PHP_SELF"] . '?action=create') . '"><span class="fa fa-plus-circle valignmiddle" title="' . $langs->transnoentities("AddProject") . '"></span></a>';
 	print '<td><input type="submit" class="button" name="save" value="' . $langs->transnoentities("Save") . '">';
 	print '</td></tr>';

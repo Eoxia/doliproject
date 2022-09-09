@@ -213,9 +213,9 @@ TimeSpentPerfect = Parfait, toutes tes heures de travail ont été consommées
 TimeSpentMustBeCompleted = Attention, toutes tes heures de travail n'ont pas été consommées du %s au %s <br> Va sur ton pointage de temps du mois de %s pour arranger cela
 TimeSpentDiff = Attention, tu as consommé trop d'heures de travail du %s au %s <br> Va sur ton pointage de temps du mois de %s pour arranger cela
 GoToTimeSpent = Aller sur le pointage de  temps du mois de %s
-ExpectedWorkedDayMonth = Nombre de jours ouvrés :
 ErrorLinkedElementTimeSheetTimeSpent = Erreur liens entre navette et temps consommé <br> il existe déjà une navette lié au temps consommé affecté à l'utilisateur %s sur la période de %s au %s
-ConsumedWorkedDayMonth = Nombre de jour pointés :
+RemoveFileTimeSheet = Supprimer la fiche navette
+ConfirmRemoveFileTimeSheet = Êtes-vous sûr de vouloir supprimer la fiche navette ? La fiche navette sera supprimer ainsi que les liens entre la navette et le temps consommé. <br> De plus la navette retournera au status brouillon.
 
 # Data - Donnée
 TimeSheet = Navette
@@ -238,6 +238,8 @@ TIMESHEET_SOCIETY_RESPONSIBLE = Responsable
 AddAttendantsConf = Ajouter des signataires
 AddAttendantsDescription = Pouvoir ajouter des signataires pendant la réalisation de la navette <br> (par défaut il y a deux signataires, l'utilisateur assigné et son responsable hiéarchirque s'il est configuré dans son profil utilisateur)
 TimesheetsCategoriesArea = Espace des tags/catégories des navettes
+ConsumedWorkedDayMonth = Nombre de jour pointés :
+ExpectedWorkedDayMonth = Nombre de jours ouvrés :
 
 
 

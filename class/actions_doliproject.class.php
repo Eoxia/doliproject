@@ -828,7 +828,7 @@ class ActionsDoliproject
 	 * @param  object    $object     Object
 	 * @throws Exception
 	 */
-	public function deleteFile(array $parameters, object $object) {
+	public function deleteFile(array $parameters, $object) {
 		if ($parameters['currentcontext'] == 'timesheetcard' && !preg_match('/signature/', $parameters['file'])) {
 			global $user;
 
