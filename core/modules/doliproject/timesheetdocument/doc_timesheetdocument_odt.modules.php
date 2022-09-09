@@ -19,7 +19,7 @@
 /**
  *	\file       core/modules/doliproject/timesheetdocument/doc_timesheetdocument_odt.modules.php
  *	\ingroup    doliproject
- *	\brief      File of class to build ODT documents for timesheets
+ *	\brief      File of class to build ODT documents for timesheet
  */
 
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
@@ -47,12 +47,12 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 	 * @var array Minimum version of PHP required by module.
 	 * e.g.: PHP ≥ 5.6 = array(5, 6)
 	 */
-	public $phpmin = array(5, 6);
+	public array $phpmin = array(5, 6);
 
 	/**
 	 * @var string Dolibarr version of the loaded document
 	 */
-	public $version = 'dolibarr';
+	public string $version = 'dolibarr';
 
 	/**
 	 *	Constructor
@@ -61,7 +61,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 	 */
 	public function __construct($db)
 	{
-		global $conf, $langs, $mysoc;
+		global $langs, $mysoc;
 
 		// Load translation files required by the page
 		$langs->loadLangs(array("main", "companies"));
@@ -69,7 +69,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 		$this->db = $db;
 		$this->name = $langs->trans('TimeSheetDocumentDoliProjectTemplate');
 		$this->description = $langs->trans("DocumentModelOdt");
-		$this->scandir = 'DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_PDF_ODT_PATH'; // Name of constant that is used to save list of directories to scan
+		$this->scandir = 'DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_ODT_PATH'; // Name of constant that is used to save list of directories to scan
 
 		// Page size for A4 format
 		$this->type = 'odt';
@@ -112,25 +112,24 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 		// Load translation files required by the page
 		$langs->loadLangs(array("errors", "companies"));
 
-		$form = new Form($this->db);
-
 		$texte = $this->description.".<br>\n";
 		$texte .= '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
 		$texte .= '<input type="hidden" name="token" value="'.newToken().'">';
 		$texte .= '<input type="hidden" name="page_y" value="">';
 		$texte .= '<input type="hidden" name="action" value="setModuleOptions">';
-		$texte .= '<input type="hidden" name="param1" value="DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_PDF_ODT_PATH">';
+		$texte .= '<input type="hidden" name="param1" value="DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_ODT_PATH">';
 		$texte .= '<table class="nobordernopadding centpercent">';
 
 		// List of directories area
 		$texte .= '<tr><td>';
 		$texttitle = $langs->trans("ListOfDirectories");
-		$listofdir = explode(',', preg_replace('/[\r\n]+/', ',', trim($conf->global->DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_PDF_ODT_PATH)));
+		$listofdir = explode(',', preg_replace('/[\r\n]+/', ',', trim($conf->global->DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_ODT_PATH)));
 		$listoffiles = array();
 		foreach ($listofdir as $key => $tmpdir) {
 			$tmpdir = trim($tmpdir);
 			$tmpdir = preg_replace('/DOL_DATA_ROOT/', DOL_DATA_ROOT, $tmpdir);
 			$tmpdir = preg_replace('/DOL_DOCUMENT_ROOT/', DOL_DOCUMENT_ROOT, $tmpdir);
+
 			if (!$tmpdir) {
 				unset($listofdir[$key]);
 				continue;
@@ -144,23 +143,10 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 				}
 			}
 		}
-		$texthelp = $langs->trans("ListOfDirectoriesForModelGenODT");
-		// Add list of substitution keys
-		$texthelp .= '<br>'.$langs->trans("FollowingSubstitutionKeysCanBeUsed").'<br>';
-		$texthelp .= $langs->transnoentitiesnoconv("FullListOnOnlineDocumentation"); // This contains an url, we don't modify it
-
-		$texte .= $form->textwithpicto($texttitle, $texthelp, 1, 'help', '', 1);
-		$texte .= '<div><div style="display: inline-block; min-width: 100px; vertical-align: middle;">';
-		$texte .= '<textarea class="flat" cols="60" name="value1">';
-		$texte .= $conf->global->DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_PDF_ODT_PATH;
-		$texte .= '</textarea>';
-		$texte .= '</div><div style="display: inline-block; vertical-align: middle;">';
-		$texte .= '<input type="submit" class="button small reposition" name="Button" value="'.$langs->trans("Modify").'">';
-		$texte .= '<br></div></div>';
 
 		// Scan directories
 		$nbofiles = count($listoffiles);
-		if (!empty($conf->global->DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_PDF_ODT_PATH)) {
+		if (!empty($conf->global->DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_ODT_PATH)) {
 			$texte .= $langs->trans("DoliProjectNumberOfModelFilesFound").': <b>';
 			//$texte.=$nbofiles?'<a id="a_'.get_class($this).'" href="#">':'';
 			$texte .= count($listoffiles);
@@ -169,32 +155,14 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 		}
 
 		if ($nbofiles) {
-			$texte .= '<div id="div_'.get_class($this).'" class="hidden">';
+			$texte .= '<div id="div_' . get_class($this) . '" class="hidden">';
 			foreach ($listoffiles as $file) {
-				$texte .= '- '.$file['name'];
-				$texte .= ' <a href="'.DOL_URL_ROOT.'/document.php?modulepart=doctemplates&file=doliproject_timesheet/'.urlencode(basename($file['name'])).'">'.img_picto('', 'listlight').'</a>';
-				$texte .= ' &nbsp; <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?modulepart=doctemplates&keyforuploaddir=COMPANY_ADDON_PDF_ODT_PATH&action=deletefile&token='.newToken().'&file='.urlencode(basename($file['name'])).'">'.img_picto('', 'delete').'</a>';
-				$texte .= '<br>';
+				$texte .= $file['name'] . '<br>';
 			}
 			$texte .= '</div>';
 		}
 
 		$texte .= '</td>';
-
-		// Add input to upload a new template file.
-		$texte .= '<div>'.$langs->trans("UploadNewTemplate").' <input type="file" name="uploadfile">';
-		$texte .= '<input type="hidden" value="DOLIPROJECT_TIMESHEETDOCUMENT_ADDON_PDF_ODT_PATH" name="keyforuploaddir">';
-		$texte .= '<input type="submit" class="button small reposition" value="'.dol_escape_htmltag($langs->trans("Upload")).'" name="upload">';
-		$texte .= '</div>';
-		$texte .= '</td>';
-
-		$texte .= '<td rowspan="2" class="tdtop hideonsmartphone">';
-		$texte .= '<span class="opacitymedium">';
-		$texte .= $langs->trans("ExampleOfDirectoriesForModelGen");
-		$texte .= '</span>';
-		$texte .= '</td>';
-		$texte .= '</tr>';
-
 		$texte .= '</table>';
 		$texte .= '</form>';
 

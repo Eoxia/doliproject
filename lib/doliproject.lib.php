@@ -26,7 +26,7 @@
  *
  * @return array
  */
-function doliprojectAdminPrepareHead()
+function doliprojectAdminPrepareHead(): array
 {
 	global $conf, $langs;
 

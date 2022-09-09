@@ -1,4 +1,4 @@
-# Copyright (C) 2020 SuperAdmin
+# Copyright (C) 2022 EOXIA <dev@eoxia.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,39 +17,31 @@
 # Générique
 #
 
-# Module label 'ModuleDoliprojectName'
-ModuleDoliprojectName = Doliproject
-# Module description 'ModuleDoliprojectDesc'
-ModuleDoliprojectDesc = Description de Doliproject
+# Module label 'ModuleDoliProjectName'
+ModuleDoliProjectName = DoliProject
+# Module description 'ModuleDoliProjectDesc'
+ModuleDoliProjectDesc = Description de DoliProject
 
 #
 # Page d'administration
 #
-DoliprojectSetup = Configuration du module Doliproject
+DoliProjectSetup = Configuration du module DoliProject
 Settings = Réglages
-DoliprojectSetupPage = Page de configuration du module Doliproject
+DoliProjectSetupPage = Page de configuration du module DoliProject
+DOLIPROJECT_DEFAUT_TICKET_TIME = Temps passé par défaut
 
 #
 # Page À propos
 #
 About = À propos
-DoliprojectAbout = À propos de Doliproject
-DoliprojectAboutPage = Page à propos de Doliproject
+DoliProjectAbout = À propos de DoliProject
+DoliProjectAboutPage = Page à propos de DoliProject
 
 #
-# Page d'exemple
+# DoliProject
 #
-MyPageName = Nom de ma page
 
-#
-# Box d'exemple
-#
-MyWidget = Mon widget
-MyWidgetDescription = Description de mon widget
-
-#
-# module doliproject
-#
+# Data - Donnée
 DescriptionTask = Réalisé depuis la facture 
 MessageInfo = Tâche créée avec succès
 MessageInfoNoCreate = Aucune tâche n'a été créée
@@ -62,8 +54,7 @@ ErrorDateEnd = Pas de date de fin
 ErrorServiceTime = Le temps du(des) service(s) est nul
 MessageTimeSpentCreate = Temps consommé crée
 MessageNoTaskLink = Pas de tâche affectée, pas de temps passé disponible
-
-DoliprojectTimeSpent = Rapport de temps passé
+DoliProjectTimeSpent = Rapport de temps passé
 ActionAC_TEL_IN = Appel téléphonique entrant
 ActionAC_TEL_OUT = Appel téléphonique sortant
 DoliProjectConfig = Configuration
@@ -71,10 +62,12 @@ DoliProjectArea  = Bienvenue sur DoliProject
 DoliProjectNumberOfModelFilesFound = Nombre de modèles par défaut
 
 
+
 #
 # Temps consommé
 #
 
+# Data - Donnée
 Monday = Lundi
 Tuesday = Mardi
 Wednesday = Mercredi
@@ -124,15 +117,13 @@ ExpectedWorkedHoursWeek = Heures de travail prévues du %s au %s
 ThemeDashboardTimeSpent = Thème du Rapport de pointage de temps
 TimeSpentList = Liste des temps consommés
 
-#
-# Setup Page
-#
-DOLIPROJECT_DEFAUT_TICKET_TIME = Temps passé par défaut
 
 
 #
 # Facture récurrente
 #
+
+# Data - Donnée
 RecurringInvoicesStatistics = Statistiques facture récurrentes
 NumberOfRecurringBills = Nb de factures récurrentes
 NumberOfRecurringBillsByMonth = Nb de factures récurrentes par mois
@@ -142,6 +133,8 @@ ExceededTimeSpentColor = Couleur temps consommés dépassés
 NotExceededTimeSpentColor = Couleur temps consommés pas dépassés ou non pointés
 PerfectTimeSpentColor = Couleur temps consommés parfait
 InvoicesCategoriesArea = Espace des tags/catégories des factures
+
+
 
 #
 # TimeSheetDocument - Fiche de navette
@@ -164,6 +157,7 @@ TimeSheetDocumentDoliProjectTemplate = ODT par défaut des fiches de navette
 # Data - Donnée
 TimeSheetDocument = Fiche de Navette
 timesheetdocument.odt = Navette ODT
+
 
 
 #
@@ -295,6 +289,8 @@ SocietyAttendant = Signataire interne
 SocietyResponsible = Responsable
 NoSocietyAttendants = Pas de signataires liés à cet objet. Pour ajouter des signataires, le statut doit être "Brouillon".
 FileGenerated
+
+
 
 #
 # Other

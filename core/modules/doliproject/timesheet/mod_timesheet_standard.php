@@ -31,29 +31,29 @@ class mod_timesheet_standard
 	 * Dolibarr version of the loaded document
 	 * @var string
 	 */
-	public $version = 'dolibarr'; // 'development', 'experimental', 'dolibarr'
+	public string $version = 'dolibarr'; // 'development', 'experimental', 'dolibarr'
 
 	/**
 	 * @var string document prefix
 	 */
-	public $prefix = 'TS';
+	public string $prefix = 'TS';
 
 	/**
 	 * @var string Error code (or message)
 	 */
-	public $error = '';
+	public string $error = '';
 
 	/**
 	 * @var string name
 	 */
-	public $name = 'Skoll';
+	public string $name = 'Skoll';
 
 	/**
 	 *  Return description of numbering module
 	 *
-	 *  @return     string      Text with description
+	 *  @return string      Text with description
 	 */
-	public function info()
+	public function info(): string
 	{
 		global $langs;
 		$langs->load("doliproject@doliproject");
@@ -63,9 +63,9 @@ class mod_timesheet_standard
 	/**
 	 *	Return if a module can be used or not
 	 *
-	 *	@return		boolean     true if module can be used
+	 *	@return boolean true if module can be used
 	 */
-	public function isEnabled()
+	public function isEnabled(): bool
 	{
 		return true;
 	}
@@ -73,9 +73,9 @@ class mod_timesheet_standard
 	/**
 	 *  Return an example of numbering
 	 *
-	 *  @return     string      Example
+	 *  @return string Example
 	 */
-	public function getExample()
+	public function getExample(): string
 	{
 		return $this->prefix."0501-0001";
 	}
@@ -84,10 +84,10 @@ class mod_timesheet_standard
 	 *  Checks if the numbers already in the database do not
 	 *  cause conflicts that would prevent this numbering working.
 	 *
-	 *  @param  Object		$object		Object we need next value for
-	 *  @return boolean     			false if conflict, true if ok
+	 *  @param  Object  $object	Object we need next value for
+	 *  @return boolean     	false if are conflict, true if ok
 	 */
-	public function canBeActivated($object)
+	public function canBeActivated(object $object): bool
 	{
 		global $conf, $langs, $db;
 
@@ -120,12 +120,13 @@ class mod_timesheet_standard
 	}
 
 	/**
-	 * 	Return next free value
+	 * Return next free value
 	 *
-	 *  @param  Object		$object		Object we need next value for
-	 *  @return string      			Value if KO, <0 if KO
+	 * @param  Object    $object Object we need next value for
+	 * @return string            Value if KO, <0 if KO
+	 * @throws Exception
 	 */
-	public function getNextValue($object)
+	public function getNextValue(object $object)
 	{
 		global $db, $conf;
 
@@ -170,9 +171,9 @@ class mod_timesheet_standard
 	/**
 	 *	Returns version of numbering module
 	 *
-	 *	@return     string      Valeur
+	 *	@return string Value
 	 */
-	public function getVersion()
+	public function getVersion(): string
 	{
 		global $langs;
 		$langs->load("admin");

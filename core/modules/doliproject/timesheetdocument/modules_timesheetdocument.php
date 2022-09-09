@@ -19,7 +19,7 @@
 /**
  *  \file			core/modules/doliproject/modules_timesheetdocument.php
  *  \ingroup		doliproject
- *  \brief			File that contains parent class for timesheets document models and parent class for timesheets numbering models
+ *  \brief			File that contains parent class for timesheet document models and parent class for timesheet numbering models
  */
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/commondocgenerator.class.php';
@@ -29,25 +29,19 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commondocgenerator.class.php';
  */
 abstract class ModeleODTTimeSheetDocument extends CommonDocGenerator
 {
-	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
 	/**
 	 *  Return list of active generation modules
 	 *
-	 *  @param	DoliDB	$db     			Database handler
-	 *  @param  integer	$maxfilenamelength  Max length of value to show
-	 *  @return	array						List of templates
+	 *  @param  DoliDB  $db     			Database handler
+	 *  @param  integer $maxfilenamelength  Max length of value to show
+	 *  @return	array					    List of templates
 	 */
-	public static function liste_modeles($db, $maxfilenamelength = 0)
+	public static function liste_modeles(DoliDB $db, int $maxfilenamelength = 0): array
 	{
-		// phpcs:enable
-		global $conf;
-
 		$type = 'timesheetdocument';
 		$list = array();
 
 		require_once __DIR__ . '/../../../../lib/doliproject_function.lib.php';
-		$list = getListOfModelsDoliProject($db, $type, $maxfilenamelength);
-
-		return $list;
+		return getListOfModelsDoliProject($db, $type, $maxfilenamelength);
 	}
 }

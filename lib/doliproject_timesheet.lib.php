@@ -24,10 +24,10 @@
 /**
  * Prepare array of tabs for TimeSheet
  *
- * @param	TimeSheet	$object		TimeSheet
- * @return 	array					Array of tabs
+ * @param  TimeSheet $object TimeSheet
+ * @return array             Array of tabs
  */
-function timesheetPrepareHead($object)
+function timesheetPrepareHead(TimeSheet $object): array
 {
 	global $conf, $langs;
 
@@ -82,8 +82,6 @@ function timesheetPrepareHead($object)
 	$h++;
 
 	complete_head_from_modules($conf, $langs, $object, $head, $h, 'timesheet@doliproject');
-
-	complete_head_from_modules($conf, $langs, $object, $head, $h, 'timesheet@doliproject', 'remove');
 
 	return $head;
 }
