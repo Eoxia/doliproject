@@ -29,17 +29,17 @@ abstract class DoliProjectStats
 	/**
 	 * @var DoliDB Database handler.
 	 */
-	protected DoliDB $db;
+	protected $db;
 
 	/**
 	 * @var array Dates of cache file read by methods.
 	 */
-	protected array $lastfetchdate = array();
+	protected $lastfetchdate = array();
 
 	/**
 	 * @var string Suffix to add to name of cache file (to avoid file name conflicts)
 	 */
-	public string $cachefilesuffix = '';
+	public $cachefilesuffix = '';
 
 	/**
 	 * Return nb of elements by month for several years

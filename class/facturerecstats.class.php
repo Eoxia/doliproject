@@ -33,52 +33,52 @@ class FactureRecStats extends DoliProjectStats
 	/**
 	 * @var int  ID soc
 	 */
-	public int $socid;
+	public $socid;
 
 	/**
 	 * @var int ID user
 	 */
-	public int $userid;
+	public $userid;
 
 	/**
 	 * @var string Name of table without prefix where object is stored
 	 */
-	public string $table_element;
+	public  $table_element;
 
 	/**
 	 * @var string Suffix to add to name of cache file (to avoid file name conflicts)
 	 */
-	public string $cachefilesuffix = '';
+	public  $cachefilesuffix = '';
 
 	/**
 	 * @var string SQL from
 	 */
-	public string $from;
+	public  $from;
 
 	/**
 	 * @var string SQL field
 	 */
-	public string $field;
+	public $field;
 
 	/**
 	 * @var string SQL where
 	 */
-	public string $where;
+	public $where;
 
 	/**
 	 * @var string SQL join
 	 */
-	public string $join;
+	public $join;
 
 	/**
 	 * @var string SQL from line
 	 */
-	public string $from_line;
+	public $from_line;
 
 	/**
 	 * @var string SQL field line
 	 */
-	public string $field_line;
+	public $field_line;
 
 	/**
 	 * 	Constructor

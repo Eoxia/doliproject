@@ -396,7 +396,9 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 				$firstdaytoshowgmt  = dol_get_first_day($datestart['year'], $datestart['mon'], true);
 				$dayInMonth         = cal_days_in_month(CAL_GREGORIAN, $datestart['mon'], $datestart['year']);
 
-				$tasksarray = $task->getTasksArray(0, 0, ($project->id ?: 0), 0, 0, '', '', '',  $object->fk_user_assign, 0, $extrafields);
+				$filter = ' AND p.rowid != ' . $conf->global->DOLIPROJECT_HR_PROJECT;
+
+				$tasksarray = $task->getTasksArray(0, 0, ($project->id ?: 0), 0, 0, '', '', $filter,  $object->fk_user_assign, 0, $extrafields);
 
 				$isavailable = array();
 
@@ -552,7 +554,6 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 						$odfHandler->mergeSegment($listlines);
 					}
 
-					$filter = ' AND p.rowid != ' . $conf->global->DOLIPROJECT_HR_PROJECT;
 					$tasksArray = $task->getTasksArray(0, 0, 0, 0, 0, '', '', $filter,  $object->fk_user_assign, 0, $extrafields);
 					if (is_array($tasksArray) && !empty($tasksArray)) {
 						foreach ($tasksArray as $tasksingle) {

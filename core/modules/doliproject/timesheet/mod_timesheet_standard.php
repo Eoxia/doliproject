@@ -31,22 +31,22 @@ class mod_timesheet_standard
 	 * Dolibarr version of the loaded document
 	 * @var string
 	 */
-	public string $version = 'dolibarr'; // 'development', 'experimental', 'dolibarr'
+	public $version = 'dolibarr'; // 'development', 'experimental', 'dolibarr'
 
 	/**
 	 * @var string document prefix
 	 */
-	public string $prefix = 'TS';
+	public $prefix = 'TS';
 
 	/**
 	 * @var string Error code (or message)
 	 */
-	public string $error = '';
+	public $error = '';
 
 	/**
 	 * @var string name
 	 */
-	public string $name = 'Skoll';
+	public $name = 'Skoll';
 
 	/**
 	 *  Return description of numbering module

@@ -34,7 +34,7 @@ class TimeSheet extends CommonObject
 	/**
 	 * @var string ID of module.
 	 */
-	public string $module = 'doliproject';
+	public $module = 'doliproject';
 
 	/**
 	 * @var string ID to identify managed object.
@@ -50,27 +50,27 @@ class TimeSheet extends CommonObject
 	 * @var int  Does this object support multicompany module ?
 	 * 0=No test on entity, 1=Test with field entity, 'field@table'=Test with link by field@table
 	 */
-	public int $ismultientitymanaged = 0;
+	public $ismultientitymanaged = 0;
 
 	/**
 	 * @var int  Does object support extrafields ? 0=No, 1=Yes
 	 */
-	public int $isextrafieldmanaged = 1;
+	public $isextrafieldmanaged = 1;
 
 	/**
 	 * @var string String with name of icon for timesheet. Must be the part after the 'object_' into object_timesheet.png
 	 */
-	public string $picto = 'timesheet@doliproject';
+	public $picto = 'timesheet@doliproject';
 
 	/**
 	 * @var array Label status of const.
 	 */
-	public array $labelStatus;
+	public $labelStatus;
 
 	/**
 	 * @var array Label status short of const.
 	 */
-	public array $labelStatusShort;
+	public $labelStatusShort;
 
 	const STATUS_DRAFT = 0;
 	const STATUS_VALIDATED = 1;
@@ -108,7 +108,7 @@ class TimeSheet extends CommonObject
 	/**
 	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
-	public array $fields = array(
+	public $fields = array(
 		'rowid'          => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
 		'ref'            => array('type'=>'varchar(128)', 'label'=>'Ref', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'visible'=>4, 'noteditable'=>'1', 'default'=>'(PROV)', 'index'=>1, 'searchall'=>1, 'showoncombobox'=>'1', 'validate'=>'1', 'comment'=>"Reference of object"),
 		'ref_ext'        => array('type'=>'varchar(128)', 'label'=>'RefExt', 'enabled'=>'1', 'position'=>20, 'notnull'=>0, 'visible'=>0,),
@@ -166,12 +166,12 @@ class TimeSheet extends CommonObject
 	 /**
 	  * @var string    Field with ID of parent key if this object has a parent
 	  */
-	 public string $fk_element = 'fk_timesheet';
+	 public $fk_element = 'fk_timesheet';
 
 	 /**
 	  * @var string    Name of subtable class that manage subtable lines
 	  */
-	 public string $class_element_line = 'TimeSheetline';
+	 public $class_element_line = 'TimeSheetline';
 
 	 /**
 	  * @var array	List of child tables. To test if we can delete object.
@@ -889,7 +889,7 @@ class TimeSheetLine extends CommonObjectLine
 	/**
 	 * @var int  Does object support extrafields ? 0=No, 1=Yes
 	 */
-	public int $isextrafieldmanaged = 0;
+	public $isextrafieldmanaged = 0;
 
 	/**
 	 *  'type' field format ('integer', 'integer:ObjectClass:PathToClass[:AddCreateButtonOrNot[:Filter[:Sortfield]]]', 'sellist:TableName:LabelFieldName[:KeyFieldName[:KeyFieldParent[:Filter[:Sortfield]]]]', 'varchar(x)', 'double(24,8)', 'real', 'price', 'text', 'text:none', 'html', 'date', 'datetime', 'timestamp', 'duration', 'mail', 'phone', 'url', 'password')
@@ -922,7 +922,7 @@ class TimeSheetLine extends CommonObjectLine
 	/**
 	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
-	public array $fields = array(
+	public $fields = array(
 		'rowid'          => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
 		'date_creation'  => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'visible'=>0,),
 		'qty'            => array('type'=>'real', 'label'=>'Quantity', 'enabled'=>'1', 'position'=>20, 'notnull'=>0, 'visible'=>0,),
@@ -1223,7 +1223,7 @@ class TimeSheetSignature extends DoliProjectSignature
 	/**
 	 * @var string String with name of icon for document. Must be the part after the 'object_' into object_document.png
 	 */
-	public string $picto = 'timesheet@doliproject';
+	public $picto = 'timesheet@doliproject';
 
 	/**
 	 * Constructor

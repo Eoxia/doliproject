@@ -29,27 +29,27 @@ class ActionsDoliproject
 	/**
 	 * @var DoliDB Database handler.
 	 */
-	public DoliDB $db;
+	public $db;
 
 	/**
 	 * @var string Error code (or message)
 	 */
-	public string $error = '';
+	public $error = '';
 
 	/**
 	 * @var array Errors
 	 */
-	public array $errors = array();
+	public $errors = array();
 
 	/**
 	 * @var array Hook results. Propagated to $hookmanager->resArray for later reuse
 	 */
-	public array $results = array();
+	public $results = array();
 
 	/**
 	 * @var string String displayed by executeHook() immediately after return
 	 */
-	public string $resprints;
+	public $resprints;
 
 	/**
 	 * Constructor
