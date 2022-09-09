@@ -638,7 +638,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	}
 	print '<span class="opacitymediumbycolor">  - ' . $langs->trans("ExpectedWorkedHoursMonth", dol_print_date(dol_mktime(0, 0, 0, $datestart['mon'], $datestart['mday'], $datestart['year']), "%B %Y")) . ' : <strong><a href="' . DOL_URL_ROOT . '/custom/doliproject/view/workinghours_card.php?id=' . $object->fk_user_assign . '" target="_blank">' . price($workinghoursMonth, 1, $langs, 0, 0) . '</a></strong>';
 	print '<span>' . ' - ' . $langs->trans("ExpectedWorkedDayMonth") . ' <strong>' . $nbworkinghoursMonth . '</strong></span>';
-	print '<span>' . ' - ' . $langs->trans("ConsumedWorkedDayMonth") . ' <strong>' . $nbconsumedworkinghoursMonth . '</strong></span>';
 	print '</span>';
 	print '</td></tr>';
 	print '<tr class="liste_total"><td class="liste_total">';
@@ -667,7 +666,17 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			$totalconsumedtime += $tasksingle;
 		}
 	}
-	print '<span class="opacitymediumbycolor">  - '.$langs->trans("ConsumedWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))).' : <strong>'.convertSecondToTime($totalconsumedtime, 'allhourmin').'</strong></span>';
+	$diffworkinghoursMonth = $nbworkinghoursMonth - $nbconsumedworkinghoursMonth;
+	if  ($diffworkinghoursMonth < 0) {
+		$morecss = colorStringToArray($conf->global->DOLIPROJECT_EXCEEDED_TIME_SPENT_COLOR);
+	} else if ($diffworkinghoursMonth > 0) {
+		$morecss = colorStringToArray($conf->global->DOLIPROJECT_NOT_EXCEEDED_TIME_SPENT_COLOR);
+	} else if ($diffworkinghoursMonth == 0) {
+		$morecss = colorStringToArray($conf->global->DOLIPROJECT_PERFECT_TIME_SPENT_COLOR);
+	}
+	print '<span class="opacitymediumbycolor">  - '.$langs->trans("ConsumedWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))).' : <strong>'.convertSecondToTime($totalconsumedtime, 'allhourmin').'</strong>';
+	print '<span>' . ' - ' . $langs->trans("ConsumedWorkedDayMonth") . ' <strong style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'">' . $nbconsumedworkinghoursMonth . '</strong></span>';
+	print '</span>';
 	print '</td></tr>';
 	print '<tr class="liste_total"><td class="liste_total">';
 	print $langs->trans("Total");
