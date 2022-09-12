@@ -674,7 +674,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		$morecss = colorStringToArray($conf->global->DOLIPROJECT_PERFECT_TIME_SPENT_COLOR);
 	}
 	print '<span class="opacitymediumbycolor">  - '.$langs->trans("ConsumedWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))).' : <strong>'.convertSecondToTime($totalconsumedtime, 'allhourmin').'</strong>';
-	print '<span>' . ' - ' . $langs->trans("ConsumedWorkedDayMonth") . ' <strong style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'">' . $nbconsumedworkinghoursMonth . '</strong></span>';
+	print '<span>' . ' - ' . $langs->trans("ConsumedWorkedDayMonth") . ' <strong style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'">' . (!empty($nbconsumedworkinghoursMonth) ?: 0) . '</strong></span>';
 	print '</span>';
 	print '</td></tr>';
 	print '<tr class="liste_total"><td class="liste_total">';
@@ -813,7 +813,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			print '<a class="' . (($object->status == $object::STATUS_VALIDATED && ! $signatory->checkSignatoriesSignatures($object->id, 'timesheet')) ? 'butAction' : 'butActionRefused classfortooltip') . '" id="actionButtonSign" title="' . (($object->status == $object::STATUS_VALIDATED && ! $signatory->checkSignatoriesSignatures($object->id, 'timesheet')) ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeValidatedToSign"))) . '" href="' . (($object->status == $object::STATUS_VALIDATED && ! $signatory->checkSignatoriesSignatures($object->id, 'timesheet')) ? dol_buildpath('/custom/doliproject/view/timesheet/timesheet_attendants.php?id=' . $object->id, 3) : '#') . '">' . $langs->trans("Sign") . '</a>';
 
 			// Lock
-			print '<span class="' . (($object->status == $object::STATUS_VALIDATED && $signatory->checkSignatoriesSignatures($object->id, 'timesheet') && $difftotaltime == 0) ? 'butAction' : 'butActionRefused classfortooltip') . '" id="' . (($object->status == $object::STATUS_VALIDATED && $signatory->checkSignatoriesSignatures($object->id, 'timesheet') && $difftotaltime == 0) ? 'actionButtonLock' : '') . '" title="' . (($object->status == $object::STATUS_VALIDATED && $signatory->checkSignatoriesSignatures($object->id, 'timesheet') && $difftotaltime == 0) ? '' : dol_escape_htmltag($langs->trans("AllSignatoriesMustHaveSignedAndDiffTimeSetAt0"))) . '">' . $langs->trans("Lock") . '</span>';
+			print '<span class="' . (($object->status == $object::STATUS_VALIDATED && $signatory->checkSignatoriesSignatures($object->id, 'timesheet') && $difftotaltime == 0 && $diffworkinghoursMonth == 0) ? 'butAction' : 'butActionRefused classfortooltip') . '" id="' . (($object->status == $object::STATUS_VALIDATED && $signatory->checkSignatoriesSignatures($object->id, 'timesheet') && $difftotaltime == 0 && $diffworkinghoursMonth == 0) ? 'actionButtonLock' : '') . '" title="' . (($object->status == $object::STATUS_VALIDATED && $signatory->checkSignatoriesSignatures($object->id, 'timesheet') && $difftotaltime == 0 && $diffworkinghoursMonth == 0) ? '' : dol_escape_htmltag($langs->trans("AllSignatoriesMustHaveSignedAndDiffTimeSetAt0"))) . '">' . $langs->trans("Lock") . '</span>';
 
 			// Send
 			//@TODO changer le send to
