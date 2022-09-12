@@ -746,7 +746,7 @@ window.eoxiaJS.menu.toggleMenu = function() {
  * @return {void}
  */
 window.eoxiaJS.menu.setMenu = function() {
-	if ($('.blockvmenu.blockvmenufirst').html().match(/doliproject/)) {
+	if (document.URL.match(/doliproject|timesheet/)) {
 		$('span.vmenu').find('.fa-chevron-circle-left').parent().parent().parent().attr('style', 'cursor:pointer ! important')
 
 		if (localStorage.maximized == 'false') {
