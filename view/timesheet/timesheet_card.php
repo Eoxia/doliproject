@@ -322,7 +322,7 @@ if (empty($reshook)) {
 	}
 
 	// Action to set status STATUS_ARCHIVED
-	if ($action == 'confirm_setArchived' && $permissiontoadd) {
+	if ($action == 'setArchived' && $permissiontoadd) {
 		$object->fetch($id);
 		if ( ! $error) {
 			$result = $object->setArchived($user, false);
@@ -509,11 +509,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	if (($action == 'setLocked' && (empty($conf->use_javascript_ajax) || !empty($conf->dol_use_jmobile)))        // Output when action = clone if jmobile or no js
 		|| (!empty($conf->use_javascript_ajax) && empty($conf->dol_use_jmobile))) {                            // Always output when not jmobile nor js
 		$formconfirm .= $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('LockTimeSheet'), $langs->trans('ConfirmLockTimeSheet', $object->ref), 'confirm_setLocked', '', 'yes', 'actionButtonLock', 350, 600);
-	}
-	// setArchived confirmation
-	if (($action == 'setArchived' && (empty($conf->use_javascript_ajax) || !empty($conf->dol_use_jmobile)))        // Output when action = clone if jmobile or no js
-		|| (!empty($conf->use_javascript_ajax) && empty($conf->dol_use_jmobile))) {                            // Always output when not jmobile nor js
-		$formconfirm .= $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('ArchiveTimeSheet'), $langs->trans('ConfirmArchiveTimeSheet', $object->ref), 'confirm_setArchived', '', 'yes', 'actionButtonArchive', 350, 600);
 	}
 	// Confirmation to delete
 	if ($action == 'delete') {
@@ -825,11 +820,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			//print '<a class="' . ($object->status == $object::STATUS_LOCKED ? 'butAction' : 'butActionRefused classfortooltip') . '" id="actionButtonSign" title="' . dol_escape_htmltag($langs->trans("TimeSheetMustBeLockedToSendEmail")) . '" href="' . ($object->status == $object::STATUS_LOCKED ? ($_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=presend&mode=init#formmailbeforetitle&sendto=' . $allLinks['LabourInspectorSociety']->id[0]) : '#') . '">' . $langs->trans('SendMail') . '</a>';
 
 			// Archive
-			if (empty(dol_dir_list($upload_dir . '/timesheetdocument/' . dol_sanitizeFileName($object->ref)))) {
-				print '<span class="' . ($object->status == $object::STATUS_LOCKED ? 'butAction' : 'butActionRefused classfortooltip') . '" id="actionButtonArchive" title="' . ($object->status == $object::STATUS_LOCKED ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeLocked"))) . '" href="' . ($object->status == $object::STATUS_LOCKED ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=setArchived') : '#') . '">' . $langs->trans("Archive") . '</span>';
-			} else {
-				print '<a class="' . ($object->status == $object::STATUS_LOCKED ? 'butAction' : 'butActionRefused classfortooltip') . '" id="" title="' . ($object->status == $object::STATUS_LOCKED ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeLocked"))) . '" href="' . ($object->status == $object::STATUS_LOCKED ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=confirm_setArchived') : '#') . '">' . $langs->trans("Archive") . '</a>';
-			}
+			print '<a class="' . ($object->status == $object::STATUS_LOCKED  && !empty(dol_dir_list($upload_dir . '/timesheetdocument/' . dol_sanitizeFileName($object->ref))) ? 'butAction' : 'butActionRefused classfortooltip') . '" id="" title="' . ($object->status == $object::STATUS_LOCKED && !empty(dol_dir_list($upload_dir . '/timesheetdocument/' . dol_sanitizeFileName($object->ref))) ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeLockedGenerated"))) . '" href="' . ($object->status == $object::STATUS_LOCKED && !empty(dol_dir_list($upload_dir . '/timesheetdocument/' . dol_sanitizeFileName($object->ref))) ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=setArchived') : '#') . '">' . $langs->trans("Archive") . '</a>';
 
 			// Delete (need delete permission, or if draft, just need create/modify permission)
 			//print dolGetButtonAction($langs->trans('Delete'), '', 'delete', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=delete&token='.newToken(), '', $permissiontodelete || ($object->status == $object::STATUS_DRAFT && $permissiontoadd));
