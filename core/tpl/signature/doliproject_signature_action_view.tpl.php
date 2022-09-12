@@ -26,7 +26,7 @@
 		</form>
 	</li>
 	<li class="dropdown-item">
-		<?php print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '">';
+		<?php print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '?id=' . $id . '">';
 		print '<input type="hidden" name="token" value="' . newToken() . '">';
 		print '<input type="hidden" name="action" value="deleteAttendant">';
 		print '<input type="hidden" name="signatoryID" value="' . $element->id . '">';
