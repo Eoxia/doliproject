@@ -400,7 +400,10 @@ $next_year  = $next['year'];
 $next_month = $next['mon'];
 $next_day   = $next['mday'];
 
-$title = $langs->trans("TimeSpent");
+$title    = $langs->trans("TimeSpent");
+$help_url = '';
+$morejs   = array("/doliproject/js/doliproject.js.php", "/core/js/timesheet.js");
+$morecss  = array("/doliproject/css/doliproject.css");
 
 $projectsListId = $projectstatic->getProjectsAuthorizedForUser($usertoprocess, (empty($usertoprocess->id) ? 2 : 0), 1); // Return all project i have permission on (assigned to me+public). I want my tasks and some of my task may be on a public projet that is not my project
 
@@ -507,7 +510,7 @@ $tasksrole = $taskstatic->getUserRolesForProjectsOrTasks(0, $usertoprocess, ($pr
 //var_dump($projectsrole);
 //var_dump($taskrole);
 
-llxHeader("", $title, "", '', '', '', array('/core/js/timesheet.js'));
+llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss);
 
 //print_barre_liste($title, $page, $_SERVER["PHP_SELF"], "", $sortfield, $sortorder, "", $num, '', 'project');
 

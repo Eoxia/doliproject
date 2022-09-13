@@ -390,7 +390,10 @@ $taskstatic = new Task($db);
 $thirdpartystatic = new Societe($db);
 $holiday = new Holiday($db);
 
-$title = $langs->trans("TimeSpent");
+$title    = $langs->trans("TimeSpent");
+$help_url = '';
+$morejs   = array("/doliproject/js/doliproject.js.php", "/core/js/timesheet.js");
+$morecss  = array("/doliproject/css/doliproject.css");
 
 $projectsListId = $projectstatic->getProjectsAuthorizedForUser($usertoprocess, (empty($usertoprocess->id) ? 2 : 0), 1); // Return all project i have permission on (assigned to me+public). I want my tasks and some of my task may be on a public projet that is not my project
 //var_dump($projectsListId);
@@ -443,7 +446,7 @@ if (!empty($conf->global->DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS)) {	// Get all ta
 $projectsrole = $taskstatic->getUserRolesForProjectsOrTasks($usertoprocess, 0, ($project->id ? $project->id : 0), 0, $onlyopenedproject);
 $tasksrole = $taskstatic->getUserRolesForProjectsOrTasks(0, $usertoprocess, ($project->id ? $project->id : 0), 0, $onlyopenedproject);
 
-llxHeader("", $title, "", '', '', '', array('/core/js/timesheet.js'));
+llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss);
 
 //print_barre_liste($title, $page, $_SERVER["PHP_SELF"], "", $sortfield, $sortorder, "", $num, '', 'project');
 
