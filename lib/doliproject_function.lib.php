@@ -817,9 +817,10 @@ function setCategoriesObject($categories, $type_categ = '', $remove_existing = t
  *
  * @param	string	   	$inc					Line output identificator (start to 0, then increased by recursive call)
  * @param	int			$firstdaytoshow			First day to show
+ * @param	int			$lastdaytoshow			Last day to show
  * @param	User|null	$fuser					Restrict list to user if defined
- * @param   string		$parent					Id of parent task to show (0 to show all)
- * @param   Task[]		$lines					Array of lines (list of tasks but we will show only if we have a specific role on task)
+ * @param   string		$parent					ID of parent task to show (0 to show all)
+ * @param   Task[]		$lines					Array of lines (list of tasks, but we will show only if we have a specific role on task)
  * @param   int			$level					Level (start to 0, then increased/decrease by recursive call)
  * @param   string		$projectsrole			Array of roles user has on project
  * @param   string		$tasksrole				Array of roles user has on task
@@ -831,7 +832,7 @@ function setCategoriesObject($categories, $type_categ = '', $remove_existing = t
  * @param	Extrafields	$extrafields		    Object extrafields
  * @return  array								Array with time spent for $fuser for each day of week on tasks in $lines and substasks
  */
-function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lines, &$level, &$projectsrole, &$tasksrole, $mine, $restricteditformytask, &$isavailable, $oldprojectforbreak = 0, $arrayfields = array(), $extrafields = null, $dayInMonth, $noprint = 0)
+function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $lastdaytoshow, $fuser, $parent, $lines, &$level, &$projectsrole, &$tasksrole, $mine, $restricteditformytask, &$isavailable, $oldprojectforbreak = 0, $arrayfields = array(), $extrafields = null, $dayInMonth, $noprint = 0)
 {
 	global $conf, $db, $user, $langs;
 
@@ -898,7 +899,7 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 				//var_dump('--- '.$level.' '.$firstdaytoshow.' '.$fuser->id.' '.$projectstatic->id.' '.$workloadforid[$projectstatic->id]);
 				//var_dump($projectstatic->monthWorkLoadPerTask);
 				if (empty($workloadforid[$projectstatic->id])) {
-					loadTimeSpentMonthByDay($firstdaytoshow, 0, $fuser->id, $projectstatic); // Load time spent from table projet_task_time for the project into this->weekWorkLoad and this->monthWorkLoadPerTask for all days of a week
+					loadTimeSpentMonthByDay($firstdaytoshow, $lastdaytoshow, 0, $fuser->id, $projectstatic); // Load time spent from table projet_task_time for the project into this->weekWorkLoad and this->monthWorkLoadPerTask for all days of a week
 					$workloadforid[$projectstatic->id] = 1;
 				}
 				//var_dump('--- '.$projectstatic->id.' '.$workloadforid[$projectstatic->id]);
@@ -1103,15 +1104,16 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 						// Time spent by user
 						print '<td class="right">';
 						$firstday = dol_print_date($firstdaytoshow, 'dayrfc');
-						$currentMonth = date('m', dol_now());
-						$year = GETPOST('reyear', 'int') ? GETPOST('reyear', 'int') : (GETPOST("year", 'int') ? GETPOST("year", "int") : date("Y"));
-						$month = GETPOST('remonth', 'int') ? GETPOST('remonth', 'int') : (GETPOST("month", 'int') ? GETPOST("month", "int") : date("m"));
-						if ($currentMonth == $month) {
-							$lastday = dol_print_date(dol_now(), 'dayrfc');
-						} else {
-							$lastdaytoshow = dol_get_last_day($year, $month);
-							$lastday = dol_print_date($lastdaytoshow, 'dayrfc');
-						}
+						$lastday = dol_print_date($lastdaytoshow, 'dayrfc');
+//						$currentMonth = date('m', dol_now());
+//						$year = GETPOST('reyear', 'int') ? GETPOST('reyear', 'int') : (GETPOST("year", 'int') ? GETPOST("year", "int") : date("Y"));
+//						$month = GETPOST('remonth', 'int') ? GETPOST('remonth', 'int') : (GETPOST("month", 'int') ? GETPOST("month", "int") : date("m"));
+//						if ($currentMonth == $month) {
+//							$lastday = dol_print_date(dol_now(), 'dayrfc');
+//						} else {
+//							$lastdaytoshow = dol_get_last_day($year, $month);
+//							$lastday = dol_print_date($lastdaytoshow, 'dayrfc');
+//						}
 						$filter = ' AND t.task_datehour BETWEEN ' . "'" . $firstday . "'" . ' AND ' . "'" . $lastday . "'";
 						$tmptimespent = $taskstatic->getSummaryOfTimeSpent($fuser->id, $filter);
 						if ($tmptimespent['total_duration']) {
@@ -1143,6 +1145,7 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 				// Fields to show current time
 				$tableCell = '';
 				$modeinput = 'hours';
+				$dayInMonth = num_between_day($firstdaytoshow, $lastdaytoshow, 1);
 				for ($idw = 0; $idw < $dayInMonth; $idw++) {
 					$tmpday = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
 
@@ -1220,7 +1223,7 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
 			if ($lines[$i]->id > 0) {
 				//var_dump('totalforeachday after taskid='.$lines[$i]->id.' and previous one on level '.$level);
 				//var_dump($totalforeachday);
-				$ret = projectLinesPerDayOnMonth($inc, $firstdaytoshow, $fuser, $lines[$i]->id, ($parent == 0 ? $lineswithoutlevel0 : $lines), $level, $projectsrole, $tasksrole, $mine, $restricteditformytask, $isavailable, $oldprojectforbreak, $arrayfields, $extrafields, $dayInMonth);
+				$ret = projectLinesPerDayOnMonth($inc, $firstdaytoshow, $lastdaytoshow, $fuser, $lines[$i]->id, ($parent == 0 ? $lineswithoutlevel0 : $lines), $level, $projectsrole, $tasksrole, $mine, $restricteditformytask, $isavailable, $oldprojectforbreak, $arrayfields, $extrafields, $dayInMonth);
 				//var_dump('ret with parent='.$lines[$i]->id.' level='.$level);
 				//var_dump($ret);
 				foreach ($ret as $key => $val) {
@@ -1242,12 +1245,14 @@ function projectLinesPerDayOnMonth(&$inc, $firstdaytoshow, $fuser, $parent, $lin
  * Load time spent into this->weekWorkLoad and this->weekWorkLoadPerTask for all day of a week of project.
  * Note: array weekWorkLoad and weekWorkLoadPerTask are reset and filled at each call.
  *
- * @param 	int		$datestart		First day of week (use dol_get_first_day to find this date)
- * @param 	int		$taskid			Filter on a task id
- * @param 	int		$userid			Time spent by a particular user
- * @return 	int						<0 if OK, >0 if KO
+ * @param  int       $datestart First day
+ * @param  int       $dateend   Last day
+ * @param  int       $taskid    Filter on a task id
+ * @param  int       $userid    Time spent by a particular user
+ * @return int                  0 < if OK, >0 if KO
+ * @throws Exception
  */
-function loadTimeSpentMonthByDay($datestart, $taskid = 0, $userid = 0, $project)
+function loadTimeSpentMonthByDay($datestart, $dateend, $taskid = 0, $userid = 0, $project)
 {
 	$error = 0;
 
@@ -1263,7 +1268,7 @@ function loadTimeSpentMonthByDay($datestart, $taskid = 0, $userid = 0, $project)
 	$sql .= " WHERE ptt.fk_task = pt.rowid";
 	$sql .= " AND pt.fk_projet = ".((int) $project->id);
 	$sql .= " AND (ptt.task_date >= '".$project->db->idate($datestart)."' ";
-	$sql .= " AND ptt.task_date <= '".$project->db->idate(dol_time_plus_duree($datestart, 1, 'm') - 1)."')";
+	$sql .= " AND ptt.task_date <= '".$project->db->idate($dateend)."')";
 	if ($task_id) {
 		$sql .= " AND ptt.fk_task=".((int) $taskid);
 	}

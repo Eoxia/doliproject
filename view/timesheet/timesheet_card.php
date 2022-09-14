@@ -162,10 +162,10 @@ if (empty($reshook)) {
 
 	$triggermodname = 'TIMESHEET_MODIFY'; // Name of trigger action code to execute when we modify record
 
-	if ($action == 'add' && $permissiontoadd && !$cancel) {
+	if (($action == 'add' || $action == 'update') && $permissiontoadd && !$cancel) {
 		$usertmp->fetch(GETPOST('fk_user_assign'));
-		$date_start = dol_mktime(12, 0, 0, GETPOST('date_startmonth', 'int'), GETPOST('date_startday', 'int'), GETPOST('date_startyear', 'int'));
-		$date_end   = dol_mktime(12, 0, 0, GETPOST('date_endmonth', 'int'), GETPOST('date_endday', 'int'), GETPOST('date_endyear', 'int'));
+		$date_start = dol_mktime(0, 0, 0, GETPOST('date_startmonth', 'int'), GETPOST('date_startday', 'int'), GETPOST('date_startyear', 'int'));
+		$date_end   = dol_mktime(0, 0, 0, GETPOST('date_endmonth', 'int'), GETPOST('date_endday', 'int'), GETPOST('date_endyear', 'int'));
 		$filter = ' AND ptt.task_date BETWEEN ' . "'" .dol_print_date($date_start, 'dayrfc') . "'" . ' AND ' . "'" . dol_print_date($date_end, 'dayrfc'). "'";
 		$alltimespent = $task->fetchAllTimeSpent($usertmp, $filter);
 		foreach ($alltimespent as $timespent) {
@@ -175,9 +175,31 @@ if (empty($reshook)) {
 			}
 		}
 
+		if ($date_start > $date_end) {
+			setEventMessages($langs->trans('ErrorDateTimeSheet', dol_print_date($date_start, 'dayreduceformat'), dol_print_date($date_end, 'dayreduceformat')), null, 'errors');
+			if ($action == 'add') {
+				$action = 'create';
+			} elseif ($action == 'update') {
+				$action = 'edit';
+			}
+		}
+
+		if ($date_end > dol_now()) {
+			setEventMessages($langs->trans('ErrorDateEndTimeSheet', dol_print_date($date_end, 'dayreduceformat'), dol_print_date(dol_now(), 'dayreduceformat')), null, 'errors');
+			if ($action == 'add') {
+				$action = 'create';
+			} elseif ($action == 'update') {
+				$action = 'edit';
+			}
+		}
+
 		if ($error > 0) {
 			setEventMessages($langs->trans('ErrorLinkedElementTimeSheetTimeSpent', $usertmp->getFullName($langs), dol_print_date($date_start, 'dayreduceformat'), dol_print_date($date_end, 'dayreduceformat')), null, 'errors');
-			$action = 'create';
+			if ($action == 'add') {
+				$action = 'create';
+			} elseif ($action == 'update') {
+				$action = 'edit';
+			}
 		}
 	}
 
@@ -453,6 +475,12 @@ if (($id || $ref) && $action == 'edit') {
 
 	print '<table class="border centpercent tableforfieldedit">'."\n";
 
+	$date_start = dol_mktime(0, 0, 0, GETPOST('date_startmonth', 'int'), GETPOST('date_startday', 'int'), GETPOST('date_startyear', 'int'));
+	$date_end   = dol_mktime(0, 0, 0, GETPOST('date_endmonth', 'int'), GETPOST('date_endday', 'int'), GETPOST('date_endyear', 'int'));
+
+	$_POST['date_start'] = (!empty($date_start) ? $date_start : $object->date_start);
+	$_POST['date_end'] = (!empty($date_end) ? $date_end : $object->date_end);
+
 	$object->fields['note_public']['visible']  = 1;
 	$object->fields['note_private']['visible'] = 1;
 
@@ -582,16 +610,27 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	$now = dol_now();
 	$datestart = dol_getdate($object->date_start, false, 'Europe/Paris');
-	$firstdaytoshow = dol_get_first_day($datestart['year'], $datestart['mon']);
-	$firstdaytoshowgmt = dol_get_first_day($datestart['year'], $datestart['mon'], true);
-	$dayInMonth = cal_days_in_month(CAL_GREGORIAN, $datestart['mon'], $datestart['year']);
-	$lastdaytoshow = dol_get_last_day($datestart['year'], $datestart['mon']);
+	//$firstdaytoshow = dol_get_first_day($datestart['year'], $datestart['mon']);
+	//$firstdaytoshowgmt = dol_get_first_day($datestart['year'], $datestart['mon'], true);
+
+	// Due to Dolibarr issue in common field add we do substract 12 hours in timestamp
+	$firstdaytoshow = $object->date_start - 12 * 60 * 60;
+	$firstdaytoshowgmt = $object->date_start - 12 * 60 * 60;
+	//$dayInMonth = cal_days_in_month(CAL_GREGORIAN, $datestart['mon'], $datestart['year']);
+	$dayInMonth = num_between_day($object->date_start, $object->date_end, 1);
+	//$lastdaytoshow = dol_get_last_day($datestart['year'], $datestart['mon']);
+	$lastdaytoshow = $object->date_end - 12 * 60 * 60;
 	$currentDayCurrent = date('d', $now);
 	$currentMonth = date('m', $now);
 	$isavailable = array();
 	$workinghoursArray = $workinghours->fetchCurrentWorkingHours($object->fk_user_assign, 'user');
 	$workinghoursMonth = 0;
 	$nbworkinghoursMonth = 0;
+	if ($currentMonth == $datestart['mon']) {
+		$dayInMonthCurrent = $dayInMonth;
+	} else {
+		$dayInMonthCurrent = $dayInMonth;
+	}
 
 	for ($idw = 0; $idw < $dayInMonth; $idw++) {
 		$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
@@ -618,7 +657,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		$tasksrole = $task->getUserRolesForProjectsOrTasks(0, $usertmp, 0, 0, 1);
 		$restrictviewformytask = ((!isset($conf->global->PROJECT_TIME_SHOW_TASK_NOT_ASSIGNED)) ? 2 : $conf->global->PROJECT_TIME_SHOW_TASK_NOT_ASSIGNED);
 		$conf->global->DOLIPROJECT_SHOW_ONLY_FAVORITE_TASKS = 0;
-		$totalforvisibletasks = projectLinesPerDayOnMonth($j, $firstdaytoshow, $usertmp, 0, $tasksarray, $level, $projectsrole, $tasksrole, 0, $restrictviewformytask, $isavailable, 0, array(), array(), $dayInMonth, 1);
+		$totalforvisibletasks = projectLinesPerDayOnMonth($j, $firstdaytoshow, $lastdaytoshow, $usertmp, 0, $tasksarray, $level, $projectsrole, $tasksrole, 0, $restrictviewformytask, $isavailable, 0, array(), array(), $dayInMonth, 1);
 	}
 
 	print '<tr class="liste_total"><td class="liste_total">';
@@ -635,17 +674,12 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			}
 		}
 	}
-	print '<span class="opacitymediumbycolor">  - ' . $langs->trans("ExpectedWorkedHoursMonth", dol_print_date(dol_mktime(0, 0, 0, $datestart['mon'], $datestart['mday'], $datestart['year']), "%B %Y")) . ' : <strong><a href="' . DOL_URL_ROOT . '/custom/doliproject/view/workinghours_card.php?id=' . $object->fk_user_assign . '" target="_blank">' . price($workinghoursMonth, 1, $langs, 0, 0) . '</a></strong>';
+	print '<span class="opacitymediumbycolor">  - ' . $langs->trans("ExpectedWorkedHoursMonthTimeSheet", dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))) . ' : <strong><a href="' . DOL_URL_ROOT . '/custom/doliproject/view/workinghours_card.php?id=' . $object->fk_user_assign . '" target="_blank">' . price($workinghoursMonth, 1, $langs, 0, 0) . '</a></strong>';
 	print '<span>' . ' - ' . $langs->trans("ExpectedWorkedDayMonth") . ' <strong>' . $nbworkinghoursMonth . '</strong></span>';
 	print '</span>';
 	print '</td></tr>';
 	print '<tr class="liste_total"><td class="liste_total">';
 	print $langs->trans("Total");
-	if ($currentMonth == $datestart['mon']) {
-		$dayInMonthCurrent = $currentDayCurrent;
-	} else {
-		$dayInMonthCurrent = $dayInMonth;
-	}
 	$workinghoursMonth = 0;
 	for ($idw = 0; $idw < $dayInMonthCurrent; $idw++) {
 		$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');
@@ -674,7 +708,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		$morecss = colorStringToArray($conf->global->DOLIPROJECT_PERFECT_TIME_SPENT_COLOR);
 	}
 	print '<span class="opacitymediumbycolor">  - '.$langs->trans("ConsumedWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))).' : <strong>'.convertSecondToTime($totalconsumedtime, 'allhourmin').'</strong>';
-	print '<span>' . ' - ' . $langs->trans("ConsumedWorkedDayMonth") . ' <strong style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'">' . (!empty($nbconsumedworkinghoursMonth) ?: 0) . '</strong></span>';
+	print '<span>' . ' - ' . $langs->trans("ConsumedWorkedDayMonth") . ' <strong style="color:'.'rgb('.$morecss[0].','.$morecss[1].','.$morecss[2].')'.'">' . (!empty($nbconsumedworkinghoursMonth) ? $nbconsumedworkinghoursMonth : 0) . '</strong></span>';
 	print '</span>';
 	print '</td></tr>';
 	print '<tr class="liste_total"><td class="liste_total">';

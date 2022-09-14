@@ -215,6 +215,8 @@ GoToTimeSpent = Aller sur le pointage de  temps du mois de %s
 ErrorLinkedElementTimeSheetTimeSpent = Erreur liens entre navette et temps consommé <br> il existe déjà une navette lié au temps consommé affecté à l'utilisateur %s sur la période de %s au %s
 RemoveFileTimeSheet = Supprimer la fiche navette
 ConfirmRemoveFileTimeSheet = Êtes-vous sûr de vouloir supprimer la fiche navette ? La fiche navette sera supprimer ainsi que les liens entre la navette et le temps consommé. <br> De plus la navette retournera au status brouillon.
+ErrorDateEndTimeSheet = Erreur date fin de navette %s supérieure à la date du jour %s
+ErrorDateTimeSheet = Erreur date début de navette %s supérieure à la date fin de navette %s
 
 # Data - Donnée
 TimeSheet = Navette
@@ -242,6 +244,7 @@ AddAttendantsDescription = Pouvoir ajouter des signataires pendant la réalisati
 TimesheetsCategoriesArea = Espace des tags/catégories des navettes
 ConsumedWorkedDayMonth = Nombre de jour pointés :
 ExpectedWorkedDayMonth = Nombre de jours ouvrés :
+ExpectedWorkedHoursMonthTimeSheet = Heures de travail prévues du %s au %s
 
 
 

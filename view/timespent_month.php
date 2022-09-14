@@ -108,7 +108,15 @@ $sortorder = GETPOST('sortorder', 'aZ09comma');
 // Define firstdaytoshow and lastdaytoshow (warning: lastdaytoshow is last second to show + 1)
 $firstdaytoshow    =  dol_get_first_day($year, $month);
 $firstdaytoshowgmt =  dol_get_first_day($year, $month, true);
-$lastdaytoshow     =  dol_get_last_day($year, $month);
+
+$currentMonth = date('m', dol_now());
+if ($currentMonth == $month) {
+	$lastdaytoshow = dol_now();
+	$lastday = dol_print_date(dol_now(), 'dayrfc');
+} else {
+	$lastdaytoshow = dol_get_last_day($year, $month);
+	$lastday = dol_print_date($lastdaytoshow, 'dayrfc');
+}
 
 $prev = dol_get_prev_month($month, $year);
 $prev_year  = $prev['year'];
@@ -779,7 +787,8 @@ if (count($tasksarray) > 0) {
 
 	$j = 0;
 	$level = 0;
-	$totalforvisibletasks = projectLinesPerDayOnMonth($j, $firstdaytoshow, $usertoprocess, 0, $tasksarray, $level, $projectsrole, $tasksrole, $mine, $restrictviewformytask, $isavailable, 0, $arrayfields, $extrafields, $dayInMonth);
+	$totalforvisibletasks = projectLinesPerDayOnMonth($j, $firstdaytoshow, $lastdaytoshow, $usertoprocess, 0, $tasksarray, $level, $projectsrole, $tasksrole, $mine, $restrictviewformytask, $isavailable, 0, $arrayfields, $extrafields, $dayInMonth);
+
 //	if (is_array($tasksarraywithoutfilter) && count($tasksarraywithoutfilter)) {
 //		$totalforalltasks = projectLinesPerDayOnMonth($j, $firstdaytoshow, $usertoprocess, 0, $tasksarraywithoutfilter, $level, $projectsrole, $tasksrole, $mine, $restrictviewformytask, $isavailable, 0, $arrayfields, $extrafields, $dayInMonth);
 //	}
