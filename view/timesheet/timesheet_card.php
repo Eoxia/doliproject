@@ -737,14 +737,25 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	print '</div>';
 	print '</div>';
 
+	$usertmp->fetch($object->fk_user_assign);
+
 	print '<div class="clearboth"></div>'; ?>
 
-	<div class="wpeo-notice notice-<?php echo $morecssnotice ?>">
-		<div class="notice-content">
-			<div class="notice-title"><?php echo $noticetitle ?></div>
+	<?php if ($workinghoursMonth == 0) : ?>
+		<div class="wpeo-notice notice-error">
+			<div class="notice-content">
+				<div class="notice-title"><?php echo $langs->trans('ErrorConfigWorkingHours') ?></div>
+			</div>
+			<a class="butAction" style="width = 100%;margin-right:0" target="_blank" href="<?php echo DOL_URL_ROOT . '/custom/doliproject/view/workinghours_card.php?id=' . $object->fk_user_assign ?>"><?php echo $langs->trans("GoToWorkingHours", $usertmp->getFullName($langs)) ?></a>
 		</div>
-		<a class="butAction" style="width = 100%;margin-right:0" target="_blank" href="<?php echo DOL_URL_ROOT . '/custom/doliproject/view/timespent_month.php?year='.$datestart['year'].'&month='.$datestart['mon'].'&day='.$datestart['mday'].'&search_usertoprocessid='.$object->fk_user_assign ?>"><?php echo $langs->trans("GoToTimeSpent", dol_print_date(dol_mktime(0, 0, 0, $datestart['mon'], $datestart['mday'], $datestart['year']), "%B %Y")) ?></a>
-	</div>
+	<?php else : ?>
+		<div class="wpeo-notice notice-<?php echo $morecssnotice ?>">
+			<div class="notice-content">
+				<div class="notice-title"><?php echo $noticetitle ?></div>
+			</div>
+			<a class="butAction" style="width = 100%;margin-right:0" target="_blank" href="<?php echo DOL_URL_ROOT . '/custom/doliproject/view/timespent_month.php?year='.$datestart['year'].'&month='.$datestart['mon'].'&day='.$datestart['mday'].'&search_usertoprocessid='.$object->fk_user_assign ?>"><?php echo $langs->trans("GoToTimeSpent", dol_print_date(dol_mktime(0, 0, 0, $datestart['mon'], $datestart['mday'], $datestart['year']), "%B %Y")) ?></a>
+		</div>
+	<?php endif; ?>
 
 	<?php print dol_get_fiche_end();
 
@@ -838,7 +849,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			print '<a class="' . ($object->status == $object::STATUS_DRAFT ? 'butAction' : 'butActionRefused classfortooltip') . '" id="actionButtonEdit" title="' . ($object->status == $object::STATUS_DRAFT ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeDraft"))) . '" href="' . ($object->status == $object::STATUS_DRAFT ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=edit') : '#') . '">' . $langs->trans("Modify") . '</a>';
 
 			// Validate
-			print '<span class="' . ($object->status == $object::STATUS_DRAFT ? 'butAction' : 'butActionRefused classfortooltip') . '" id="' . ($object->status == $object::STATUS_DRAFT ? 'actionButtonPendingSignature' : '') . '" title="' . ($object->status == $object::STATUS_DRAFT ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeDraftToValidate"))) . '" href="' . ($object->status == $object::STATUS_DRAFT ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=setPendingSignature') : '#') . '">' . $langs->trans("Validate") . '</span>';
+			print '<span class="' . ($object->status == $object::STATUS_DRAFT && $workinghoursMonth != 0 ? 'butAction' : 'butActionRefused classfortooltip') . '" id="' . ($object->status == $object::STATUS_DRAFT && $workinghoursMonth != 0 ? 'actionButtonPendingSignature' : '') . '" title="' . ($object->status == $object::STATUS_DRAFT && $workinghoursMonth != 0 ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeDraftToValidate"))) . '" href="' . ($object->status == $object::STATUS_DRAFT && $workinghoursMonth != 0 ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=setPendingSignature') : '#') . '">' . $langs->trans("Validate") . '</span>';
 
 			// ReOpen
 			print '<span class="' . ($object->status == $object::STATUS_VALIDATED ? 'butAction' : 'butActionRefused classfortooltip') . '" id="' . ($object->status == $object::STATUS_VALIDATED ? 'actionButtonInProgress' : '') . '" title="' . ($object->status == $object::STATUS_VALIDATED ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeValidated"))) . '" href="' . ($object->status == $object::STATUS_VALIDATED ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=setDraft') : '#') . '">' . $langs->trans("ReOpenDoli") . '</span>';

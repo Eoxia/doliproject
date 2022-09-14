@@ -217,6 +217,8 @@ RemoveFileTimeSheet = Supprimer la fiche navette
 ConfirmRemoveFileTimeSheet = Êtes-vous sûr de vouloir supprimer la fiche navette ? La fiche navette sera supprimer ainsi que les liens entre la navette et le temps consommé. <br> De plus la navette retournera au status brouillon.
 ErrorDateEndTimeSheet = Erreur date fin de navette %s supérieure à la date du jour %s
 ErrorDateTimeSheet = Erreur date début de navette %s supérieure à la date fin de navette %s
+ErrorConfigWorkingHours = Erreur : configuration des heures de travail manquantes
+GoToWorkingHours = Aller sur la page Horaires de l'utilisateur %s
 
 # Data - Donnée
 TimeSheet = Navette
