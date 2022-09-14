@@ -1872,7 +1872,9 @@ function doliprojectshowdocuments($modulepart, $modulesubdir, $filedir, $urlsour
 		} else {
 			$genbutton  = '<input style="display : none" class="button buttongen disabled" name="' . $forname . '_generatebutton" style="cursor: not-allowed" value="' . $buttonlabel . '"' . '>';
 			$genbutton .= '<label for="' . $forname . '_generatebutton">';
-			$genbutton .= '<i class="fas fa-exclamation-triangle pictowarning wpeo-tooltip-event" aria-label="' . $langs->trans($tooltiptext) . '"></i>';
+			if (empty($file_list)) {
+				$genbutton .= '<i class="fas fa-exclamation-triangle pictowarning wpeo-tooltip-event" aria-label="' . $langs->trans($tooltiptext) . '"></i>';
+			}
 			$genbutton .= '<div class="wpeo-button button-square-40 button-grey wpeo-tooltip-event" aria-label="' . $langs->trans('Generate') . '"><i class="fas fa-print button-icon"></i></div>';
 			$genbutton .= '</label>';
 		}
