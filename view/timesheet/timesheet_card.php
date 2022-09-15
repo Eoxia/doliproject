@@ -415,7 +415,14 @@ if ($action == 'create') {
 	$object->fields['label']['default'] = $langs->trans('TimeSheet') . ' ' . dol_print_date(dol_mktime(0, 0, 0, $month, $day, $year), "%B %Y") . ' ' . $user->getFullName($langs, 0, 0);
 	$object->fields['fk_project']['default']   = $conf->global->DOLIPROJECT_HR_PROJECT;
 	$object->fields['fk_user_assign']['default'] = $user->id;
-	if ($conf->global->DOLIPROJECT_TIMESHEET_PREFILL_DATE) {
+
+	$date_start = dol_mktime(0, 0, 0, GETPOST('date_startmonth', 'int'), GETPOST('date_startday', 'int'), GETPOST('date_startyear', 'int'));
+	$date_end   = dol_mktime(0, 0, 0, GETPOST('date_endmonth', 'int'), GETPOST('date_endday', 'int'), GETPOST('date_endyear', 'int'));
+
+	$_POST['date_start'] = $date_start;
+	$_POST['date_end']   = $date_end;
+
+	if ($conf->global->DOLIPROJECT_TIMESHEET_PREFILL_DATE && empty($_POST['date_start']) && empty($_POST['date_end'])) {
 		$firstday = dol_get_first_day($year, $month);
 		$firstday = dol_getdate($firstday);
 
