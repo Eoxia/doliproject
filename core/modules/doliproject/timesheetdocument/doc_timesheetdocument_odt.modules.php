@@ -378,27 +378,33 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 
 				$usertmp->fetch($object->fk_user_assign);
 
-				//$datestart          = dol_getdate($object->date_start, false, 'Europe/Paris');
-				//$firstdaytoshow     = dol_get_first_day($datestart['year'], $datestart['mon']);
-				//$firstdaytoshowgmt  = dol_get_first_day($datestart['year'], $datestart['mon'], true);
-				//$dayInMonth         = cal_days_in_month(CAL_GREGORIAN, $datestart['mon'], $datestart['year']);
-				$firstdaytoshow    = $object->date_start - 12 * 60 * 60;
-				$firstdaytoshowgmt = $object->date_start - 12 * 60 * 60;
-				$dayInMonth        = num_between_day($object->date_start, $object->date_end, 1);
-				$lastdaytoshow     = $object->date_end - 12 * 60 * 60;
+				$datestart          = dol_getdate($object->date_start);
+				$firstdaytoshow     = dol_get_first_day($datestart['year'], $datestart['mon']);
+				$firstdaytoshowgmt  = dol_get_first_day($datestart['year'], $datestart['mon'], true);
+				$dayInMonth         = cal_days_in_month(CAL_GREGORIAN, $datestart['mon'], $datestart['year']);
+				$daystarttoshow     = $object->date_start - 12 * 60 * 60;
+				$daystarttoshowgmt  = $object->date_start - 12 * 60 * 60;
+				$dayInDateRange     = num_between_day($object->date_start, $object->date_end, 1);
+				$lastdaytoshow      = $object->date_end - 12 * 60 * 60;
+
+				for ($idw = 0; $idw < $dayInDateRange; $idw++) {
+					$dayinloopfromfirstdaytoshow = dol_time_plus_duree($daystarttoshow, $idw, 'd');
+					$day = dol_getdate($dayinloopfromfirstdaytoshow);
+					$dayInDateRangeArray[] = $day['mday'];
+				}
 
 				$tasksarray = $task->getTasksArray(0, 0, 0, 0, 0, '', '', '',  $object->fk_user_assign, 0, $extrafields);
 
 				$isavailable = array();
 
 				for ($idw = 0; $idw < $dayInMonth; $idw++) {
-					$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
-					$dayinloopfromfirstdaytoshowgmt = dol_time_plus_duree($firstdaytoshowgmt, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
+					$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $daystarttoshow is a date with hours = 0
+					$dayinloopfromfirstdaytoshowgmt = dol_time_plus_duree($firstdaytoshowgmt, $idw, 'd'); // $daystarttoshow is a date with hours = 0
 
 					$statusofholidaytocheck = Holiday::STATUS_APPROVED;
 
 					$isavailablefordayanduser = $holiday->verifDateHolidayForTimestamp($object->fk_user_assign, $dayinloopfromfirstdaytoshow, $statusofholidaytocheck);
-					$isavailable[$dayinloopfromfirstdaytoshow] = $isavailablefordayanduser; // in projectLinesPerWeek later, we are using $firstdaytoshow and dol_time_plus_duree to loop on each day
+					$isavailable[$dayinloopfromfirstdaytoshow] = $isavailablefordayanduser; // in projectLinesPerWeek later, we are using $daystarttoshow and dol_time_plus_duree to loop on each day
 
 					$test = num_public_holiday($dayinloopfromfirstdaytoshowgmt, $dayinloopfromfirstdaytoshowgmt + 86400, $mysoc->country_code);
 					if ($test) {
@@ -411,7 +417,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 				$projectsrole = $task->getUserRolesForProjectsOrTasks($usertmp, 0, ($project->id ?: 0), 0, 1);
 				$tasksrole = $task->getUserRolesForProjectsOrTasks(0, $usertmp, ($project->id ?: 0), 0, 1);
 				$restrictviewformytask = ((!isset($conf->global->PROJECT_TIME_SHOW_TASK_NOT_ASSIGNED)) ? 2 : $conf->global->PROJECT_TIME_SHOW_TASK_NOT_ASSIGNED);
-				$totalforvisibletasks = projectLinesPerDayOnMonth($j, $firstdaytoshow, $lastdaytoshow, $usertmp, 0, $tasksarray, $level, $projectsrole, $tasksrole, 0, $restrictviewformytask, $isavailable, 0, array(), $extrafields, $dayInMonth, 1);
+				$totalforvisibletasks = projectLinesPerDayOnMonth($j, $daystarttoshow, $lastdaytoshow, $usertmp, 0, $tasksarray, $level, $projectsrole, $tasksrole, 0, $restrictviewformytask, $isavailable, 0, array(), $extrafields, $dayInMonth, 1);
 
 				$tmparray['employee_firstname'] = $usertmp->firstname;
 				$tmparray['employee_lastname']  = $usertmp->lastname;
@@ -490,11 +496,13 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 					}
 					if ($foundtagforlines) {
 						$linenumber = 0;
-						for ($idw = 0; $idw <= $dayInMonth; $idw++) {
-							$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
-							$idw++;
-							$tmparray['day'.$idw] = dol_print_date($dayinloopfromfirstdaytoshow, '%a');
-							$idw--;
+						for ($idw = 1; $idw <= 31; $idw++) {
+							if (in_array($idw, $dayInDateRangeArray)) {
+								$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, array_search($idw, $dayInDateRangeArray), 'd'); // $daystarttoshow is a date with hours = 0
+								$tmparray['day'.$idw] = dol_print_date($dayinloopfromfirstdaytoshow, '%a');
+							} else {
+								$tmparray['day'.$idw] = '-';
+							}
 						}
 
 //						$linenumber++;
@@ -546,15 +554,17 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 
 									$project->fetch($tasksingle->fk_project);
 
-									loadTimeSpentMonthByDay($firstdaytoshow, $lastdaytoshow, $tasksingle->id, $object->fk_user_assign, $project);
+									loadTimeSpentMonthByDay($daystarttoshow, $lastdaytoshow, $tasksingle->id, $object->fk_user_assign, $project);
 
-									for ($idw = 0; $idw <= $dayInMonth; $idw++) {
-										$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
-										$idw++;
+									for ($idw = 1; $idw <= 31; $idw++) {
 										$tmparray['task_ref'] = $tasksingle->ref;
 										$tmparray['task_label'] = dol_trunc($tasksingle->label, 16);
-										$tmparray['time' . $idw] = (($project->monthWorkLoadPerTask[$dayinloopfromfirstdaytoshow][$tasksingle->id] != 0) ? convertSecondToTime($project->monthWorkLoadPerTask[$dayinloopfromfirstdaytoshow][$tasksingle->id], (is_float($project->monthWorkLoadPerTask[$dayinloopfromfirstdaytoshow][$tasksingle->id]/60/60) ? 'allhourmin' : 'allhour')) : '-');
-										$idw--;
+										if (in_array($idw, $dayInDateRangeArray)) {
+											$dayinloopfromfirstdaytoshow = dol_time_plus_duree($daystarttoshow, array_search($idw, $dayInDateRangeArray), 'd'); // $daystarttoshow is a date with hours = 0
+											$tmparray['time' . $idw] = (($project->monthWorkLoadPerTask[$dayinloopfromfirstdaytoshow][$tasksingle->id] != 0) ? convertSecondToTime($project->monthWorkLoadPerTask[$dayinloopfromfirstdaytoshow][$tasksingle->id], (is_float($project->monthWorkLoadPerTask[$dayinloopfromfirstdaytoshow][$tasksingle->id] / 60 / 60) ? 'allhourmin' : 'allhour')) : '-');
+										} else {
+											$tmparray['time' . $idw] = '-';
+										}
 									}
 
 //						$linenumber++;
@@ -619,15 +629,17 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 							if ($foundtagforlines) {
 								$linenumber = 0;
 
-								loadTimeSpentMonthByDay($firstdaytoshow, $lastdaytoshow, $tasksingle->id, $object->fk_user_assign, $project);
+								loadTimeSpentMonthByDay($daystarttoshow, $lastdaytoshow, $tasksingle->id, $object->fk_user_assign, $project);
 
 								//echo '<pre>'; print_r($project->monthWorkLoad); echo '</pre>';
 
-								for ($idw = 0; $idw <= $dayInMonth; $idw++) {
-									$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
-									$idw++;
-									$tmparray[$segment[1][$i].$idw] = (($project->monthWorkLoadPerTask[$dayinloopfromfirstdaytoshow][$tasksingle->id] != 0 ) ? convertSecondToTime($project->monthWorkLoadPerTask[$dayinloopfromfirstdaytoshow][$tasksingle->id], (is_float($project->monthWorkLoadPerTask[$dayinloopfromfirstdaytoshow][$tasksingle->id]/60/60) ? 'allhourmin' : 'allhour')) : '-');
-									$idw--;
+								for ($idw = 1; $idw <= 31; $idw++) {
+									if (in_array($idw, $dayInDateRangeArray)) {
+										$dayinloopfromfirstdaytoshow = dol_time_plus_duree($daystarttoshow, array_search($idw, $dayInDateRangeArray), 'd'); // $daystarttoshow is a date with hours = 0
+										$tmparray[$segment[1][$i] . $idw] = (($project->monthWorkLoadPerTask[$dayinloopfromfirstdaytoshow][$tasksingle->id] != 0) ? convertSecondToTime($project->monthWorkLoadPerTask[$dayinloopfromfirstdaytoshow][$tasksingle->id], (is_float($project->monthWorkLoadPerTask[$dayinloopfromfirstdaytoshow][$tasksingle->id] / 60 / 60) ? 'allhourmin' : 'allhour')) : '-');
+									} else {
+										$tmparray[$segment[1][$i] . $idw] = '-';
+									}
 								}
 
 //						$linenumber++;
@@ -667,11 +679,13 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 					}
 					if ($foundtagforlines) {
 						$linenumber = 0;
-						for ($idw = 0; $idw <= $dayInMonth; $idw++) {
-							$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
-							$idw++;
-							$tmparray['totalrh'.$idw] = (($project->monthWorkLoad[$dayinloopfromfirstdaytoshow] != 0 ) ? convertSecondToTime($project->monthWorkLoad[$dayinloopfromfirstdaytoshow], (is_float($project->monthWorkLoad[$dayinloopfromfirstdaytoshow]/60/60) ? 'allhourmin' : 'allhour')) : '-');
-							$idw--;
+						for ($idw = 1; $idw <= 31; $idw++) {
+							if (in_array($idw, $dayInDateRangeArray)) {
+								$dayinloopfromfirstdaytoshow = dol_time_plus_duree($daystarttoshow, array_search($idw, $dayInDateRangeArray), 'd'); // $daystarttoshow is a date with hours = 0
+								$tmparray['totalrh' . $idw] = (($project->monthWorkLoad[$dayinloopfromfirstdaytoshow] != 0) ? convertSecondToTime($project->monthWorkLoad[$dayinloopfromfirstdaytoshow], (is_float($project->monthWorkLoad[$dayinloopfromfirstdaytoshow] / 60 / 60) ? 'allhourmin' : 'allhour')) : '-');
+							} else {
+								$tmparray['totalrh' . $idw] = '-';
+							}
 						}
 
 //						$linenumber++;
@@ -709,14 +723,14 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 					if ($foundtagforlines) {
 						$linenumber = 0;
 
-						for ($idw = 0; $idw <= $dayInMonth; $idw++) {
-							$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
-
-							$totaltime = $totalforvisibletasks[$dayinloopfromfirstdaytoshow] - $project->monthWorkLoad[$dayinloopfromfirstdaytoshow];
-
-							$idw++;
-							$tmparray['totaltime'.$idw] = (($totaltime != 0 ) ? convertSecondToTime($totaltime, 'allhour') : '-');
-							$idw--;
+						for ($idw = 1; $idw <= 31; $idw++) {
+							if (in_array($idw, $dayInDateRangeArray)) {
+								$dayinloopfromfirstdaytoshow = dol_time_plus_duree($daystarttoshow, array_search($idw, $dayInDateRangeArray), 'd'); // $daystarttoshow is a date with hours = 0
+								$totaltime = $totalforvisibletasks[$dayinloopfromfirstdaytoshow] - $project->monthWorkLoad[$dayinloopfromfirstdaytoshow];
+								$tmparray['totaltime' . $idw] = (($totaltime != 0) ? convertSecondToTime($totaltime, 'allhour') : '-');
+							} else {
+								$tmparray['totaltime' . $idw] = '-';
+							}
 						}
 
 //						$linenumber++;
@@ -753,11 +767,13 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 					}
 					if ($foundtagforlines) {
 						$linenumber = 0;
-						for ($idw = 0; $idw <= $dayInMonth; $idw++) {
-							$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd'); // $firstdaytoshow is a date with hours = 0
-							$idw++;
-							$tmparray['totaltps'.$idw] = (($totalforvisibletasks[$dayinloopfromfirstdaytoshow] != 0 ) ? convertSecondToTime($totalforvisibletasks[$dayinloopfromfirstdaytoshow], (is_float($totalforvisibletasks[$dayinloopfromfirstdaytoshow]/60/60) ? 'allhourmin' : 'allhour')) : '-');
-							$idw--;
+						for ($idw = 1; $idw <= 31; $idw++) {
+							if (in_array($idw, $dayInDateRangeArray)) {
+								$dayinloopfromfirstdaytoshow = dol_time_plus_duree($daystarttoshow, array_search($idw, $dayInDateRangeArray), 'd'); // $daystarttoshow is a date with hours = 0
+								$tmparray['totaltps' . $idw] = (($totalforvisibletasks[$dayinloopfromfirstdaytoshow] != 0) ? convertSecondToTime($totalforvisibletasks[$dayinloopfromfirstdaytoshow], (is_float($totalforvisibletasks[$dayinloopfromfirstdaytoshow] / 60 / 60) ? 'allhourmin' : 'allhour')) : '-');
+							} else {
+								$tmparray['totaltps' . $idw] = '-';
+							}
 						}
 
 //						$linenumber++;
@@ -799,18 +815,20 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 						$workinghoursArray = $workinghours->fetchCurrentWorkingHours($object->fk_user_assign, 'user');
 						$workinghoursMonth = 0;
 
-						for ($idw = 0; $idw <= $dayInMonth; $idw++) {
-							$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');  // $firstdaytoshow is a date with hours = 0
-							if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
-								$currentDay = date('l', $dayinloopfromfirstdaytoshow);
-								$currentDay = 'workinghours_' . strtolower($currentDay);
-								$workinghoursMonth = $workinghoursArray->{$currentDay} * 60;
+						for ($idw = 1; $idw <= 31; $idw++) {
+							if (in_array($idw, $dayInDateRangeArray)) {
+								$dayinloopfromfirstdaytoshow = dol_time_plus_duree($daystarttoshow, array_search($idw, $dayInDateRangeArray), 'd');  // $daystarttoshow is a date with hours = 0
+								if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+									$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+									$currentDay = 'workinghours_' . strtolower($currentDay);
+									$workinghoursMonth = $workinghoursArray->{$currentDay} * 60;
+								} else {
+									$workinghoursMonth = 0;
+								}
+								$tmparray['ta' . $idw] = (($workinghoursMonth != 0) ? convertSecondToTime($workinghoursMonth, 'allhour') : '-');
 							} else {
-								$workinghoursMonth = 0;
+								$tmparray['ta' . $idw] = '-';
 							}
-							$idw++;
-							$tmparray['ta'.$idw] = (($workinghoursMonth != 0 ) ? convertSecondToTime($workinghoursMonth, 'allhour') : '-');
-							$idw--;
 						}
 
 //						$linenumber++;
@@ -852,20 +870,21 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 						$workinghoursArray = $workinghours->fetchCurrentWorkingHours($object->fk_user_assign, 'user');
 						$workinghoursMonth = 0;
 
-						for ($idw = 0; $idw <= $dayInMonth; $idw++) {
-							$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, $idw, 'd');  // $firstdaytoshow is a date with hours = 0
-							if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
-								$currentDay = date('l', $dayinloopfromfirstdaytoshow);
-								$currentDay = 'workinghours_' . strtolower($currentDay);
-								$workinghoursMonth = $workinghoursArray->{$currentDay} * 60;
+						for ($idw = 1; $idw <= 31; $idw++) {
+							if (in_array($idw, $dayInDateRangeArray)) {
+								$dayinloopfromfirstdaytoshow = dol_time_plus_duree($daystarttoshow, array_search($idw, $dayInDateRangeArray), 'd');  // $daystarttoshow is a date with hours = 0
+								if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
+									$currentDay = date('l', $dayinloopfromfirstdaytoshow);
+									$currentDay = 'workinghours_' . strtolower($currentDay);
+									$workinghoursMonth = $workinghoursArray->{$currentDay} * 60;
+								} else {
+									$workinghoursMonth = 0;
+								}
+								$difftotaltime = $workinghoursMonth - $totalforvisibletasks[$dayinloopfromfirstdaytoshow];
+								$tmparray['diff' . $idw] = (($difftotaltime != 0) ? convertSecondToTime(abs($difftotaltime), 'allhour') : '-');
 							} else {
-								$workinghoursMonth = 0;
+								$tmparray['diff' . $idw] = '-';
 							}
-
-							$difftotaltime = $workinghoursMonth - $totalforvisibletasks[$dayinloopfromfirstdaytoshow];
-							$idw++;
-							$tmparray['diff'.$idw] .= (($difftotaltime != 0 ) ? convertSecondToTime(abs($difftotaltime), 'allhour') : '-');
-							$idw--;
 						}
 
 //						$linenumber++;
