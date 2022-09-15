@@ -116,6 +116,7 @@ class modDoliproject extends DolibarrModules
 			12 => array('DOLIPROJECT_TIMESHEET_ADDON', 'chaine', 'mod_timesheet_standard', '', 0, 'current'),
 			13 => array('DOLIPROJECT_TIMESHEET_PREFILL_DATE', 'integer', 1, '', 0, 'current'),
 			14 => array('DOLIPROJECT_TIMESHEET_ADD_ATTENDANTS', 'integer', 0, '', 0, 'current'),
+			15 => array('DOLIPROJECT_TIMESHEET_CHECK_DATE_END', 'integer', 1, '', 0, 'current'),
 
 			// CONST TIMESHEET DOCUMENT
 			20 => array('MAIN_AGENDA_ACTIONAUTO_TIMESHEETDOCUMENT_CREATE', 'integer', 1, '', 0, 'current'),

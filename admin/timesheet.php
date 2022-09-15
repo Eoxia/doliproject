@@ -113,6 +113,16 @@ print ajax_constantonoff('DOLIPROJECT_TIMESHEET_ADD_ATTENDANTS');
 print '</td>';
 print '</tr>';
 
+print '<tr class="oddeven"><td>';
+print $langs->trans('CheckDateEnd');
+print "</td><td>";
+print $langs->trans('CheckDateEndDescription');
+print '</td>';
+print '<td class="center">';
+print ajax_constantonoff('DOLIPROJECT_TIMESHEET_CHECK_DATE_END');
+print '</td>';
+print '</tr>';
+
 print '</table>';
 
 // Page end

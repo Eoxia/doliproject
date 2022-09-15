@@ -184,12 +184,14 @@ if (empty($reshook)) {
 			}
 		}
 
-		if ($date_end > dol_now()) {
-			setEventMessages($langs->trans('ErrorDateEndTimeSheet', dol_print_date($date_end, 'dayreduceformat'), dol_print_date(dol_now(), 'dayreduceformat')), null, 'errors');
-			if ($action == 'add') {
-				$action = 'create';
-			} elseif ($action == 'update') {
-				$action = 'edit';
+		if ($conf->global->DOLIPROJECT_TIMESHEET_CHECK_DATE_END > 0) {
+			if ($date_end > dol_now()) {
+				setEventMessages($langs->trans('ErrorDateEndTimeSheet', dol_print_date($date_end, 'dayreduceformat'), dol_print_date(dol_now(), 'dayreduceformat')), null, 'errors');
+				if ($action == 'add') {
+					$action = 'create';
+				} elseif ($action == 'update') {
+					$action = 'edit';
+				}
 			}
 		}
 
