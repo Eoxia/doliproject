@@ -670,7 +670,9 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			$currentDay = date('l', $dayinloopfromfirstdaytoshow);
 			$currentDay = 'workinghours_' . strtolower($currentDay);
 			$workinghoursMonth += $workinghoursArray->{$currentDay} / 60;
-			$nbworkinghoursMonth++;
+			if ($workinghoursArray->{$currentDay} / 60 > 0) {
+				$nbworkinghoursMonth++;
+			}
 			if ($totalforvisibletasks[$dayinloopfromfirstdaytoshow] > 0) {
 				$nbconsumedworkinghoursMonth++;
 			}
