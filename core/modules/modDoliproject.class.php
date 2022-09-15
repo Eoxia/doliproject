@@ -406,6 +406,7 @@ class modDoliproject extends DolibarrModules
 			require_once DOL_DOCUMENT_ROOT . '/core/modules/project/mod_project_simple.php';
 
 			$project = new Project($db);
+			$usertmp = new User($db);
 			$projectRef  = new $conf->global->PROJECT_ADDON();
 
 			$project->ref         = $projectRef->getNextValue('', $project);
@@ -429,6 +430,14 @@ class modDoliproject extends DolibarrModules
 
 			if ($result > 0) {
 				dolibarr_set_const($db, 'DOLIPROJECT_HR_PROJECT', $result, 'integer', 0, '', $conf->entity);
+				$usertmp->fetchAll('', '', 0, 0, array('customsql' => 'fk_soc IS NULL'), 'AND', true);
+				$liste_type_contacts = array_keys($project->listeTypeContacts());
+				if (is_array($usertmp->users) && !empty($usertmp->users)) {
+					foreach ($usertmp->users as $usersingle) {
+						$test = $project->add_contact($usersingle->id, $liste_type_contacts[1], 'internal');
+					}
+				}
+
 				$task = new Task($db);
 				$defaultref = '';
 				$obj = empty($conf->global->PROJECT_TASK_ADDON) ? 'mod_task_simple' : $conf->global->PROJECT_TASK_ADDON;
@@ -468,6 +477,18 @@ class modDoliproject extends DolibarrModules
 				$task->label = $langs->trans('RTT');
 				$task->date_c = dol_now();
 				$task->create($user);
+
+				$taskarray = $task->getTasksArray(0, 0, $result);
+
+				if (is_array($usertmp->users) && !empty($usertmp->users)) {
+					foreach ($usertmp->users as $usersingle) {
+						if (is_array($taskarray) && !empty($taskarray)) {
+							foreach ($taskarray as $tasksingle) {
+								$tasksingle->add_contact($usersingle->id, $liste_type_contacts[3], 'internal');
+							}
+						}
+					}
+				}
 
 				dolibarr_set_const($db, 'DOLIPROJECT_RTT_TASK', 1, 'integer', 0, '', $conf->entity);
 			}
