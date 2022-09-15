@@ -582,8 +582,7 @@ class ActionsDoliproject
 					}
 					?>
 					<script>
-						let element = jQuery('#row-'+<?php echo json_encode($linked_task->id) ?>);
-						element.find('.nowraponall').html(element.find('.nowraponall').html()  + ' ' + <?php echo json_encode($favoriteStar) ?>)
+						jQuery('#row-'+<?php echo json_encode($linked_task->id) ?>).find('.nowraponall').html(jQuery('#row-'+<?php echo json_encode($linked_task->id) ?>).find('.nowraponall').html()  + ' ' + <?php echo json_encode($favoriteStar) ?>  )
 					</script>
 					<?php
 				}
@@ -608,12 +607,11 @@ class ActionsDoliproject
 					?>
 					<script>
 						if (typeof taskId == null) {
-							<?php echo json_encode($linked_task->id); ?>
+							taskId = <?php echo json_encode($linked_task->id); ?>
 						} else {
 							taskId = <?php echo json_encode($linked_task->id); ?>
 						}
-						let element = jQuery("tr[data-rowid="+taskId+"] .nowraponall:not(.tdoverflowmax150)");
-						element.html(element.html()  + ' ' + <?php echo json_encode($favoriteStar) ?>)
+						jQuery("tr[data-rowid="+taskId+"] .nowraponall:not(.tdoverflowmax150)").html(jQuery("tr[data-rowid="+taskId+"] .nowraponall:not(.tdoverflowmax150)").html()  + ' ' + <?php echo json_encode($favoriteStar) ?>  )
 					</script>
 					<?php
 				}
