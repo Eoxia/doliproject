@@ -89,7 +89,7 @@ class modDoliproject extends DolibarrModules
 		$this->dirs 					= array("/doliproject/temp");
 		$this->config_page_url 			= array("setup.php@doliproject");
 		$this->hidden 					= false;
-		$this->depends 					= array('modProjet', 'modBookmark', 'modHoliday', 'modFckeditor', 'modSalaries', 'modProduct', 'modService');
+		$this->depends 					= array('modProjet', 'modBookmark', 'modHoliday', 'modFckeditor', 'modSalaries', 'modProduct', 'modService', 'modSociete');
 		$this->requiredby 				= array(); // List of module class names as string to disable if this one is disabled. Example: array('modModuleToDisable1', ...)
 		$this->conflictwith 			= array(); // List of module class names as string this module is in conflict with. Example: array('modModuleToDisable1', ...)
 		$this->langfiles 				= array("doliproject@doliproject");
