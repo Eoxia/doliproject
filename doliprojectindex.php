@@ -40,7 +40,7 @@ if (!$res) die("Include of main fails");
 require_once './core/modules/modDoliproject.class.php';
 
 // Global variables definitions
-global $db, $langs, $user;
+global $conf, $db, $langs, $user;
 
 // Load translation files required by the page
 $langs->loadLangs(array("doliproject@doliproject"));
@@ -53,6 +53,12 @@ $doliproject = new modDoliproject($db);
 
 // Security check
 if (! $user->rights->doliproject->lire) accessforbidden();
+
+/*
+ *  Actions
+*/
+
+require_once './core/tpl/doliproject_projectcreation_action.tpl.php';
 
 /*
  * View

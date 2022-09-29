@@ -63,6 +63,8 @@ if (!$user->admin) accessforbidden();
 
 include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
 
+require_once '../core/tpl/doliproject_projectcreation_action.tpl.php';
+
 /*
  * View
  */
