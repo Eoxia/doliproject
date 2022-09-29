@@ -41,6 +41,11 @@ DoliProjectAboutPage = Page à propos de DoliProject
 # DoliProject
 #
 
+# Right - Droit
+LireDoliProject = Consulter DoliProject
+ReadDoliProject = Consulter DoliProject (read)
+ReadAdminPage = Accéder à la configuration du module DoliProject
+
 # Data - Donnée
 DescriptionTask = Réalisé depuis la facture 
 MessageInfo = Tâche créée avec succès
@@ -314,3 +319,4 @@ MealTicket = Ticket restaurant
 JourneySubscription = Abonnement trajet
 13thMonthBonus = Prime 13ème mois
 SpecialBonus = Prime spéciale
+MinimizeMenu = Réduire le menu
