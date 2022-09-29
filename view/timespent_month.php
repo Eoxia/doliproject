@@ -737,10 +737,10 @@ if ($conf->use_javascript_ajax) {
 		if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
 			$currentDay = date('l', $dayinloopfromfirstdaytoshow);
 			$currentDay = 'workinghours_' . strtolower($currentDay);
-			$workinghoursMonth += $workinghoursArray->{$currentDay} / 60;
+			$workinghoursMonth += $workinghoursArray->{$currentDay} * 60;
 		}
 	}
-	print '<span class="opacitymediumbycolor">  - '.$langs->trans("ExpectedWorkedHoursMonth", dol_print_date(dol_mktime(0, 0, 0, $month, $day, $year), "%B %Y")).' : <strong><a href="'. DOL_URL_ROOT . '/custom/doliproject/view/workinghours_card.php?id=' . $usertoprocess->id.'" target="_blank">'.price($workinghoursMonth, 1, $langs, 0, 0).'</a></strong></span>';
+	print '<span class="opacitymediumbycolor">  - '.$langs->trans("ExpectedWorkedHoursMonth", dol_print_date(dol_mktime(0, 0, 0, $month, $day, $year), "%B %Y")).' : <strong><a href="'. DOL_URL_ROOT . '/custom/doliproject/view/workinghours_card.php?id=' . $usertoprocess->id.'" target="_blank">'.(($workinghoursMonth != 0) ? convertSecondToTime($workinghoursMonth, 'allhourmin') : '00:00').'</a></strong></span>';
 	print '</td>';
 	if (!empty($arrayfields['timeconsumed']['checked'])) {
 		print '<td class="liste_total"></td>';
@@ -880,11 +880,11 @@ if (count($tasksarray) > 0) {
 			if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
 				$currentDay = date('l', $dayinloopfromfirstdaytoshow);
 				$currentDay = 'workinghours_' . strtolower($currentDay);
-				$workinghoursMonth += $workinghoursArray->{$currentDay} / 60;
+				$workinghoursMonth += $workinghoursArray->{$currentDay} * 60;
 			}
 		}
-		$totalspenttime = $workinghoursMonth;
-		print '<span class="opacitymediumbycolor">  - '.$langs->trans("SpentWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))).' : <strong>'.price($workinghoursMonth, 1, $langs, 0, 0).'</strong></span>';
+		$totalspenttime = $workinghoursMonth/60/60;
+		print '<span class="opacitymediumbycolor">  - '.$langs->trans("SpentWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))).' : <strong>'.(($workinghoursMonth != 0) ? convertSecondToTime($workinghoursMonth, 'allhourmin') : '00:00').'</strong></span>';
 		print '</td>';
 		if (!empty($arrayfields['timeconsumed']['checked'])) {
 			print '<td class="liste_total right"></td>';

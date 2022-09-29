@@ -676,7 +676,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
 			$currentDay = date('l', $dayinloopfromfirstdaytoshow);
 			$currentDay = 'workinghours_' . strtolower($currentDay);
-			$workinghoursMonth += $workinghoursArray->{$currentDay} / 60;
+			$workinghoursMonth += $workinghoursArray->{$currentDay} * 60;
 			if ($workinghoursArray->{$currentDay} / 60 > 0) {
 				$nbworkinghoursMonth++;
 			}
@@ -685,7 +685,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			}
 		}
 	}
-	print '<span class="opacitymediumbycolor">  - ' . $langs->trans("ExpectedWorkedHoursMonthTimeSheet", dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))) . ' : <strong><a href="' . DOL_URL_ROOT . '/custom/doliproject/view/workinghours_card.php?id=' . $object->fk_user_assign . '" target="_blank">' . price($workinghoursMonth, 1, $langs, 0, 0) . '</a></strong>';
+	print '<span class="opacitymediumbycolor">  - ' . $langs->trans("ExpectedWorkedHoursMonthTimeSheet", dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))) . ' : <strong><a href="' . DOL_URL_ROOT . '/custom/doliproject/view/workinghours_card.php?id=' . $object->fk_user_assign . '" target="_blank">' . (($workinghoursMonth != 0) ? convertSecondToTime($workinghoursMonth, 'allhourmin') : '00:00') . '</a></strong>';
 	print '<span>' . ' - ' . $langs->trans("ExpectedWorkedDayMonth") . ' <strong>' . $nbworkinghoursMonth . '</strong></span>';
 	print '</span>';
 	print '</td></tr>';
@@ -697,11 +697,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		if ($isavailable[$dayinloopfromfirstdaytoshow]['morning'] && $isavailable[$dayinloopfromfirstdaytoshow]['afternoon']) {
 			$currentDay = date('l', $dayinloopfromfirstdaytoshow);
 			$currentDay = 'workinghours_' . strtolower($currentDay);
-			$workinghoursMonth += $workinghoursArray->{$currentDay} / 60;
+			$workinghoursMonth += $workinghoursArray->{$currentDay} * 60;
 		}
 	}
-	$totalspenttime = $workinghoursMonth;
-	print '<span class="opacitymediumbycolor">  - ' . $langs->trans("SpentWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))) . ' : <strong>' . price($workinghoursMonth, 1, $langs, 0, 0) . '</strong></span>';
+	$totalspenttime = $workinghoursMonth/60/60;
+	print '<span class="opacitymediumbycolor">  - ' . $langs->trans("SpentWorkedHoursMonth", dol_print_date($firstdaytoshow, "dayreduceformat"), (($dayInMonth == $dayInMonthCurrent) ? dol_print_date($lastdaytoshow, "dayreduceformat") : dol_print_date($now, "dayreduceformat"))) . ' : <strong>' . (($workinghoursMonth != 0) ? convertSecondToTime($workinghoursMonth, 'allhourmin') : '00:00') . '</strong></span>';
 	print '</td></tr>';
 	print '<tr class="liste_total"><td class="liste_total">';
 	print $langs->trans("Total");
