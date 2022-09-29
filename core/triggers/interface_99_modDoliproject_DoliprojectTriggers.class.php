@@ -154,6 +154,7 @@ class InterfaceDoliprojectTriggers extends DolibarrTriggers
 			case 'TIMESHEET_CREATE' :
 				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
 				require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
+				require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
 
 				require_once __DIR__ . '/../../class/timesheet.class.php';
 
@@ -161,6 +162,7 @@ class InterfaceDoliprojectTriggers extends DolibarrTriggers
 				$usertmp    = new User($this->db);
 				$product    = new Product($this->db);
 				$objectline = new TimeSheetLine($this->db);
+				$actioncomm = new ActionComm($this->db);
 
 				if (!empty($object->fk_user_assign)) {
 					$usertmp->fetch($object->fk_user_assign);
@@ -212,6 +214,17 @@ class InterfaceDoliprojectTriggers extends DolibarrTriggers
 					$objectline->product_type   = 1;
 					$objectline->insert($user);
 				}
+
+				$actioncomm->elementtype = 'timesheet@doliproject';
+				$actioncomm->code        = 'AC_TIMESHEET_CREATE';
+				$actioncomm->type_code   = 'AC_OTH_AUTO';
+				$actioncomm->label       = $langs->trans('TimeSheetCreateTrigger');
+				$actioncomm->datep       = $now;
+				$actioncomm->fk_element  = $object->id;
+				$actioncomm->userownerid = $user->id;
+				$actioncomm->percentage  = -1;
+
+				$actioncomm->create($user);
 				break;
 
 			case 'TIMESHEET_MODIFY' :
