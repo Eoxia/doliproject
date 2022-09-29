@@ -450,6 +450,10 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 					$decoded_image = base64_decode($encoded_image);
 					file_put_contents($tempdir . "signature.png", $decoded_image);
 					$tmparray['society_responsible_signature'] = $tempdir . "signature.png";
+				} else {
+					$tmparray['society_responsible_fullname'] = '';
+					$tmparray['society_responsible_signature_date'] = '';
+					$tmparray['society_responsible_signature'] = '';
 				}
 				if ( ! empty($societey_attendant) && $societey_attendant > 0) {
 					$tmparray['society_attendant_fullname']       = $societey_attendant->lastname . ' ' . $societey_attendant->firstname;
@@ -459,19 +463,27 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 					$decoded_image = base64_decode($encoded_image);
 					file_put_contents($tempdir . "signature1.png", $decoded_image);
 					$tmparray['society_attendant_signature'] = $tempdir . "signature1.png";
+				} else {
+					$tmparray['society_attendant_fullname'] = '';
+					$tmparray['society_attendant_signature_date'] = '';
+					$tmparray['society_attendant_signature'] = '';
 				}
 
 				foreach ($tmparray as $key => $value) {
 					try {
 						if ($key == 'society_responsible_signature' || $key == 'society_attendant_signature') { // Image
-							$list     = getimagesize($value);
-							$newWidth = 350;
-							if ($list[0]) {
-								$ratio     = $newWidth / $list[0];
-								$newHeight = $ratio * $list[1];
-								dol_imageResizeOrCrop($value, 0, $newWidth, $newHeight);
+							if (file_exists($value)) {
+								$list = getimagesize($value);
+								$newWidth = 350;
+								if ($list[0]) {
+									$ratio = $newWidth / $list[0];
+									$newHeight = $ratio * $list[1];
+									dol_imageResizeOrCrop($value, 0, $newWidth, $newHeight);
+								}
+								$odfHandler->setImage($key, $value);
+							} else {
+								$odfHandler->setVars($key, $langs->trans('NoData'), true, 'UTF-8');
 							}
-							$odfHandler->setImage($key, $value);
 						} elseif (preg_match('/logo$/', $key)) {
 							if (file_exists($value)) $odfHandler->setImage($key, $value);
 							else $odfHandler->setVars($key, $langs->transnoentities('ErrorFileNotFound'), true, 'UTF-8');
@@ -727,7 +739,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 							if (in_array($idw, $dayInDateRangeArray)) {
 								$dayinloopfromfirstdaytoshow = dol_time_plus_duree($daystarttoshow, array_search($idw, $dayInDateRangeArray), 'd'); // $daystarttoshow is a date with hours = 0
 								$totaltime = $totalforvisibletasks[$dayinloopfromfirstdaytoshow] - $project->monthWorkLoad[$dayinloopfromfirstdaytoshow];
-								$tmparray['totaltime' . $idw] = (($totaltime != 0) ? convertSecondToTime($totaltime, 'allhour') : '-');
+								$tmparray['totaltime' . $idw] = (($totaltime != 0) ? convertSecondToTime($totaltime, (is_float($totaltime / 60 / 60) ? 'allhourmin' : 'allhour')) : '-');
 							} else {
 								$tmparray['totaltime' . $idw] = '-';
 							}
@@ -825,7 +837,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 								} else {
 									$workinghoursMonth = 0;
 								}
-								$tmparray['ta' . $idw] = (($workinghoursMonth != 0) ? convertSecondToTime($workinghoursMonth, 'allhour') : '-');
+								$tmparray['ta' . $idw] = (($workinghoursMonth != 0) ? convertSecondToTime($workinghoursMonth, (is_float($workinghoursMonth / 60 / 60) ? 'allhourmin' : 'allhour')) : '-');
 							} else {
 								$tmparray['ta' . $idw] = '-';
 							}
@@ -881,7 +893,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 									$workinghoursMonth = 0;
 								}
 								$difftotaltime = $workinghoursMonth - $totalforvisibletasks[$dayinloopfromfirstdaytoshow];
-								$tmparray['diff' . $idw] = (($difftotaltime != 0) ? convertSecondToTime(abs($difftotaltime), 'allhour') : '-');
+								$tmparray['diff' . $idw] = (($difftotaltime != 0) ? convertSecondToTime(abs($difftotaltime), (is_float($difftotaltime / 60 / 60) ? 'allhourmin' : 'allhour')) : '-');
 							} else {
 								$tmparray['diff' . $idw] = '-';
 							}

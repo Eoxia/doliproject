@@ -320,3 +320,5 @@ JourneySubscription = Abonnement trajet
 13thMonthBonus = Prime 13ème mois
 SpecialBonus = Prime spéciale
 MinimizeMenu = Réduire le menu
+ErrorFileNotFound = Fichier non trouvé
+NoData = N/A
