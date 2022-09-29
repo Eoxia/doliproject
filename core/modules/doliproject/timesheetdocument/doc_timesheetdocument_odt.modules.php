@@ -510,7 +510,7 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 						$linenumber = 0;
 						for ($idw = 1; $idw <= 31; $idw++) {
 							if (in_array($idw, $dayInDateRangeArray)) {
-								$dayinloopfromfirstdaytoshow = dol_time_plus_duree($firstdaytoshow, array_search($idw, $dayInDateRangeArray), 'd'); // $daystarttoshow is a date with hours = 0
+								$dayinloopfromfirstdaytoshow = dol_time_plus_duree($daystarttoshow, array_search($idw, $dayInDateRangeArray), 'd'); // $daystarttoshow is a date with hours = 0
 								$tmparray['day'.$idw] = dol_print_date($dayinloopfromfirstdaytoshow, '%a');
 							} else {
 								$tmparray['day'.$idw] = '-';
