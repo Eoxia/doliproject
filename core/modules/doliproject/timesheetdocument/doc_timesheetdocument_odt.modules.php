@@ -47,12 +47,12 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 	 * @var array Minimum version of PHP required by module.
 	 * e.g.: PHP ≥ 5.6 = array(5, 6)
 	 */
-	public array $phpmin = array(5, 6);
+	public $phpmin = array(5, 6);
 
 	/**
 	 * @var string Dolibarr version of the loaded document
 	 */
-	public string $version = 'dolibarr';
+	public $version = 'dolibarr';
 
 	/**
 	 *	Constructor
@@ -468,6 +468,9 @@ class doc_timesheetdocument_odt extends ModeleODTTimeSheetDocument
 					$tmparray['society_attendant_signature_date'] = '';
 					$tmparray['society_attendant_signature'] = '';
 				}
+
+				unset($tmparray['object_fields']);
+				unset($tmparray['object_lines']);
 
 				foreach ($tmparray as $key => $value) {
 					try {

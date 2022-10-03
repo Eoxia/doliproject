@@ -247,7 +247,7 @@ class TimeSheet extends CommonObject
 	 * @param  string|null $ref Ref
 	 * @return int              0 < if KO, 0 if not found, >0 if OK
 	 */
-	public function fetch(int $id, string $ref = null): int
+	public function fetch($id, string $ref = null): int
 	{
 		$result = $this->fetchCommon($id, $ref);
 		if ($result > 0 && !empty($this->table_element_line)) {
