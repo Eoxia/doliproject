@@ -1,1 +1,1 @@
-# Le projet est archivé est transferé vers [DoliSIRH](https://github.com/Evarisk/DoliSIRH)
+# Le projet est archivé et transferé vers [DoliSIRH](https://github.com/Evarisk/DoliSIRH)
